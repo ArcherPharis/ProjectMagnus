@@ -2,6 +2,7 @@
 
 
 #include "Character_Base.h"
+#include "Weapon.h"
 
 // Sets default values
 ACharacter_Base::ACharacter_Base()
@@ -15,6 +16,14 @@ ACharacter_Base::ACharacter_Base()
 void ACharacter_Base::BeginPlay()
 {
 	Super::BeginPlay();
+	if (weaponClass)
+	{
+		AWeapon* weapon;
+		weapon = GetWorld()->SpawnActor<AWeapon>(weaponClass);
+		weapon->SetOwner(this);
+		weapon->OnEquip(GetMesh());
+		equippedWeapon = weapon;
+	}
 	
 }
 
@@ -29,6 +38,21 @@ void ACharacter_Base::Tick(float DeltaTime)
 void ACharacter_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &ACharacter_Base::Aim);
+	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &ACharacter_Base::StopAiming);
+		
 
+}
+
+void ACharacter_Base::Aim()
+{
+	bIsAiming = true;
+	bUseControllerRotationYaw = true;
+}
+
+void ACharacter_Base::StopAiming()
+{
+	bIsAiming = false;
+	bUseControllerRotationYaw = false;
 }
 

@@ -15,6 +15,9 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
 
+	UFUNCTION(BlueprintCallable, Category = "PlayerAiming")
+	bool GetIsAiming() const { return bIsAiming; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -25,5 +28,18 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Gear")
+	TSubclassOf<class AWeapon> weaponClass;
+
+
+	UPROPERTY(VisibleAnywhere, Category = "Gear")
+	AWeapon* equippedWeapon;
+
+	bool bIsAiming = false;
+
+	void Aim();
+	void StopAiming();
 
 };
