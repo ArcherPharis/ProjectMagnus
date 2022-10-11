@@ -4,6 +4,7 @@
 #include "PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -29,6 +30,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	UGameplayStatics::GetPlayerController(this, 0)->PlayerCameraManager->ViewPitchMin = -70.f;
+	UGameplayStatics::GetPlayerController(this, 0)->PlayerCameraManager->ViewPitchMax = 60.f;
+
+	
 }
 
 void APlayerCharacter::MoveForward(float value)
@@ -57,4 +62,18 @@ FRotator APlayerCharacter::GetControlRotator()
 	FRotator controlRotator(0.0f, controlRotationYaw, 0.0f);
 	return controlRotator;
 	
+}
+
+void APlayerCharacter::Aim()
+{
+	Super::Aim();
+	playerEye->SetFieldOfView(aimFOV);
+	
+
+}
+
+void APlayerCharacter::StopAiming()
+{
+	Super::StopAiming();
+	playerEye->SetFieldOfView(nonAimFOV);
 }

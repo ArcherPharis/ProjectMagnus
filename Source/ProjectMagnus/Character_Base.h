@@ -21,6 +21,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Aim();
+	virtual void StopAiming();
 
 public:	
 	// Called every frame
@@ -37,9 +39,11 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Gear")
 	AWeapon* equippedWeapon;
 
+	UPROPERTY(EditDefaultsOnly, Category = "PlayerUnit")
+	class UStatComponent* statComponenet;
+
 	bool bIsAiming = false;
 
-	void Aim();
-	void StopAiming();
+
 
 };

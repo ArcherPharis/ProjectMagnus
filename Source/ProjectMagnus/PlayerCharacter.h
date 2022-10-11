@@ -20,12 +20,26 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintPure, Category = "Camera")
+	class USpringArmComponent* GetSpringArm() { return springArm; }
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	class UCameraComponent* playerEye;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Camera")
-	class USpringArmComponent* springArm;
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	USpringArmComponent* springArm;
+
+
+
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	float aimFOV;
+
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	float nonAimFOV;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Character")
+	float aimOffset = 50.f;
 
 	UFUNCTION()
 	void MoveForward(float value);
@@ -40,5 +54,9 @@ private:
 	void LookUp(float value);
 
 	FRotator GetControlRotator();
-	
+
+	virtual void Aim() override;
+	virtual void StopAiming() override;
+
+
 };

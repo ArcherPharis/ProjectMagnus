@@ -3,12 +3,14 @@
 
 #include "Character_Base.h"
 #include "Weapon.h"
+#include "StatComponent.h"
 
 // Sets default values
 ACharacter_Base::ACharacter_Base()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	statComponenet = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
 
 }
 
@@ -47,12 +49,12 @@ void ACharacter_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 void ACharacter_Base::Aim()
 {
 	bIsAiming = true;
-	bUseControllerRotationYaw = true;
+	
 }
 
 void ACharacter_Base::StopAiming()
 {
 	bIsAiming = false;
-	bUseControllerRotationYaw = false;
+	
 }
 
