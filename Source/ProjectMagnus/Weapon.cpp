@@ -2,6 +2,7 @@
 
 
 #include "Weapon.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -13,12 +14,14 @@ AWeapon::AWeapon()
 	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	mesh->SetupAttachment(root);
 
+
 }
 
 // Called when the game starts or when spawned
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+	weight = weight / 10;
 	
 }
 
@@ -32,5 +35,10 @@ void AWeapon::Tick(float DeltaTime)
 void AWeapon::OnEquip(USkeletalMeshComponent* ownerMesh)
 {
 	AttachToComponent(ownerMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, socketName);
+}
+
+void AWeapon::Attack()
+{
+	UGameplayStatics::SpawnSoundAttached(attackAudio, mesh);
 }
 

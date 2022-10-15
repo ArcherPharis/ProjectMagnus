@@ -24,7 +24,15 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void DrainStamina(float drainAmount);
+
+	float GetCurrentStamina() const { return currentStamina; }
+
 private:
+
+	class ACharacter_Base* ownerCharacter;
+
+
 	UPROPERTY(EditDefaultsOnly, Category = "VisibleStats")
 	float Health = 100.f;
 
@@ -34,9 +42,21 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "VisibleStats")
 	float Stamina = 100.f;
 
+	UPROPERTY(EditAnywhere, Category = "VisibleStats")
+	float currentStamina;
+
+	UPROPERTY(VisibleAnywhere, Category = "Bonus Stats")
+	float currentEquipmentWeight;
+
 	UPROPERTY(EditDefaultsOnly, Category = "VisibleStats")
 	float Speed = 30.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VisibleStats")
+	float Strength = 30.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VisibleStats")
 	float Dexterity = 30.f;
+
+	UPROPERTY(VisibleAnywhere, Category = "Bonus Stats")
+	float staminaReductionBonus;
 };

@@ -2,6 +2,7 @@
 
 
 #include "StatComponent.h"
+#include "Character_Base.h"
 
 // Sets default values for this component's properties
 UStatComponent::UStatComponent()
@@ -18,6 +19,9 @@ UStatComponent::UStatComponent()
 void UStatComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	currentStamina = Stamina;
+	ownerCharacter = Cast<ACharacter_Base>(GetOwner());
+	staminaReductionBonus = (Strength + Speed) / 10;
 
 	// ...
 	
@@ -30,5 +34,16 @@ void UStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UStatComponent::DrainStamina(float drainAmount)
+{
+	if (ownerCharacter)
+	{
+		currentEquipmentWeight = ownerCharacter->GetCurrentWeight();
+		float trueDrain = (drainAmount / staminaReductionBonus) * currentEquipmentWeight;
+		currentStamina -= trueDrain;
+		currentStamina = FMath::Clamp(currentStamina, 0, Stamina);
+	}
 }
 

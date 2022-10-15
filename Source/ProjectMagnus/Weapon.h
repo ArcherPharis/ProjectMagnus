@@ -25,6 +25,16 @@ public:
 
 	void OnEquip(USkeletalMeshComponent* ownerMesh);
 
+	float GetWeight() const { return weight; }
+
+	virtual void Attack();
+
+	bool bFireButtonPressed = false;
+
+	USkeletalMeshComponent* GetWeaponMesh() const { return mesh; }
+
+	UTexture2D* GetWeaponCrosshair() const { return crossHair; }
+
 private:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
@@ -32,5 +42,16 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
 	USkeletalMeshComponent* mesh;
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	USoundBase* attackAudio;
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FName socketName;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UTexture2D* crossHair;
+
+	UPROPERTY(EditDefaultsOnly, Category = "WeaponStats")
+	float weight = 0.0f;
+
+
+
 };

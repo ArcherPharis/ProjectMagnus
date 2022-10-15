@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "Character_Base.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponEquipped, AWeapon*, weapon);
+
 UCLASS()
 class PROJECTMAGNUS_API ACharacter_Base : public ACharacter
 {
@@ -17,6 +19,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "PlayerAiming")
 	bool GetIsAiming() const { return bIsAiming; }
+
+	FOnWeaponEquipped onWeaponEquipped;
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,6 +35,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	class UStatComponent* GetStatComponent() const { return statComponenet; }
+
+	float GetCurrentWeight();
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Gear")
 	TSubclassOf<class AWeapon> weaponClass;
@@ -43,6 +51,14 @@ private:
 	class UStatComponent* statComponenet;
 
 	bool bIsAiming = false;
+
+	void Attack();
+
+	void StopAttack();
+
+	void GiveEquipment();
+
+	
 
 
 

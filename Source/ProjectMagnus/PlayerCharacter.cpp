@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "StatComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -38,12 +39,48 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::MoveForward(float value)
 {
+	if(GetStatComponent()->GetCurrentStamina() > 0)
 	AddMovementInput(FRotationMatrix(GetControlRotator()).GetScaledAxis(EAxis::X) * value);
+	if (value != 0 && !bHasAlreadyStartedMoving)
+	{
+		bHasAlreadyStartedMoving = true;
+
+		if (value < 0)
+		{
+			GetStatComponent()->DrainStamina(-value);
+		}
+		else
+		{
+			GetStatComponent()->DrainStamina(value);
+		}
+	}
+	else
+	{
+		bHasAlreadyStartedMoving = false;
+
+	}
 }
 
 void APlayerCharacter::MoveRight(float value)
 {
+	if (GetStatComponent()->GetCurrentStamina() > 0)
 	AddMovementInput(FRotationMatrix(GetControlRotator()).GetScaledAxis(EAxis::Y) * value);
+	if (value != 0 && !bHasAlreadyStartedMoving)
+	{
+		bHasAlreadyStartedMoving = true;
+		if (value < 0)
+		{
+			GetStatComponent()->DrainStamina(-value);
+		}
+		else
+		{
+			GetStatComponent()->DrainStamina(value);
+		}
+	}
+	else
+	{
+		bHasAlreadyStartedMoving = false;
+	}
 }
 
 void APlayerCharacter::LookRight(float value)

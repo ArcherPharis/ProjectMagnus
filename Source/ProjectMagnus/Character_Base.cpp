@@ -18,14 +18,7 @@ ACharacter_Base::ACharacter_Base()
 void ACharacter_Base::BeginPlay()
 {
 	Super::BeginPlay();
-	if (weaponClass)
-	{
-		AWeapon* weapon;
-		weapon = GetWorld()->SpawnActor<AWeapon>(weaponClass);
-		weapon->SetOwner(this);
-		weapon->OnEquip(GetMesh());
-		equippedWeapon = weapon;
-	}
+	GiveEquipment();
 	
 }
 
@@ -42,7 +35,46 @@ void ACharacter_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &ACharacter_Base::Aim);
 	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &ACharacter_Base::StopAiming);
+	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &ACharacter_Base::Attack);
+	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Released, this, &ACharacter_Base::StopAttack);
+
+
 		
+
+}
+
+float ACharacter_Base::GetCurrentWeight()
+{
+	return equippedWeapon->GetWeight();
+}
+
+void ACharacter_Base::Attack()
+{
+	equippedWeapon->bFireButtonPressed = true;
+	if (bIsAiming)
+	{
+		equippedWeapon->Attack();
+	}
+}
+
+void ACharacter_Base::StopAttack()
+{
+	equippedWeapon->bFireButtonPressed = false;
+
+}
+
+void ACharacter_Base::GiveEquipment()
+{
+	if (weaponClass)
+	{
+		AWeapon* weapon;
+		weapon = GetWorld()->SpawnActor<AWeapon>(weaponClass);
+		weapon->SetOwner(this);
+		weapon->OnEquip(GetMesh());
+		equippedWeapon = weapon;
+		onWeaponEquipped.Broadcast(equippedWeapon);
+
+	}
 
 }
 
