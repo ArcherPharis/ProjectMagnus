@@ -40,5 +40,11 @@ private:
 	UPROPERTY(meta = (BindWIdget))
 	class UProgressBar* staminaBar;
 
+	UPROPERTY(meta = (BindWidget))
+	class UValueGauge* healthGauge;
+
+	UPROPERTY(meta = (BindWidget))
+	class UValueGauge* staminaGauge;
+
 	
 };
