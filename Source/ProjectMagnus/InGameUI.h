@@ -21,11 +21,24 @@ public:
 	UFUNCTION()
 	void GetNewWeaponInfo(class AWeapon* weapon);
 
+	UFUNCTION()
+	void UpdateHealth(float health, float maxHealth);
+
+	UFUNCTION()
+	void UpdateStamina(float health, float maxHealth);
+
 private:
 	UPROPERTY(meta = (BindWidget))
 	class UCanvasPanel* inGameCanvas;
 
 	UPROPERTY(meta = (BindWidget))
 	class UImage* crossHair;
+
+	UPROPERTY(meta = (BindWIdget))
+	class UProgressBar* healthBar;
+
+	UPROPERTY(meta = (BindWIdget))
+	class UProgressBar* staminaBar;
+
 	
 };

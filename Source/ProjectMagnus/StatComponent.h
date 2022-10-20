@@ -6,6 +6,10 @@
 #include "Components/ActorComponent.h"
 #include "StatComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChange, float, health, float, maxHealth);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStaminaChange, float, stam, float, maxStam);
+
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTMAGNUS_API UStatComponent : public UActorComponent
@@ -15,6 +19,9 @@ class PROJECTMAGNUS_API UStatComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UStatComponent();
+
+	FOnHealthChange onHealthChange;
+	FOnStaminaChange onStamChange;
 
 protected:
 	// Called when the game starts
@@ -35,6 +42,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "VisibleStats")
 	float Health = 100.f;
+
+	UPROPERTY(VisibleAnywhere, Category = "VisibleStats")
+	float currentHealth = 100.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VisibleStats")
 	int ActionPoints = 3;
@@ -59,4 +69,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Bonus Stats")
 	float staminaReductionBonus;
+
+	UFUNCTION()
+	void DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* Instigator, AActor* DamageCauser);
+	void ChangeHealth(float amount);
 };

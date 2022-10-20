@@ -25,10 +25,14 @@ class PROJECTMAGNUS_API AFirearm : public AWeapon
 public:
 	AFirearm();
 
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Gun Events")
 	void OnAttack();
 	UFUNCTION(BlueprintImplementableEvent, Category = "Gun Events")
 	void OnStopAttack();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Gun Events")
+	void SpawnImpactEffects(const FHitResult result);
 
 private:
 

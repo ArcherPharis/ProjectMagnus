@@ -4,6 +4,7 @@
 #include "InGameUI.h"
 #include "Weapon.h"
 #include "Components/Image.h"
+#include "Components/ProgressBar.h"
 
 void UInGameUI::NativeConstruct()
 {
@@ -13,7 +14,6 @@ void UInGameUI::NativeConstruct()
 void UInGameUI::GetNewWeaponInfo(AWeapon* weapon)
 {
 	UTexture2D* crossHairImage = weapon->GetWeaponCrosshair();
-	UE_LOG(LogTemp, Warning, TEXT("InGameUI recieved the broadcast, must be execution flow"));
 	if (crossHairImage)
 	{
 		crossHair->SetBrushFromTexture(crossHairImage);
@@ -24,5 +24,16 @@ void UInGameUI::GetNewWeaponInfo(AWeapon* weapon)
 		crossHair->SetVisibility(ESlateVisibility::Hidden);
 	}
 	
+
+}
+
+void UInGameUI::UpdateHealth(float health, float maxHealth)
+{
+	healthBar->SetPercent(health / maxHealth);
+}
+
+void UInGameUI::UpdateStamina(float health, float maxHealth)
+{
+	staminaBar->SetPercent(health / maxHealth);
 
 }

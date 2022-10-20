@@ -31,7 +31,8 @@ void AFirearm::Attack()
 	{
 		UGameplayStatics::ApplyDamage(result.GetActor(), damage, nullptr, GetOwner(), nullptr);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
-		DrawDebugPoint(GetWorld(), result.Location, 10, FColor::Red, true, 2.f);
+		SpawnImpactEffects(result);
+		//DrawDebugPoint(GetWorld(), result.Location, 10, FColor::Red, true, 2.f);
 
 	}
 	

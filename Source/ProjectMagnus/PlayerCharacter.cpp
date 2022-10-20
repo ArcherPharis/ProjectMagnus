@@ -39,6 +39,8 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::MoveForward(float value)
 {
+
+	if (!GetStatComponent()) return;
 	if(GetStatComponent()->GetCurrentStamina() > 0)
 	AddMovementInput(FRotationMatrix(GetControlRotator()).GetScaledAxis(EAxis::X) * value);
 	if (value != 0 && !bHasAlreadyStartedMoving)
@@ -47,6 +49,9 @@ void APlayerCharacter::MoveForward(float value)
 
 		if (value < 0)
 		{
+			//todo, refactor soonish, so that enemies also drain stamina
+			//this method is ok, but does not change drain when moving slower.
+			//so, we should instead drain this, by velocity of actor instead.
 			GetStatComponent()->DrainStamina(-value);
 		}
 		else
@@ -63,6 +68,7 @@ void APlayerCharacter::MoveForward(float value)
 
 void APlayerCharacter::MoveRight(float value)
 {
+	if (!GetStatComponent()) return;
 	if (GetStatComponent()->GetCurrentStamina() > 0)
 	AddMovementInput(FRotationMatrix(GetControlRotator()).GetScaledAxis(EAxis::Y) * value);
 	if (value != 0 && !bHasAlreadyStartedMoving)

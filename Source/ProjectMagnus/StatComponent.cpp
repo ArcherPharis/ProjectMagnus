@@ -22,6 +22,7 @@ void UStatComponent::BeginPlay()
 	currentStamina = Stamina;
 	ownerCharacter = Cast<ACharacter_Base>(GetOwner());
 	staminaReductionBonus = (Strength + Speed) / 10;
+	GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UStatComponent::DamageTaken);
 
 	// ...
 	
@@ -44,6 +45,21 @@ void UStatComponent::DrainStamina(float drainAmount)
 		float trueDrain = (drainAmount / staminaReductionBonus) * currentEquipmentWeight;
 		currentStamina -= trueDrain;
 		currentStamina = FMath::Clamp(currentStamina, 0, Stamina);
+		onStamChange.Broadcast(currentStamina, Stamina);
 	}
+}
+
+void UStatComponent::DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* Instigator, AActor* DamageCauser)
+{
+	ChangeHealth(-Damage);
+	UE_LOG(LogTemp, Warning, TEXT("We're taking damage"));
+}
+
+void UStatComponent::ChangeHealth(float amount)
+{
+	if (amount == 0) return;
+	currentHealth = FMath::Clamp(currentHealth + amount, 0, Health);
+	onHealthChange.Broadcast(currentHealth, Health);
+	//TODO consider adding the Delta (the damage done)
 }
 
