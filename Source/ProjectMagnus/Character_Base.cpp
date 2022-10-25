@@ -4,6 +4,7 @@
 #include "Character_Base.h"
 #include "Weapon.h"
 #include "StatComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ACharacter_Base::ACharacter_Base()
@@ -19,6 +20,9 @@ void ACharacter_Base::BeginPlay()
 {
 	Super::BeginPlay();
 	GiveEquipment();
+	originalSpeedValue = GetCharacterMovement()->GetMaxSpeed();
+	sprintValue = GetCharacterMovement()->GetMaxSpeed() * speedMultiplier;
+	aimSpeedValue = originalSpeedValue / 2;
 	
 }
 
@@ -33,10 +37,8 @@ void ACharacter_Base::Tick(float DeltaTime)
 void ACharacter_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &ACharacter_Base::Aim);
-	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &ACharacter_Base::StopAiming);
-	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &ACharacter_Base::Attack);
-	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Released, this, &ACharacter_Base::StopAttack);
+
+
 
 
 		
@@ -63,6 +65,17 @@ void ACharacter_Base::StopAttack()
 
 }
 
+bool ACharacter_Base::IsCharacterSprinting()
+{
+	if (GetVelocity().Length() > 600)
+	{
+		return true;
+	}
+
+
+	return false;
+}
+
 void ACharacter_Base::GiveEquipment()
 {
 	if (weaponClass)
@@ -80,13 +93,32 @@ void ACharacter_Base::GiveEquipment()
 
 void ACharacter_Base::Aim()
 {
+
 	bIsAiming = true;
+	GetCharacterMovement()->MaxWalkSpeed = aimSpeedValue;
+
 	
 }
 
 void ACharacter_Base::StopAiming()
 {
 	bIsAiming = false;
+	GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
+	StopAttack();
+
 	
+}
+
+void ACharacter_Base::Sprint()
+{
+	if(!bIsAiming)
+	GetCharacterMovement()->MaxWalkSpeed = sprintValue;
+}
+
+void ACharacter_Base::StopSprint()
+{
+	if (!bIsAiming)
+	GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
+
 }
 

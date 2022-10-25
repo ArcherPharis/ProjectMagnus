@@ -22,11 +22,24 @@ public:
 
 	FOnWeaponEquipped onWeaponEquipped;
 
+	void Sprint();
+	void StopSprint();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void Aim();
 	virtual void StopAiming();
+	virtual void Attack();
+	virtual void StopAttack();
+
+	float GetWalkSpeed() const { return originalSpeedValue; }
+	float GetRunSpeed() const { return sprintValue; }
+
+	bool IsCharacterSprinting();
+
+
+
 
 public:	
 	// Called every frame
@@ -50,11 +63,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "PlayerUnit")
 	class UStatComponent* statComponenet;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Meta Stats")
+	float speedMultiplier = 1.3f;
+	float originalSpeedValue;
+	float sprintValue;
+	float aimSpeedValue;
+
 	bool bIsAiming = false;
 
-	void Attack();
 
-	void StopAttack();
 
 	void GiveEquipment();
 

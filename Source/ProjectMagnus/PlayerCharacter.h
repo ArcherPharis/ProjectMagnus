@@ -57,6 +57,8 @@ private:
 
 	virtual void Aim() override;
 	virtual void StopAiming() override;
+	virtual void Attack() override;
+	virtual void StopAttack() override;
 	bool bHasAlreadyStartedMoving;
 
 

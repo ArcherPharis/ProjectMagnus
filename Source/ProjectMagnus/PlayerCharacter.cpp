@@ -26,6 +26,14 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::LookUp);
 	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::LookRight);
+	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Pressed, this, &ACharacter_Base::Sprint);
+	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Released, this, &ACharacter_Base::StopSprint);
+	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &APlayerCharacter::Aim);
+	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &APlayerCharacter::StopAiming);
+	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &APlayerCharacter::Attack);
+	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Released, this, &APlayerCharacter::StopAttack);
+
+
 }
 
 void APlayerCharacter::BeginPlay()
@@ -109,6 +117,7 @@ FRotator APlayerCharacter::GetControlRotator()
 
 void APlayerCharacter::Aim()
 {
+
 	Super::Aim();
 	playerEye->SetFieldOfView(aimFOV);
 	
@@ -117,6 +126,17 @@ void APlayerCharacter::Aim()
 
 void APlayerCharacter::StopAiming()
 {
+	
 	Super::StopAiming();
 	playerEye->SetFieldOfView(nonAimFOV);
+}
+
+void APlayerCharacter::Attack()
+{
+	Super::Attack();
+}
+
+void APlayerCharacter::StopAttack()
+{
+	Super::StopAttack();
 }
