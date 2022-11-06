@@ -12,31 +12,35 @@ AFirearm::AFirearm()
 
 void AFirearm::Attack()
 {
-	Super::Attack();
-	if (canfire)
+	if (currentAmmo > 0)
 	{
-		canfire = false;
-	}
-	else
-	{
-		return;
-	}
-	FHitResult result;
-	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+		Super::Attack();
+		if (canfire)
+		{
+			canfire = false;
+		}
+		else
+		{
+			return;
+		}
+		FHitResult result;
+		APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 
-	UGameplayStatics::SpawnEmitterAttached(muzzleEffect, firePoint);
-	FVector CameraEnd = cameraManager->GetCameraLocation() + cameraManager->GetActorForwardVector() * weaponRange;
-	OnAttack();
-	if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), WeaponSpread(CameraEnd), ECC_Camera))
-	{
-		UGameplayStatics::ApplyDamage(result.GetActor(), damage, nullptr, GetOwner(), nullptr);
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
-		SpawnImpactEffects(result);
-		//DrawDebugPoint(GetWorld(), result.Location, 10, FColor::Red, true, 2.f);
+		UGameplayStatics::SpawnEmitterAttached(muzzleEffect, firePoint);
+		FVector CameraEnd = cameraManager->GetCameraLocation() + cameraManager->GetActorForwardVector() * weaponRange;
+		OnAttack();
+		if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), WeaponSpread(CameraEnd), ECC_Camera))
+		{
+			UGameplayStatics::ApplyDamage(result.GetActor(), damage, nullptr, GetOwner(), nullptr);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
+			SpawnImpactEffects(result);
+			//DrawDebugPoint(GetWorld(), result.Location, 10, FColor::Red, true, 2.f);
 
+		}
+		PlayWeaponSound(firePoint);
+		currentAmmo--;
+		GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / fireRate);
 	}
-	
-	GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / fireRate);
 
 }
 

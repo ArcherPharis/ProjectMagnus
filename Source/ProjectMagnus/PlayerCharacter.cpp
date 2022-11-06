@@ -41,7 +41,7 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	UGameplayStatics::GetPlayerController(this, 0)->PlayerCameraManager->ViewPitchMin = -70.f;
 	UGameplayStatics::GetPlayerController(this, 0)->PlayerCameraManager->ViewPitchMax = 60.f;
-
+	onUnitGiven.Broadcast(this);
 	
 }
 

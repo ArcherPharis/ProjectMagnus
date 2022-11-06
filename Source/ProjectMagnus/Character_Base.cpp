@@ -20,9 +20,6 @@ void ACharacter_Base::BeginPlay()
 {
 	Super::BeginPlay();
 	GiveEquipment();
-	originalSpeedValue = GetCharacterMovement()->GetMaxSpeed();
-	sprintValue = GetCharacterMovement()->GetMaxSpeed() * speedMultiplier;
-	aimSpeedValue = originalSpeedValue / 2;
 	
 }
 
@@ -38,10 +35,6 @@ void ACharacter_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-
-
-
-		
 
 }
 

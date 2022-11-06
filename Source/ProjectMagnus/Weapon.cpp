@@ -25,6 +25,11 @@ void AWeapon::BeginPlay()
 	
 }
 
+void AWeapon::PlayWeaponSound(USceneComponent* firePoint)
+{
+	UGameplayStatics::SpawnSoundAttached(attackAudio, firePoint);
+}
+
 // Called every frame
 void AWeapon::Tick(float DeltaTime)
 {
@@ -39,6 +44,6 @@ void AWeapon::OnEquip(USkeletalMeshComponent* ownerMesh)
 
 void AWeapon::Attack()
 {
-	UGameplayStatics::SpawnSoundAttached(attackAudio, mesh);
+	
 }
 

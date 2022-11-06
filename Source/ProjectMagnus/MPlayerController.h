@@ -17,6 +17,8 @@ class PROJECTMAGNUS_API AMPlayerController : public APlayerController
 public:
 	virtual void OnPossess(APawn* newPawn) override;
 
+	virtual void BeginPlay() override;
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	TSubclassOf<class UInGameUI> inGameUIClass;
@@ -24,5 +26,7 @@ private:
 	UInGameUI* inGameUI;
 
 	class APlayerCharacter* playerCharacter;
+
+	class APMGameModeBase* gameMode;
 	
 };

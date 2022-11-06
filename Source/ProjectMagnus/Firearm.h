@@ -50,13 +50,20 @@ private:
 	UParticleSystem* hitEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-		float damage;
+	float damage;
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-		float weaponRange;
+	float weaponRange;
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-		float minSpread = -10;
+	float minSpread = -10;
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-		float maxSpread = 10;
+	float maxSpread = 10;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	float currentAmmo = 10;
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	float maxAmmo = 10;
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	float ammoReserves = 30;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Fire Mode")
 	TEnumAsByte<Firetype> fireMode;

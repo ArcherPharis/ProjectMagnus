@@ -8,6 +8,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponEquipped, AWeapon*, weapon);
 
+
+
 UCLASS()
 class PROJECTMAGNUS_API ACharacter_Base : public ACharacter
 {
@@ -52,9 +54,20 @@ public:
 
 	float GetCurrentWeight();
 
+	class UTexture2D* GetUnitPortrait() const { return unitPortrait; }
+	class FName GetUnitName() const { return unitName; }
+
+	
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Gear")
 	TSubclassOf<class AWeapon> weaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Unit Personal Info")
+	UTexture2D* unitPortrait;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Unit Personal Info")
+	FName unitName;
 
 
 	UPROPERTY(VisibleAnywhere, Category = "Gear")
@@ -64,10 +77,9 @@ private:
 	class UStatComponent* statComponenet;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Meta Stats")
-	float speedMultiplier = 1.3f;
-	float originalSpeedValue;
-	float sprintValue;
-	float aimSpeedValue;
+	float originalSpeedValue = 600.f;
+	float sprintValue  = 780.f;
+	float aimSpeedValue = 300.f;
 
 	bool bIsAiming = false;
 

@@ -27,7 +27,16 @@ public:
 	UFUNCTION()
 	void UpdateStamina(float health, float maxHealth);
 
+	UFUNCTION()
+	void NewUnitGiven(class APlayerCharacter* unit);
+
 private:
+	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* UISwitcher;
+
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* tacticsCanvas;
+
 	UPROPERTY(meta = (BindWidget))
 	class UCanvasPanel* inGameCanvas;
 
@@ -45,6 +54,9 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UValueGauge* staminaGauge;
+
+	UPROPERTY(meta = (BindWidget))
+	class UListView* unitList;
 
 	
 };

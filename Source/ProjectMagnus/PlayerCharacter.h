@@ -6,6 +6,8 @@
 #include "Character_Base.h"
 #include "PlayerCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUnitGiven, APlayerCharacter*, unit);
+
 /**
  * 
  */
@@ -16,6 +18,8 @@ class PROJECTMAGNUS_API APlayerCharacter : public ACharacter_Base
 
 public:
 	APlayerCharacter();
+
+	FOnUnitGiven onUnitGiven;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;

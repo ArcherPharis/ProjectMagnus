@@ -13,5 +13,18 @@ UCLASS()
 class PROJECTMAGNUS_API APMGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+public:
+	void SpawnInitialUnits(class UInGameUI* aUI);
+
+private:
+
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+
 	
+
+	UPROPERTY(EditDefaultsOnly, Category = "Deployable Units")
+	TArray<TSubclassOf<class APlayerCharacter>> deployablePlayerUnits;
+	
+	TArray<APlayerCharacter*> currentPlayerUnits;
 };

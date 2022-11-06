@@ -6,6 +6,8 @@
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include"ValueGauge.h"
+#include "PlayerCharacter.h"
+#include "Components/ListView.h"
 
 void UInGameUI::NativeConstruct()
 {
@@ -39,4 +41,9 @@ void UInGameUI::UpdateStamina(float health, float maxHealth)
 	staminaBar->SetPercent(health / maxHealth);
 	staminaGauge->SetValue(health, maxHealth);
 
+}
+
+void UInGameUI::NewUnitGiven(APlayerCharacter* unit)
+{
+	unitList->AddItem(unit);
 }
