@@ -11,18 +11,23 @@
 void AMPlayerController::OnPossess(APawn* newPawn)
 {
 	Super::OnPossess(newPawn);
+	
 	playerCharacter = Cast<APlayerCharacter>(newPawn);
 	if (playerCharacter)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("You possessed the player actor!"));
+		OnPossessEffect();
+		playerCharacter->onUnitGiven.AddDynamic(inGameUI, &UInGameUI::NewUnitGiven);
 		playerCharacter->onWeaponEquipped.AddDynamic(inGameUI, &UInGameUI::GetNewWeaponInfo);
 		playerCharacter->GetStatComponent()->onHealthChange.AddDynamic(inGameUI, &UInGameUI::UpdateHealth);
 		playerCharacter->GetStatComponent()->onStamChange.AddDynamic(inGameUI, &UInGameUI::UpdateStamina);
-		playerCharacter->onUnitGiven.AddDynamic(inGameUI, &UInGameUI::NewUnitGiven);
-
+		playerCharacter->OnDeployed();
+	
 	}
 	else
 	{
-		//this would be where the special tactics mode actor logic would go
+		SetViewTarget(newPawn);
+		UE_LOG(LogTemp, Warning, TEXT("You possessed the tactics actor!"));
 	}
 
 }

@@ -12,7 +12,7 @@ AFirearm::AFirearm()
 
 void AFirearm::Attack()
 {
-	if (currentAmmo > 0)
+	if (GetCurrentAmmo() > 0)
 	{
 		Super::Attack();
 		if (canfire)
@@ -38,7 +38,8 @@ void AFirearm::Attack()
 
 		}
 		PlayWeaponSound(firePoint);
-		currentAmmo--;
+		ChangeCurrentAmmo(-1);
+		onWeaponUse.Broadcast(GetCurrentAmmo());
 		GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / fireRate);
 	}
 

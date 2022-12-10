@@ -7,6 +7,7 @@
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUnitGiven, APlayerCharacter*, unit);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClickedDeploy, APlayerCharacter*, charaToDeploy);
 
 /**
  * 
@@ -20,12 +21,15 @@ public:
 	APlayerCharacter();
 
 	FOnUnitGiven onUnitGiven;
+	FOnClickedDeploy onUnitDeployed;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintPure, Category = "Camera")
 	class USpringArmComponent* GetSpringArm() { return springArm; }
+
+	void OnDeployed();
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")

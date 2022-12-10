@@ -26,6 +26,8 @@ public:
 
 	void Sprint();
 	void StopSprint();
+	void GiveEquipment();
+	
 
 protected:
 	// Called when the game starts or when spawned
@@ -39,7 +41,7 @@ protected:
 	float GetRunSpeed() const { return sprintValue; }
 
 	bool IsCharacterSprinting();
-
+	
 
 
 
@@ -54,14 +56,17 @@ public:
 
 	float GetCurrentWeight();
 
+	class AWeapon* GetCurrentWeapon() { return equippedWeapon; }
+
 	class UTexture2D* GetUnitPortrait() const { return unitPortrait; }
 	class FName GetUnitName() const { return unitName; }
+	
 
 	
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Gear")
-	TSubclassOf<class AWeapon> weaponClass;
+	TSubclassOf<AWeapon> weaponClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Unit Personal Info")
 	UTexture2D* unitPortrait;
@@ -85,7 +90,7 @@ private:
 
 
 
-	void GiveEquipment();
+	
 
 	
 

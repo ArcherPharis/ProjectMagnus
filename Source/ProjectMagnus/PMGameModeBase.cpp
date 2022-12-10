@@ -20,8 +20,15 @@ void APMGameModeBase::SpawnInitialUnits(UInGameUI* aUI)
 		APlayerCharacter* initCharacter =  GetWorld()->SpawnActor<APlayerCharacter>(character);
 		currentPlayerUnits.Add(initCharacter);
 		aUI->NewUnitGiven(initCharacter);
+		
 	}
 
-	UGameplayStatics::GetPlayerController(this, 0)->Possess(currentPlayerUnits[0]);
+	//UGameplayStatics::GetPlayerController(this, 0)->Possess(currentPlayerUnits[0]);
+	
+	for (APlayerCharacter* player : currentPlayerUnits)
+	{
+		player->GiveEquipment();
+
+	}
 	//todo, we also put up each initial ui on the list
 }

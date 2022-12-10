@@ -47,3 +47,9 @@ void AWeapon::Attack()
 	
 }
 
+void AWeapon::ChangeCurrentAmmo(int amt)
+{
+	currentAmmo += amt;
+}
+
+

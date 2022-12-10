@@ -25,6 +25,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Deployable Units")
 	TArray<TSubclassOf<class APlayerCharacter>> deployablePlayerUnits;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Deployable Units")
+	AActor* targetPoints;
 	
 	TArray<APlayerCharacter*> currentPlayerUnits;
 };

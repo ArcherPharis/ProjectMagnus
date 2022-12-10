@@ -19,7 +19,6 @@ ACharacter_Base::ACharacter_Base()
 void ACharacter_Base::BeginPlay()
 {
 	Super::BeginPlay();
-	GiveEquipment();
 	
 }
 
@@ -83,6 +82,7 @@ void ACharacter_Base::GiveEquipment()
 	}
 
 }
+
 
 void ACharacter_Base::Aim()
 {

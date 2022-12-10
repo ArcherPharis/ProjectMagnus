@@ -28,9 +28,16 @@ public:
 	void UpdateStamina(float health, float maxHealth);
 
 	UFUNCTION()
+	void UpdateAmmoCount(int ammo);
+
+	UFUNCTION()
 	void NewUnitGiven(class APlayerCharacter* unit);
 
 private:
+
+	UFUNCTION()
+	void PossessNewUnit(APlayerCharacter* newUnit);
+
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* UISwitcher;
 
@@ -42,12 +49,16 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UImage* crossHair;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* ammoCount;
+	UPROPERTY(meta = (BindWidget))
+	UImage* weaponIcon;
 
-	UPROPERTY(meta = (BindWIdget))
-	class UProgressBar* healthBar;
+	//UPROPERTY(meta = (BindWIdget))
+	//class UProgressBar* healthBar;
 
-	UPROPERTY(meta = (BindWIdget))
-	class UProgressBar* staminaBar;
+	//UPROPERTY(meta = (BindWIdget))
+	//class UProgressBar* staminaBar;
 
 	UPROPERTY(meta = (BindWidget))
 	class UValueGauge* healthGauge;

@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponUse, int, ammoCount);
+
 UCLASS()
 class PROJECTMAGNUS_API AWeapon : public AActor
 {
@@ -14,6 +16,8 @@ class PROJECTMAGNUS_API AWeapon : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AWeapon();
+
+	FOnWeaponUse onWeaponUse;
 
 protected:
 	// Called when the game starts or when spawned
@@ -37,6 +41,11 @@ public:
 
 	UTexture2D* GetWeaponCrosshair() const { return crossHair; }
 
+	UTexture2D* GetWeaponIcon() const { return weaponIcon; }
+
+	int GetCurrentAmmo() const { return currentAmmo; }
+	void ChangeCurrentAmmo(int amt);
+
 private:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
@@ -50,6 +59,15 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UTexture2D* crossHair;
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UTexture2D* weaponIcon;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	int currentAmmo = 10;
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	int maxAmmo = 10;
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	int ammoReserves = 30;
 
 	UPROPERTY(EditDefaultsOnly, Category = "WeaponStats")
 	float weight = 0.0f;

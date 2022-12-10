@@ -45,6 +45,11 @@ void APlayerCharacter::BeginPlay()
 	
 }
 
+void APlayerCharacter::OnDeployed()
+{
+	onWeaponEquipped.Broadcast(GetCurrentWeapon());
+}
+
 void APlayerCharacter::MoveForward(float value)
 {
 
@@ -140,3 +145,4 @@ void APlayerCharacter::StopAttack()
 {
 	Super::StopAttack();
 }
+

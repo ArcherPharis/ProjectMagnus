@@ -7,6 +7,9 @@
 #include "Blueprint/IUserObjectListEntry.h"
 #include "UnitListEntry.generated.h"
 
+
+
+
 /**
  * 
  */
@@ -14,6 +17,11 @@ UCLASS()
 class PROJECTMAGNUS_API UUnitListEntry : public UUserWidget, public IUserObjectListEntry
 {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION()
+	void UnitButtonPressed();
+
 
 private:
 

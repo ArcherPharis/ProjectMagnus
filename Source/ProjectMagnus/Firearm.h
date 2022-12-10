@@ -34,6 +34,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Gun Events")
 	void SpawnImpactEffects(const FHitResult result);
 
+	
+
 private:
 
 	virtual void Attack() override;
@@ -58,12 +60,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 	float maxSpread = 10;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-	float currentAmmo = 10;
-	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-	float maxAmmo = 10;
-	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-	float ammoReserves = 30;
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "Fire Mode")
 	TEnumAsByte<Firetype> fireMode;
