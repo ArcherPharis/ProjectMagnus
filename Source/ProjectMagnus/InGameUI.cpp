@@ -45,10 +45,10 @@ void UInGameUI::UpdateHealth(float health, float maxHealth)
 	healthGauge->SetValue(health, maxHealth);
 }
 
-void UInGameUI::UpdateStamina(float health, float maxHealth)
+void UInGameUI::UpdateStamina(float stam, float maxStam)
 {
 	//staminaBar->SetPercent(health / maxHealth);
-	staminaGauge->SetValue(health, maxHealth);
+	staminaGauge->SetValue(stam, maxStam);
 
 }
 

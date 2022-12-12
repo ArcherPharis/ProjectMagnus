@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Engine/TargetPoint.h"
 #include "PMGameModeBase.generated.h"
 
 /**
@@ -20,14 +21,17 @@ public:
 private:
 
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
-
+	void GetAllSpawnLocations();
 	
 
 	UPROPERTY(EditDefaultsOnly, Category = "Deployable Units")
 	TArray<TSubclassOf<class APlayerCharacter>> deployablePlayerUnits;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Deployable Units")
-	AActor* targetPoints;
+	TArray<AActor*> spawnPoints;
 	
 	TArray<APlayerCharacter*> currentPlayerUnits;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Deployable Units")
+	int numberOfUnitsAllowedForChapter = 3;
 };

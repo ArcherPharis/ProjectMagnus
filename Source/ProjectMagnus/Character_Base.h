@@ -4,14 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "AbilitySystemInterface.h"
+#include "GameplayEffectTypes.h"
+#include "PRAbilityTypes.h"
 #include "Character_Base.generated.h"
 
+class UPRGameplayAbilityBase;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponEquipped, AWeapon*, weapon);
-
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAbilityAdded, UPRGameplayAbilityBase*, newAbility);
 
 UCLASS()
-class PROJECTMAGNUS_API ACharacter_Base : public ACharacter
+class PROJECTMAGNUS_API ACharacter_Base : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -19,10 +23,14 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
 
+	void ApplyInitialEffect();
+	virtual void PossessedBy(AController* NewController) override;
+
 	UFUNCTION(BlueprintCallable, Category = "PlayerAiming")
 	bool GetIsAiming() const { return bIsAiming; }
 
 	FOnWeaponEquipped onWeaponEquipped;
+	FOnAbilityAdded onAbilityAdded;
 
 	void Sprint();
 	void StopSprint();
@@ -37,10 +45,15 @@ protected:
 	virtual void Attack();
 	virtual void StopAttack();
 
+	UFUNCTION(BlueprintCallable, Category = "GameplayAbilities")
+	void ApplyEffectToSelf(const TSubclassOf<class UGameplayEffect>& effectToApply);
+
 	float GetWalkSpeed() const { return originalSpeedValue; }
 	float GetRunSpeed() const { return sprintValue; }
 
 	bool IsCharacterSprinting();
+
+	void UseItem();
 	
 
 
@@ -60,8 +73,11 @@ public:
 
 	class UTexture2D* GetUnitPortrait() const { return unitPortrait; }
 	class FName GetUnitName() const { return unitName; }
-	
 
+	
+	
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const;
+	FORCEINLINE class UPRAttributeSet* GetAttributeSet() const { return attributeSet; }
 	
 
 private:
@@ -88,6 +104,20 @@ private:
 
 	bool bIsAiming = false;
 
+	UPROPERTY()
+	class UPRAbilitySystemComponent* abilitySystemComp;
+
+	UPROPERTY()
+	UPRAttributeSet* attributeSet;
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
+	TArray<TSubclassOf<class UGameplayEffect>> InitialEffects;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
+	TMap<EPRAbilityInputID, TSubclassOf<UGameplayAbility>> InitialAbilities;
+
+	void GiveAbility(const TSubclassOf<class UGameplayAbility>& newAbility, int inputID = -1, bool broadCast = false);
 
 
 	

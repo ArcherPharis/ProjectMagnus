@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "StatComponent.h"
+#include "AbilitySystemComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -32,6 +33,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &APlayerCharacter::StopAiming);
 	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &APlayerCharacter::Attack);
 	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Released, this, &APlayerCharacter::StopAttack);
+	GetAbilitySystemComponent()->BindAbilityActivationToInputComponent(PlayerInputComponent, FGameplayAbilityInputBinds("Confirm",
+		"Cancel",
+		"EPRAbilityInputID",
+		static_cast<int32>(EPRAbilityInputID::Confirm),
+		static_cast<int32>(EPRAbilityInputID::Cancel)));
+
 
 
 }

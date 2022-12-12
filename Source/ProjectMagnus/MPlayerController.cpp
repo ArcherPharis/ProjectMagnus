@@ -6,6 +6,7 @@
 #include "InGameUI.h"
 #include "StatComponent.h"
 #include "PMGameModeBase.h"
+#include "PRAttributeSet.h"
 #include "Kismet/GameplayStatics.h"
 
 void AMPlayerController::OnPossess(APawn* newPawn)
@@ -19,8 +20,10 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 		OnPossessEffect();
 		playerCharacter->onUnitGiven.AddDynamic(inGameUI, &UInGameUI::NewUnitGiven);
 		playerCharacter->onWeaponEquipped.AddDynamic(inGameUI, &UInGameUI::GetNewWeaponInfo);
-		playerCharacter->GetStatComponent()->onHealthChange.AddDynamic(inGameUI, &UInGameUI::UpdateHealth);
+		//playerCharacter->GetStatComponent()->onHealthChange.AddDynamic(inGameUI, &UInGameUI::UpdateHealth);
 		playerCharacter->GetStatComponent()->onStamChange.AddDynamic(inGameUI, &UInGameUI::UpdateStamina);
+		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetHealthAttribute()).AddUObject(this, &AMPlayerController::HealthUpdated);
+		//playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetStaminaAttribute()).AddUObject(this, &AMPlayerController::StaminaUpdated);
 		playerCharacter->OnDeployed();
 	
 	}
@@ -40,4 +43,13 @@ void AMPlayerController::BeginPlay()
 	gameMode->SpawnInitialUnits(inGameUI); //I think eventually, the game is gonna start by possessing a special
 	//actor just for tactics mode selection rather than any player.
 
+}
+
+void AMPlayerController::HealthUpdated(const FOnAttributeChangeData& AttributeData)
+{
+	inGameUI->UpdateHealth(AttributeData.NewValue, playerCharacter->GetAttributeSet()->GetMaxHealth());
+}
+
+void AMPlayerController::StaminaUpdated(const FOnAttributeChangeData& AttributeData)
+{
 }

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "GameplayEffectTypes.h"
 #include "MPlayerController.generated.h"
 
 /**
@@ -25,6 +26,10 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	TSubclassOf<class UInGameUI> inGameUIClass;
+
+	void HealthUpdated(const FOnAttributeChangeData& AttributeData);
+
+	void StaminaUpdated(const FOnAttributeChangeData& AttributeData);
 
 	UInGameUI* inGameUI;
 
