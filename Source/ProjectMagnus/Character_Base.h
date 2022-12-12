@@ -12,6 +12,7 @@
 class UPRGameplayAbilityBase;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponEquipped, AWeapon*, weapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAPGauge, float, APAmount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAbilityAdded, UPRGameplayAbilityBase*, newAbility);
 
 UCLASS()
@@ -30,6 +31,7 @@ public:
 	bool GetIsAiming() const { return bIsAiming; }
 
 	FOnWeaponEquipped onWeaponEquipped;
+	FOnAPGauge onAPGauge;
 	FOnAbilityAdded onAbilityAdded;
 
 	void Sprint();

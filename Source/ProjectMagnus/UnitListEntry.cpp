@@ -6,6 +6,7 @@
 #include "PlayerCharacter.h"
 #include "Components/Image.h"
 #include "Components/Button.h"
+#include "PRAttributeSet.h"
 
 
 
@@ -16,10 +17,16 @@ void UUnitListEntry::NativeOnListItemObjectSet(UObject* ListItemObject)
 	unitPortrait->SetBrushFromTexture(character->GetUnitPortrait());
 	unitName->SetText(FText::FromString(character->GetUnitName().ToString()));
 	unitSelectButton->OnReleased.AddDynamic(this, &UUnitListEntry::UnitButtonPressed);
+	APCount->SetText(FText::FromString(FString::FromInt(character->GetAttributeSet()->GetMaxActionPoints())));
 }
 
 void UUnitListEntry::UnitButtonPressed()
 {
 	APlayerCharacter* character = GetListItem<APlayerCharacter>();
 	character->onUnitDeployed.Broadcast(character);
+}
+
+void UUnitListEntry::SetUnitEntryAP(float value)
+{
+	APCount->SetText(FText::FromString(FString::FromInt(value)));
 }

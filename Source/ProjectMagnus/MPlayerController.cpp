@@ -24,6 +24,7 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 		playerCharacter->GetStatComponent()->onStamChange.AddDynamic(inGameUI, &UInGameUI::UpdateStamina);
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetHealthAttribute()).AddUObject(this, &AMPlayerController::HealthUpdated);
 		//playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetStaminaAttribute()).AddUObject(this, &AMPlayerController::StaminaUpdated);
+		playerCharacter->onAPGauge.AddDynamic(inGameUI, &UInGameUI::SetAPText);
 		playerCharacter->OnDeployed();
 	
 	}

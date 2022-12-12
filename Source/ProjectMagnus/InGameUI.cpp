@@ -5,13 +5,14 @@
 #include "Weapon.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
-#include"ValueGauge.h"
+#include "ValueGauge.h"
 #include "PlayerCharacter.h"
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/CanvasPanel.h"
+#include "APValue.h"
 
 void UInGameUI::NativeConstruct()
 {
@@ -63,6 +64,16 @@ void UInGameUI::NewUnitGiven(APlayerCharacter* unit)
 	unitList->AddItem(unit);
 	unit->onUnitDeployed.AddDynamic(this, &UInGameUI::PossessNewUnit);
 
+}
+
+void UInGameUI::SetValueSegments(float maxSegments)
+{
+	APGauge->SetMaxValue(maxSegments);
+}
+
+void UInGameUI::SetAPText(float newValue)
+{
+	APCount->SetText(FText::FromString(FString::FromInt(newValue)));
 }
 
 void UInGameUI::PossessNewUnit(APlayerCharacter* newUnit)

@@ -33,6 +33,12 @@ public:
 	UFUNCTION()
 	void NewUnitGiven(class APlayerCharacter* unit);
 
+	UFUNCTION()
+	void SetValueSegments(float maxSegments);
+
+	UFUNCTION()
+	void SetAPText(float newValue);
+
 private:
 
 	UFUNCTION()
@@ -52,6 +58,8 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* ammoCount;
 	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* APCount;
+	UPROPERTY(meta = (BindWidget))
 	UImage* weaponIcon;
 
 	//UPROPERTY(meta = (BindWIdget))
@@ -65,6 +73,9 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UValueGauge* staminaGauge;
+
+	UPROPERTY(meta = (BindWidget))
+	class UAPValue* APGauge;
 
 	UPROPERTY(meta = (BindWidget))
 	class UListView* unitList;

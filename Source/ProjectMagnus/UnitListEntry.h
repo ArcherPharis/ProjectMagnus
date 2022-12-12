@@ -22,6 +22,9 @@ public:
 	UFUNCTION()
 	void UnitButtonPressed();
 
+	UFUNCTION()
+	void SetUnitEntryAP(float value);
+
 
 private:
 
@@ -33,5 +36,7 @@ private:
 	class UTextBlock* unitName;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* unitSelectButton;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* APCount;
 	
 };

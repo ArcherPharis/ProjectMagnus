@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "StatComponent.h"
 #include "AbilitySystemComponent.h"
+#include "PRAttributeSet.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -55,6 +56,8 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::OnDeployed()
 {
 	onWeaponEquipped.Broadcast(GetCurrentWeapon());
+	onAPGauge.Broadcast(GetAttributeSet()->GetMaxActionPoints());
+	//we don't need to create another one for when it changes, just use the one for ability system. look at controller.
 }
 
 void APlayerCharacter::MoveForward(float value)

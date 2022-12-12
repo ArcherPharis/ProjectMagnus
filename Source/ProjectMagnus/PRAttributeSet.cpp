@@ -18,4 +18,9 @@ void UPRAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallback
     {
         SetStamina(FMath::Clamp(GetStamina(), 0.f, GetMaxStamina()));
     }
+
+    if (Data.EvaluatedData.Attribute == GetActionPointsAttribute())
+    {
+        SetActionPoints(FMath::Clamp(GetActionPoints(), 0.f, GetMaxActionPoints()));
+    }
 }

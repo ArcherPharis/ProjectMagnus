@@ -42,6 +42,14 @@ public:
 	FGameplayAttributeData MaxStamina;
 	ATTRIBUTE_ACCESSORS(UPRAttributeSet, MaxStamina);
 
+	UPROPERTY()
+	FGameplayAttributeData ActionPoints;
+	ATTRIBUTE_ACCESSORS(UPRAttributeSet, ActionPoints);
+
+	UPROPERTY()
+	FGameplayAttributeData MaxActionPoints;
+	ATTRIBUTE_ACCESSORS(UPRAttributeSet, MaxActionPoints);
+
 };
 	
 
