@@ -7,6 +7,7 @@
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUnitGiven, APlayerCharacter*, unit);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateHealthStamRange, float, maxHealth, float, maxStam);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClickedDeploy, APlayerCharacter*, charaToDeploy);
 
 /**
@@ -21,6 +22,7 @@ public:
 	APlayerCharacter();
 
 	FOnUnitGiven onUnitGiven;
+	FOnUpdateHealthStamRange onUpdateHealthStamRange;
 	FOnClickedDeploy onUnitDeployed;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

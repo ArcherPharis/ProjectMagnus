@@ -31,6 +31,8 @@ private:
 
 	void StaminaUpdated(const FOnAttributeChangeData& AttributeData);
 
+	void APUpdated(const FOnAttributeChangeData& AttributeData);
+
 	UInGameUI* inGameUI;
 
 	class APlayerCharacter* playerCharacter;

@@ -76,6 +76,13 @@ public:
 	class UTexture2D* GetUnitPortrait() const { return unitPortrait; }
 	class FName GetUnitName() const { return unitName; }
 
+	void ChangeAP(int amount);
+
+	bool CharacterCanAct();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "CharacterBase")
+	void OnStopMoving();
+
 	
 	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const;
@@ -117,10 +124,17 @@ private:
 
 
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
+	TSubclassOf<UGameplayEffect> staminaDrainEffect;
+
+
+	bool isMoving;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
 	TMap<EPRAbilityInputID, TSubclassOf<UGameplayAbility>> InitialAbilities;
 
 	void GiveAbility(const TSubclassOf<class UGameplayAbility>& newAbility, int inputID = -1, bool broadCast = false);
-
+	void DrainStamina();
 
 	
 

@@ -45,6 +45,7 @@ void ACharacter_Base::BeginPlay()
 void ACharacter_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	DrainStamina();
 
 }
 
@@ -61,6 +62,20 @@ float ACharacter_Base::GetCurrentWeight()
 	return equippedWeapon->GetWeight();
 }
 
+void ACharacter_Base::ChangeAP(int amount)
+{
+	GetAttributeSet()->SetActionPoints(GetAttributeSet()->GetActionPoints() + amount);
+}
+
+bool ACharacter_Base::CharacterCanAct()
+{
+	if (GetAttributeSet()->GetActionPoints() > 0)
+	{
+		return true;
+	}
+	return false;
+}
+
 UAbilitySystemComponent* ACharacter_Base::GetAbilitySystemComponent() const
 {
 	return abilitySystemComp;
@@ -73,6 +88,23 @@ void ACharacter_Base::GiveAbility(const TSubclassOf<class UGameplayAbility>& new
 	if (broadCast)
 	{
 		onAbilityAdded.Broadcast(Cast<UPRGameplayAbilityBase>(GetAbilitySystemComponent()->FindAbilitySpecFromHandle(AbilitySpecHandle)->Ability));
+	}
+}
+
+void ACharacter_Base::DrainStamina()
+{
+	if (GetVelocity().Length() > 0 && !isMoving)
+	{
+		isMoving = true;
+		FGameplayEffectContextHandle handle;
+		GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(staminaDrainEffect.GetDefaultObject(), -1, handle);
+	}
+	else if (GetVelocity().Length() == 0)
+	{
+
+		if (isMoving == false) return;
+		OnStopMoving();
+		isMoving = false;
 	}
 }
 

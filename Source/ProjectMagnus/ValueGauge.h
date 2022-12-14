@@ -16,6 +16,9 @@ class PROJECTMAGNUS_API UValueGauge : public UUserWidget
 
 public:
 	void SetValue(float newValue, float max);
+	void SetHealthRange(float newRange);
+	void SetStamRange(float newRange);
+
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -23,5 +26,8 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Value")
 	FName ValueParamName;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Value")
+	FName RangeParamName;
 	
 };

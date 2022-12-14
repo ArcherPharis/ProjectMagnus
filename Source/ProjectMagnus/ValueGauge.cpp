@@ -6,3 +6,13 @@ void UValueGauge::SetValue(float newValue, float max)
 {
 	valueImage->GetDynamicMaterial()->SetScalarParameterValue(ValueParamName, newValue / max);
 }
+
+void UValueGauge::SetHealthRange(float newRange)
+{
+	valueImage->GetDynamicMaterial()->SetScalarParameterValue(RangeParamName, newRange / 100);
+}
+
+void UValueGauge::SetStamRange(float newRange)
+{
+	valueImage->GetDynamicMaterial()->SetScalarParameterValue(RangeParamName, newRange / 250);
+}

@@ -39,6 +39,9 @@ public:
 	UFUNCTION()
 	void SetAPText(float newValue);
 
+	UFUNCTION()
+	void UpdateRanges(float maxHealth, float maxStam);
+
 private:
 
 	UFUNCTION()

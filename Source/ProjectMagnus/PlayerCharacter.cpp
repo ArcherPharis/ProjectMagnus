@@ -56,60 +56,21 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::OnDeployed()
 {
 	onWeaponEquipped.Broadcast(GetCurrentWeapon());
-	onAPGauge.Broadcast(GetAttributeSet()->GetMaxActionPoints());
-	//we don't need to create another one for when it changes, just use the one for ability system. look at controller.
+	onAPGauge.Broadcast(GetAttributeSet()->GetActionPoints());
+	onUpdateHealthStamRange.Broadcast(GetAttributeSet()->GetMaxHealth(), GetAttributeSet()->GetMaxStamina());
 }
 
 void APlayerCharacter::MoveForward(float value)
 {
 
-	if (!GetStatComponent()) return;
-	if(GetStatComponent()->GetCurrentStamina() > 0)
 	AddMovementInput(FRotationMatrix(GetControlRotator()).GetScaledAxis(EAxis::X) * value);
-	if (value != 0 && !bHasAlreadyStartedMoving)
-	{
-		bHasAlreadyStartedMoving = true;
-
-		if (value < 0)
-		{
-			//todo, refactor soonish, so that enemies also drain stamina
-			//this method is ok, but does not change drain when moving slower.
-			//so, we should instead drain this, by velocity of actor instead.
-			GetStatComponent()->DrainStamina(-value);
-		}
-		else
-		{
-			GetStatComponent()->DrainStamina(value);
-		}
-	}
-	else
-	{
-		bHasAlreadyStartedMoving = false;
-
-	}
+	
 }
 
 void APlayerCharacter::MoveRight(float value)
 {
-	if (!GetStatComponent()) return;
-	if (GetStatComponent()->GetCurrentStamina() > 0)
 	AddMovementInput(FRotationMatrix(GetControlRotator()).GetScaledAxis(EAxis::Y) * value);
-	if (value != 0 && !bHasAlreadyStartedMoving)
-	{
-		bHasAlreadyStartedMoving = true;
-		if (value < 0)
-		{
-			GetStatComponent()->DrainStamina(-value);
-		}
-		else
-		{
-			GetStatComponent()->DrainStamina(value);
-		}
-	}
-	else
-	{
-		bHasAlreadyStartedMoving = false;
-	}
+
 }
 
 void APlayerCharacter::LookRight(float value)

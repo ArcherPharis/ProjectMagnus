@@ -23,8 +23,10 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 		//playerCharacter->GetStatComponent()->onHealthChange.AddDynamic(inGameUI, &UInGameUI::UpdateHealth);
 		playerCharacter->GetStatComponent()->onStamChange.AddDynamic(inGameUI, &UInGameUI::UpdateStamina);
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetHealthAttribute()).AddUObject(this, &AMPlayerController::HealthUpdated);
-		//playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetStaminaAttribute()).AddUObject(this, &AMPlayerController::StaminaUpdated);
+		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetStaminaAttribute()).AddUObject(this, &AMPlayerController::StaminaUpdated);
+		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetActionPointsAttribute()).AddUObject(this, &AMPlayerController::APUpdated);
 		playerCharacter->onAPGauge.AddDynamic(inGameUI, &UInGameUI::SetAPText);
+		playerCharacter->onUpdateHealthStamRange.AddDynamic(inGameUI, &UInGameUI::UpdateRanges);
 		playerCharacter->OnDeployed();
 	
 	}
@@ -53,4 +55,10 @@ void AMPlayerController::HealthUpdated(const FOnAttributeChangeData& AttributeDa
 
 void AMPlayerController::StaminaUpdated(const FOnAttributeChangeData& AttributeData)
 {
+	inGameUI->UpdateStamina(AttributeData.NewValue, playerCharacter->GetAttributeSet()->GetMaxStamina());
+}
+
+void AMPlayerController::APUpdated(const FOnAttributeChangeData& AttributeData)
+{
+	inGameUI->SetAPText(AttributeData.NewValue);
 }

@@ -43,13 +43,17 @@ void UInGameUI::GetNewWeaponInfo(AWeapon* weapon)
 void UInGameUI::UpdateHealth(float health, float maxHealth)
 {
 	//healthBar->SetPercent(health / maxHealth);
+	
 	healthGauge->SetValue(health, maxHealth);
+	
 }
 
 void UInGameUI::UpdateStamina(float stam, float maxStam)
 {
 	//staminaBar->SetPercent(health / maxHealth);
+	
 	staminaGauge->SetValue(stam, maxStam);
+	
 
 }
 
@@ -74,6 +78,12 @@ void UInGameUI::SetValueSegments(float maxSegments)
 void UInGameUI::SetAPText(float newValue)
 {
 	APCount->SetText(FText::FromString(FString::FromInt(newValue)));
+}
+
+void UInGameUI::UpdateRanges(float maxHealth, float maxStam)
+{
+	healthGauge->SetHealthRange(maxHealth);
+	staminaGauge->SetStamRange(maxStam);
 }
 
 void UInGameUI::PossessNewUnit(APlayerCharacter* newUnit)
