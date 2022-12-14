@@ -51,6 +51,7 @@ void APlayerCharacter::BeginPlay()
 	UGameplayStatics::GetPlayerController(this, 0)->PlayerCameraManager->ViewPitchMax = 60.f;
 	onUnitGiven.Broadcast(this);
 	
+	
 }
 
 void APlayerCharacter::OnDeployed()
@@ -62,13 +63,14 @@ void APlayerCharacter::OnDeployed()
 
 void APlayerCharacter::MoveForward(float value)
 {
-
+	if (IsCharacterOutOfStamina()) return;
 	AddMovementInput(FRotationMatrix(GetControlRotator()).GetScaledAxis(EAxis::X) * value);
 	
 }
 
 void APlayerCharacter::MoveRight(float value)
 {
+	if (IsCharacterOutOfStamina()) return;
 	AddMovementInput(FRotationMatrix(GetControlRotator()).GetScaledAxis(EAxis::Y) * value);
 
 }

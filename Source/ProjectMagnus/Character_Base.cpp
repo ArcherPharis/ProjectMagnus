@@ -15,7 +15,6 @@ ACharacter_Base::ACharacter_Base()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	statComponenet = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
 	abilitySystemComp = CreateDefaultSubobject<UPRAbilitySystemComponent>(TEXT("Ability System Comp"));
 	attributeSet = CreateDefaultSubobject<UPRAttributeSet>(TEXT("Attribute Set"));
 
@@ -34,6 +33,7 @@ void ACharacter_Base::BeginPlay()
 {
 	Super::BeginPlay();
 	ApplyInitialEffect();
+	GiveAbility(SprintAbility);
 	for (auto& abilityKeyValuePair : InitialAbilities)
 	{
 		GiveAbility(abilityKeyValuePair.Value, static_cast<int>(abilityKeyValuePair.Key), true);
@@ -76,6 +76,11 @@ bool ACharacter_Base::CharacterCanAct()
 	return false;
 }
 
+void ACharacter_Base::SetSprinting(bool value)
+{
+	isSprinting = value;
+}
+
 UAbilitySystemComponent* ACharacter_Base::GetAbilitySystemComponent() const
 {
 	return abilitySystemComp;
@@ -93,6 +98,7 @@ void ACharacter_Base::GiveAbility(const TSubclassOf<class UGameplayAbility>& new
 
 void ACharacter_Base::DrainStamina()
 {
+	if (isSprinting) return;
 	if (GetVelocity().Length() > 0 && !isMoving)
 	{
 		isMoving = true;
@@ -138,13 +144,12 @@ void ACharacter_Base::ApplyInitialEffect()
 	}
 }
 
-bool ACharacter_Base::IsCharacterSprinting()
+bool ACharacter_Base::IsCharacterOutOfStamina()
 {
-	if (GetVelocity().Length() > 600)
+	if (GetAttributeSet()->GetStamina() == 0)
 	{
 		return true;
 	}
-
 
 	return false;
 }
@@ -190,14 +195,14 @@ void ACharacter_Base::StopAiming()
 
 void ACharacter_Base::Sprint()
 {
-	if(!bIsAiming)
-	GetCharacterMovement()->MaxWalkSpeed = sprintValue;
+	if (!bIsAiming)
+	abilitySystemComp->TryActivateAbilityByClass(SprintAbility);
 }
 
 void ACharacter_Base::StopSprint()
 {
 	if (!bIsAiming)
-	GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
+	onStoppedSprinting.Broadcast();
 
 }
 

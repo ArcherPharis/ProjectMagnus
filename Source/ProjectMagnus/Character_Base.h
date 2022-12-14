@@ -14,6 +14,7 @@ class UPRGameplayAbilityBase;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponEquipped, AWeapon*, weapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAPGauge, float, APAmount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAbilityAdded, UPRGameplayAbilityBase*, newAbility);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStoppedSprinting);
 
 UCLASS()
 class PROJECTMAGNUS_API ACharacter_Base : public ACharacter, public IAbilitySystemInterface
@@ -33,6 +34,7 @@ public:
 	FOnWeaponEquipped onWeaponEquipped;
 	FOnAPGauge onAPGauge;
 	FOnAbilityAdded onAbilityAdded;
+	FOnStoppedSprinting onStoppedSprinting;
 
 	void Sprint();
 	void StopSprint();
@@ -53,9 +55,11 @@ protected:
 	float GetWalkSpeed() const { return originalSpeedValue; }
 	float GetRunSpeed() const { return sprintValue; }
 
-	bool IsCharacterSprinting();
+	bool IsCharacterOutOfStamina();
 
 	void UseItem();
+
+
 	
 
 
@@ -67,7 +71,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	class UStatComponent* GetStatComponent() const { return statComponenet; }
 
 	float GetCurrentWeight();
 
@@ -83,6 +86,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "CharacterBase")
 	void OnStopMoving();
 
+	void SetSprinting(bool value);
+
 	
 	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const;
@@ -92,6 +97,8 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Gear")
 	TSubclassOf<AWeapon> weaponClass;
+
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "Unit Personal Info")
 	UTexture2D* unitPortrait;
@@ -103,8 +110,6 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Gear")
 	AWeapon* equippedWeapon;
 
-	UPROPERTY(EditDefaultsOnly, Category = "PlayerUnit")
-	class UStatComponent* statComponenet;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Meta Stats")
 	float originalSpeedValue = 600.f;
@@ -126,12 +131,20 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
 	TSubclassOf<UGameplayEffect> staminaDrainEffect;
 
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
+	TSubclassOf<UGameplayAbility> SprintAbility;
+
+	bool isSprinting = false;
+
+
+
 
 	bool isMoving;
 
 
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
 	TMap<EPRAbilityInputID, TSubclassOf<UGameplayAbility>> InitialAbilities;
+
 
 	void GiveAbility(const TSubclassOf<class UGameplayAbility>& newAbility, int inputID = -1, bool broadCast = false);
 	void DrainStamina();
