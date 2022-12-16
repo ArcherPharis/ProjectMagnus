@@ -42,10 +42,18 @@ public:
 	UFUNCTION()
 	void UpdateRanges(float maxHealth, float maxStam);
 
+	UFUNCTION()
+	void SetForecast(int STK, int ammoLeft);
+
+	UFUNCTION()
+	void ClearForecast();
+
 private:
 
 	UFUNCTION()
 	void PossessNewUnit(APlayerCharacter* newUnit);
+
+
 
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* UISwitcher;
@@ -58,12 +66,23 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UImage* crossHair;
+
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* ammoCount;
+	class UImage* firearmForecastImage;
+
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* APCount;
+	class UTextBlock* shotsToKillText;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ammoLeftText;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ammoCount;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* APCount;
 	UPROPERTY(meta = (BindWidget))
 	UImage* weaponIcon;
+	UPROPERTY(meta = (BindWidget))
+	class UHorizontalBox* forecastHoriBox;
+
 
 	//UPROPERTY(meta = (BindWIdget))
 	//class UProgressBar* healthBar;

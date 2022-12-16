@@ -34,6 +34,13 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Gun Events")
 	void SpawnImpactEffects(const FHitResult result);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Gun Events")
+	void RotateCharacter(class ACharacter_Base* character, AActor* result);
+
+	void FirearmAim();
+	void StopFirearmAim();
+	
+
 	
 
 private:
@@ -43,7 +50,7 @@ private:
 	FVector WeaponSpread(FVector Endpoint);
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-		USceneComponent* firePoint;
+	USceneComponent* firePoint;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UParticleSystem* muzzleEffect;
@@ -60,8 +67,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 	float maxSpread = 10;
 
-
-
 	UPROPERTY(EditDefaultsOnly, Category = "Fire Mode")
 	TEnumAsByte<Firetype> fireMode;
 
@@ -71,9 +76,16 @@ private:
 	bool canfire = true;
 
 	FTimerHandle fireDelayTimer;
+	FTimerHandle aimCastTimerHandle;
+
+	AActor* targetedActor;
+	AActor* potentialActor;
+
+	FHitResult PotentialActorResult(FHitResult potResult);
 
 	void WeaponFire();
 	void AfterFireCheck();
+	int GetBulletsToKill(AActor* currentTarget);
 
 
 };

@@ -113,7 +113,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Meta Stats")
 	float originalSpeedValue = 600.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Meta Stats")
 	float sprintValue  = 780.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Meta Stats")
 	float aimSpeedValue = 300.f;
 
 	bool bIsAiming = false;

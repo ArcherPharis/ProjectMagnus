@@ -3,6 +3,7 @@
 
 #include "Weapon.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character_Base.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -22,6 +23,7 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 	weight = weight / 10;
+	
 	
 }
 
@@ -50,6 +52,12 @@ void AWeapon::Attack()
 void AWeapon::ChangeCurrentAmmo(int amt)
 {
 	currentAmmo += amt;
+}
+
+void AWeapon::SetWeaponOwner(ACharacter_Base* owner)
+{
+	SetOwner(owner);
+	myOwner = owner;
 }
 
 

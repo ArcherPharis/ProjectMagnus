@@ -22,7 +22,6 @@ void UGASprint::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 
 void UGASprint::StopSprinting()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Sprint is getting event"));
 	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), false, false);
 	character->GetAbilitySystemComponent()->RemoveActiveEffectsWithTags(sprintDrainEffectTag);
 	character->SetSprinting(false);

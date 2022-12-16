@@ -63,14 +63,22 @@ void APlayerCharacter::OnDeployed()
 
 void APlayerCharacter::MoveForward(float value)
 {
-	if (IsCharacterOutOfStamina()) return;
+	if (IsCharacterOutOfStamina())
+	{
+		StopSprint();
+		return;
+	}
 	AddMovementInput(FRotationMatrix(GetControlRotator()).GetScaledAxis(EAxis::X) * value);
 	
 }
 
 void APlayerCharacter::MoveRight(float value)
 {
-	if (IsCharacterOutOfStamina()) return;
+	if (IsCharacterOutOfStamina())
+	{
+		StopSprint();
+		return;
+	}
 	AddMovementInput(FRotationMatrix(GetControlRotator()).GetScaledAxis(EAxis::Y) * value);
 
 }

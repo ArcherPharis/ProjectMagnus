@@ -3,6 +3,7 @@
 
 #include "Character_Base.h"
 #include "Weapon.h"
+#include "Firearm.h"
 #include "StatComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PRAbilitySystemComponent.h"
@@ -165,7 +166,7 @@ void ACharacter_Base::GiveEquipment()
 	{
 		AWeapon* weapon;
 		weapon = GetWorld()->SpawnActor<AWeapon>(weaponClass);
-		weapon->SetOwner(this);
+		weapon->SetWeaponOwner(this);
 		weapon->OnEquip(GetMesh());
 		equippedWeapon = weapon;
 		onWeaponEquipped.Broadcast(equippedWeapon);
@@ -179,7 +180,9 @@ void ACharacter_Base::Aim()
 {
 
 	bIsAiming = true;
-	GetCharacterMovement()->MaxWalkSpeed = aimSpeedValue;
+	GetCharacterMovement()->MaxWalkSpeed = 0;
+	AFirearm* fireArm = Cast<AFirearm>(GetCurrentWeapon());
+	fireArm->FirearmAim();
 
 	
 }
@@ -189,6 +192,12 @@ void ACharacter_Base::StopAiming()
 	bIsAiming = false;
 	GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
 	StopAttack();
+	AFirearm* fireArm = Cast<AFirearm>(GetCurrentWeapon());
+	if (fireArm)
+	{
+		fireArm->StopFirearmAim();
+	}
+	GetCurrentWeapon()->onClearForecast.Broadcast();
 
 	
 }
@@ -197,12 +206,14 @@ void ACharacter_Base::Sprint()
 {
 	if (!bIsAiming)
 	abilitySystemComp->TryActivateAbilityByClass(SprintAbility);
+	GetCharacterMovement()->MaxWalkSpeed = sprintValue;
 }
 
 void ACharacter_Base::StopSprint()
 {
 	if (!bIsAiming)
 	onStoppedSprinting.Broadcast();
+	GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
 
 }
 

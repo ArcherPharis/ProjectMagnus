@@ -7,6 +7,8 @@
 #include "Weapon.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponUse, int, ammoCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnForecastInfo, int, shotsToKill, int, shotsLeft);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClearForecast);
 
 UCLASS()
 class PROJECTMAGNUS_API AWeapon : public AActor
@@ -18,12 +20,16 @@ public:
 	AWeapon();
 
 	FOnWeaponUse onWeaponUse;
+	FOnForecastInfo onForecastInfo;
+	FOnClearForecast onClearForecast;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void PlayWeaponSound(USceneComponent* firePoint);
+
+	class ACharacter_Base* GetWeaponOwner() const { return myOwner; }
 
 public:	
 	// Called every frame
@@ -46,6 +52,8 @@ public:
 	int GetCurrentAmmo() const { return currentAmmo; }
 	void ChangeCurrentAmmo(int amt);
 
+	void SetWeaponOwner(ACharacter_Base* owner);
+
 private:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
@@ -61,6 +69,8 @@ private:
 	UTexture2D* crossHair;
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UTexture2D* weaponIcon;
+
+	ACharacter_Base* myOwner;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 	int currentAmmo = 10;

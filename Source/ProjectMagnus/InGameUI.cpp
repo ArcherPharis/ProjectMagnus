@@ -12,11 +12,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/CanvasPanel.h"
+#include "Components/HorizontalBox.h"
 #include "APValue.h"
 
 void UInGameUI::NativeConstruct()
 {
 	Super::NativeConstruct();
+	firearmForecastImage->SetVisibility(ESlateVisibility::Hidden);
+	forecastHoriBox->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UInGameUI::GetNewWeaponInfo(AWeapon* weapon)
@@ -95,4 +98,18 @@ void UInGameUI::PossessNewUnit(APlayerCharacter* newUnit)
 	//the character also needs to tell the ui it would like to send its data over, hence
 	//the lack of icons and recticle
 	
+}
+
+void UInGameUI::SetForecast(int STK, int ammoLeft)
+{
+	firearmForecastImage->SetVisibility(ESlateVisibility::Visible);
+	forecastHoriBox->SetVisibility(ESlateVisibility::Visible);
+	shotsToKillText->SetText(FText::FromString(FString::FromInt(STK)));
+	ammoLeftText->SetText(FText::FromString(FString::FromInt(ammoLeft)));
+}
+
+void UInGameUI::ClearForecast()
+{
+	firearmForecastImage->SetVisibility(ESlateVisibility::Hidden);
+	forecastHoriBox->SetVisibility(ESlateVisibility::Hidden);
 }

@@ -4,6 +4,7 @@
 #include "MPlayerController.h"
 #include "PlayerCharacter.h"
 #include "InGameUI.h"
+#include "Weapon.h"
 #include "StatComponent.h"
 #include "PMGameModeBase.h"
 #include "PRAttributeSet.h"
@@ -27,6 +28,8 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetActionPointsAttribute()).AddUObject(this, &AMPlayerController::APUpdated);
 		playerCharacter->onAPGauge.AddDynamic(inGameUI, &UInGameUI::SetAPText);
 		playerCharacter->onUpdateHealthStamRange.AddDynamic(inGameUI, &UInGameUI::UpdateRanges);
+		playerCharacter->GetCurrentWeapon()->onForecastInfo.AddDynamic(inGameUI, &UInGameUI::SetForecast);
+		playerCharacter->GetCurrentWeapon()->onClearForecast.AddDynamic(inGameUI, &UInGameUI::ClearForecast);
 		playerCharacter->OnDeployed();
 	
 	}
