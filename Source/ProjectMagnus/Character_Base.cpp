@@ -178,11 +178,13 @@ void ACharacter_Base::GiveEquipment()
 
 void ACharacter_Base::Aim()
 {
-
-	bIsAiming = true;
-	GetCharacterMovement()->MaxWalkSpeed = 0;
-	AFirearm* fireArm = Cast<AFirearm>(GetCurrentWeapon());
-	fireArm->FirearmAim();
+	if (!bIsAiming)
+	{
+		bIsAiming = true;
+		GetCharacterMovement()->MaxWalkSpeed = aimSpeedValue;
+		AFirearm* fireArm = Cast<AFirearm>(GetCurrentWeapon());
+		fireArm->FirearmAim();
+	}
 
 	
 }

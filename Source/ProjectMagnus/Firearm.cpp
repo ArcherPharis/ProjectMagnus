@@ -56,7 +56,9 @@ void AFirearm::Attack()
 		potentialActor = nullptr;
 		return;
 	}
-
+	onClearForecast.Broadcast();
+	APlayerController* pc = Cast<APlayerController>(GetWeaponOwner()->GetController());
+	pc->SetInputMode(FInputModeUIOnly());
 	WeaponFire();
 
 }
@@ -75,41 +77,14 @@ FVector AFirearm::WeaponSpread(FVector EndPoint)
 FHitResult AFirearm::PotentialActorResult(FHitResult potResult)
 {
 	return potResult;
-	//if (GetCurrentAmmo() > 0)
-//{
-//	if (canfire)
-//	{
-//		canfire = false;
-//	}
-//	else
-//	{
-//		return;
-//	}
-//	FHitResult result;
-//	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 
-//	UGameplayStatics::SpawnEmitterAttached(muzzleEffect, firePoint);
-//	FVector CameraEnd = cameraManager->GetCameraLocation() + cameraManager->GetActorForwardVector() * weaponRange;
-//	OnAttack();
-//	if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), WeaponSpread(CameraEnd), ECC_Camera))
-//	{
-//		UGameplayStatics::ApplyDamage(result.GetActor(), damage, nullptr, GetOwner(), nullptr);
-//		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
-//		SpawnImpactEffects(result);
-//		//DrawDebugPoint(GetWorld(), result.Location, 10, FColor::Red, true, 2.f);
-
-//	}
-//	PlayWeaponSound(firePoint);
-//	ChangeCurrentAmmo(-1);
-//	onWeaponUse.Broadcast(GetCurrentAmmo());
-//	GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / fireRate);
-//}
 }
 
 void AFirearm::WeaponFire()
 {
 	if (GetCurrentAmmo() > 0)
-	{
+	{		
+
 	if (canfire)
 	{
 		canfire = false;
@@ -124,9 +99,22 @@ void AFirearm::WeaponFire()
 	UGameplayStatics::SpawnEmitterAttached(muzzleEffect, firePoint);
 	FVector CameraEnd = cameraManager->GetCameraLocation() + cameraManager->GetActorForwardVector() * weaponRange;
 	OnAttack();
-	if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), WeaponSpread(CameraEnd), ECC_Camera))
+	if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), WeaponSpread(CameraEnd), ECC_GameTraceChannel1))
 	{
-		UGameplayStatics::ApplyDamage(result.GetActor(), damage, nullptr, GetOwner(), nullptr);
+		//TODO in the future, maybe a damagable interface? OR, simply if not damagable chara, use built in apply damnage.
+		ACharacter_Base* damagableChara = Cast<ACharacter_Base>(result.GetActor());
+
+		if (damagableChara)
+		{
+			damagableChara->GetAttributeSet()->SetHealth(damagableChara->GetAttributeSet()->GetHealth() - damage);
+			UE_LOG(LogTemp, Warning, TEXT("%i"), damagableChara->GetAttributeSet()->GetHealth());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("wtf?"));
+
+		}
+
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
 		SpawnImpactEffects(result);
 		//DrawDebugPoint(GetWorld(), result.Location, 10, FColor::Red, true, 2.f);
@@ -134,6 +122,7 @@ void AFirearm::WeaponFire()
 	}
 	PlayWeaponSound(firePoint);
 	ChangeCurrentAmmo(-1);
+	onForecastInfo.Broadcast(GetBulletsToKill(targetedActor), GetCurrentAmmo());
 	onWeaponUse.Broadcast(GetCurrentAmmo());
 	GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / fireRate);
 }
@@ -145,7 +134,7 @@ void AFirearm::AfterFireCheck()
 	canfire = true;
 	OnStopAttack();
 	//if (bFireButtonPressed && fireMode == Firetype::Automatic)
-	Attack();
+	WeaponFire();
 		
 
 }
@@ -153,9 +142,14 @@ void AFirearm::AfterFireCheck()
 int AFirearm::GetBulletsToKill(AActor* currentTarget)
 {
 	ACharacter_Base* character = Cast<ACharacter_Base>(currentTarget);
-	float currentTargetHealth = character->GetAttributeSet()->GetHealth();
+	if (character)
+	{
+		float currentTargetHealth = character->GetAttributeSet()->GetHealth();
 
-	int shotsToKill = FMath::CeilToInt(currentTargetHealth / damage);
-	UE_LOG(LogTemp, Warning, TEXT("%i"), shotsToKill);
-	return shotsToKill;
+		int shotsToKill =  FMath::CeilToInt(currentTargetHealth / damage);
+		shotsToKill = FMath::Clamp(shotsToKill, 0, 100);
+		return shotsToKill;
+	}
+	return 0;
+	
 }
