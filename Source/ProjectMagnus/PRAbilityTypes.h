@@ -11,5 +11,6 @@ enum class EPRAbilityInputID : uint8
 	None,
 	Confirm,
 	Cancel,
-	UseItem
+	UseItem,
+	Reload
 };

@@ -22,12 +22,29 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GameplayAbilityBase")
 	FOnAbilityCommited onAbilityActivated;
 
+	UFUNCTION(BlueprintCallable, Category = "GameplayAbilityBase")
+	float GetCooldownDuration() const;
+
+	UFUNCTION(BlueprintCallable, Category = "GameplayAbilityBase")
+	float GetCost() const;
+
+	UFUNCTION(BlueprintCallable, Category = "GameplayAbilityBase")
+	FORCEINLINE UTexture2D* GetIcon() const { return AbilityIcon; }
+
+	class ACharacter_Base* AvatarCharacterBase;
+
+
 protected:
-	FORCEINLINE class ACharacter_Base* GetAvatarAsCharacter() const { return AvatarCharacterBase; }
+	FORCEINLINE  ACharacter_Base* GetAvatarAsCharacter() const { return AvatarCharacterBase; }
+
+	
 
 	virtual bool CommitAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) override;
 
 
 private:
-	ACharacter_Base* AvatarCharacterBase;
+	
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbilityBase")
+	UTexture2D* AbilityIcon;
 };
