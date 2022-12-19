@@ -9,6 +9,8 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponUse, int, ammoCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnForecastInfo, int, shotsToKill, int, shotsLeft);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClearForecast);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBeginAttackEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilledTargetWithGun, class ACharacter_Base*, charaThatDied);
 
 UCLASS()
 class PROJECTMAGNUS_API AWeapon : public AActor
@@ -22,10 +24,25 @@ public:
 	FOnWeaponUse onWeaponUse;
 	FOnForecastInfo onForecastInfo;
 	FOnClearForecast onClearForecast;
+	FOnBeginAttackEvent onBeginAttackEvent;
+	FOnKilledTargetWithGun onKilledTargetWithGun;
+
+	void SetPlayerWantsToStopFiring(bool value);
+	bool GetPlayerWantsToStopFiring() { return playersWantsToStopFiring; }
+	void SetInAttackEvent(bool value);
+
+
+
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	bool GetInAttackEvent() { return inAttackEvent; }
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	
+	
+
 
 	void PlayWeaponSound(USceneComponent* firePoint);
 
@@ -40,6 +57,7 @@ public:
 	float GetWeight() const { return weight; }
 
 	virtual void Attack();
+
 
 	bool bFireButtonPressed = false;
 
@@ -81,6 +99,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "WeaponStats")
 	float weight = 0.0f;
+
+	bool playersWantsToStopFiring = false;
+
+	bool inAttackEvent = false;
 
 
 

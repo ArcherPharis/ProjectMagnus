@@ -31,11 +31,20 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Camera")
 	class USpringArmComponent* GetSpringArm() { return springArm; }
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Camera")
+	void DeathEvent();
+
 	void OnDeployed();
+
+	virtual void StopAiming() override;
+	virtual void OnUnitDeath(class ACharacter_Base* characterToDie) override;
+
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	class UCameraComponent* playerEye;
+
+
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	USpringArmComponent* springArm;
@@ -68,7 +77,7 @@ private:
 	FRotator GetControlRotator();
 
 	virtual void Aim() override;
-	virtual void StopAiming() override;
+	
 	virtual void Attack() override;
 	virtual void StopAttack() override;
 	bool bHasAlreadyStartedMoving;

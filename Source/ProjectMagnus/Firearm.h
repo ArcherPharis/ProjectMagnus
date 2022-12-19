@@ -6,6 +6,9 @@
 #include "Weapon.h"
 #include "Firearm.generated.h"
 
+
+
+
 UENUM()
 enum Firetype
 {
@@ -39,6 +42,8 @@ public:
 
 	void FirearmAim();
 	void StopFirearmAim();
+	bool TryStopFiring();
+	
 	
 
 	
@@ -72,6 +77,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 	float fireRate = 2.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	float Handleability = 5.0f;
+	UPROPERTY(EditAnywhere, Category = "Stats")
+	float wielderControlPercent = 15.f;
 
 	bool canfire = true;
 
@@ -84,8 +93,13 @@ private:
 	FHitResult PotentialActorResult(FHitResult potResult);
 
 	void WeaponFire();
+	void BeginAttack();
 	void AfterFireCheck();
 	int GetBulletsToKill(AActor* currentTarget);
+
+	FTimerHandle GunKilledHandle;
+	void GunKilledTarget();
+	
 
 
 };

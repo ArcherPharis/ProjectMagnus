@@ -24,6 +24,9 @@ public:
 	void OnPossessEffect();
 
 private:
+
+	
+
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	TSubclassOf<class UInGameUI> inGameUIClass;
 
@@ -32,6 +35,9 @@ private:
 	void StaminaUpdated(const FOnAttributeChangeData& AttributeData);
 
 	void APUpdated(const FOnAttributeChangeData& AttributeData);
+
+	UFUNCTION()
+	void FiringEventStop();
 
 	UInGameUI* inGameUI;
 

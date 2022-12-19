@@ -31,6 +31,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PlayerAiming")
 	bool GetIsAiming() const { return bIsAiming; }
 
+	UFUNCTION(BlueprintCallable, Category = "PlayerAiming")
+	void SetIsAiming(bool value);
+
 	FOnWeaponEquipped onWeaponEquipped;
 	FOnAPGauge onAPGauge;
 	FOnAbilityAdded onAbilityAdded;
@@ -39,15 +42,18 @@ public:
 	void Sprint();
 	void StopSprint();
 	void GiveEquipment();
+	virtual void StopAiming();
+	TSubclassOf<APawn> GetDeathPawnClass() const { return deathPawnClass; }
+	
 	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void Aim();
-	virtual void StopAiming();
 	virtual void Attack();
 	virtual void StopAttack();
+	void StopFiring();
 
 	UFUNCTION(BlueprintCallable, Category = "GameplayAbilities")
 	void ApplyEffectToSelf(const TSubclassOf<class UGameplayEffect>& effectToApply);
@@ -68,12 +74,17 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void PlayGunAttackClip();
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
+	virtual void OnUnitDeath(class ACharacter_Base* characterToDie);
+	
 	float GetCurrentWeight();
 
+	UFUNCTION(BlueprintPure, Category = "CharacterBase")
 	class AWeapon* GetCurrentWeapon() { return equippedWeapon; }
 
 	class UTexture2D* GetUnitPortrait() const { return unitPortrait; }
@@ -86,7 +97,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "CharacterBase")
 	void OnStopMoving();
 
+
 	void SetSprinting(bool value);
+	bool GetIsDead() { return isDead; }
 
 	
 	
@@ -99,9 +112,18 @@ private:
 	TSubclassOf<AWeapon> weaponClass;
 
 
+	UPROPERTY(EditDefaultsOnly, Category = "PossessablePawns")
+	TSubclassOf<APawn> deathPawnClass;
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "Unit Personal Info")
 	UTexture2D* unitPortrait;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Unit Personal Info")
+	USoundBase* GunAttackClip;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Unit Personal Info")
+	UAnimMontage* onDeadMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Unit Personal Info")
 	FName unitName;
@@ -138,11 +160,12 @@ private:
 	TSubclassOf<UGameplayAbility> SprintAbility;
 
 	bool isSprinting = false;
-
-
-
-
+	bool isDead = false;
 	bool isMoving;
+
+	FTimerHandle returnToUnitHandle;
+	void AfterUnitDeath();
+	void SpawnDeathUnit();
 
 
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
@@ -151,7 +174,7 @@ private:
 
 	void GiveAbility(const TSubclassOf<class UGameplayAbility>& newAbility, int inputID = -1, bool broadCast = false);
 	void DrainStamina();
-
+	void CharacterDied(const FOnAttributeChangeData& AttributeData);
 	
 
 	

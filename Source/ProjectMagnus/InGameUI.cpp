@@ -14,12 +14,15 @@
 #include "Components/CanvasPanel.h"
 #include "Components/HorizontalBox.h"
 #include "APValue.h"
+#include "Components/Button.h"
 
 void UInGameUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 	firearmForecastImage->SetVisibility(ESlateVisibility::Hidden);
 	forecastHoriBox->SetVisibility(ESlateVisibility::Hidden);
+	stopFiringOverlayButton->bIsEnabled = false;
+	stopFiringOverlayButton->OnPressed.AddDynamic(this, &UInGameUI::StopFiring);
 }
 
 void UInGameUI::GetNewWeaponInfo(AWeapon* weapon)
@@ -112,4 +115,26 @@ void UInGameUI::ClearForecast()
 {
 	firearmForecastImage->SetVisibility(ESlateVisibility::Hidden);
 	forecastHoriBox->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UInGameUI::UnhideButton()
+{
+
+	
+	if (stopFiringOverlayButton->bIsEnabled)
+	{
+		stopFiringOverlayButton->bIsEnabled = false;
+		return;
+	}
+
+	stopFiringOverlayButton->bIsEnabled = true;
+
+
+}
+
+void UInGameUI::StopFiring()
+{
+	
+	onButtonPressed.Broadcast();
+	stopFiringOverlayButton->bIsEnabled = false;
 }

@@ -10,6 +10,8 @@
 #include "PRGameplayAbilityBase.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "PRAttributeSet.h"
+#include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ACharacter_Base::ACharacter_Base()
@@ -26,13 +28,18 @@ ACharacter_Base::ACharacter_Base()
 void ACharacter_Base::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	abilitySystemComp->InitAbilityActorInfo(this, this);
+	abilitySystemComp->InitAbilityActorInfo(this, this);}
+
+void ACharacter_Base::SetIsAiming(bool value)
+{
+	bIsAiming = value;
 }
 
 // Called when the game starts or when spawned
 void ACharacter_Base::BeginPlay()
 {
 	Super::BeginPlay();
+	GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(GetAttributeSet()->GetHealthAttribute()).AddUObject(this, &ACharacter_Base::CharacterDied);
 	ApplyInitialEffect();
 	GiveAbility(SprintAbility);
 	for (auto& abilityKeyValuePair : InitialAbilities)
@@ -50,11 +57,32 @@ void ACharacter_Base::Tick(float DeltaTime)
 
 }
 
+void ACharacter_Base::PlayGunAttackClip()
+{
+	if(GunAttackClip)
+	UGameplayStatics::PlaySoundAtLocation(this, GunAttackClip, GetActorLocation(), 1.f);
+}
+
 // Called to bind functionality to input
 void ACharacter_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+
+}
+
+void ACharacter_Base::OnUnitDeath(ACharacter_Base* characterToDie)
+{
+
+	
+	GetWorldTimerManager().SetTimer(returnToUnitHandle, this, &ACharacter_Base::AfterUnitDeath, 6.5f, false);
+	//inGameUI->HideHUD();
+	characterToDie->SetActorHiddenInGame(true);
+	APawn* DeathPawn = GetWorld()->SpawnActor<APawn>(characterToDie->GetDeathPawnClass(), characterToDie->GetTransform());
+	APlayerController* cont = Cast<APlayerController>(GetController());
+	characterToDie->GetCurrentWeapon()->SetActorHiddenInGame(true);
+	cont->SetViewTargetWithBlend(DeathPawn, 0.5f);
+	
 
 }
 
@@ -87,6 +115,16 @@ UAbilitySystemComponent* ACharacter_Base::GetAbilitySystemComponent() const
 	return abilitySystemComp;
 }
 
+void ACharacter_Base::AfterUnitDeath()
+{
+	APlayerController* cont = Cast<APlayerController>(GetController());
+	cont->SetViewTargetWithBlend(this, 0.5f);
+	cont->SetInputMode(FInputModeGameOnly());
+	GetCurrentWeapon()->SetInAttackEvent(false);
+	StopAiming();
+
+}
+
 void ACharacter_Base::GiveAbility(const TSubclassOf<class UGameplayAbility>& newAbility, int inputID, bool broadCast)
 {
 	FGameplayAbilitySpecHandle AbilitySpecHandle = abilitySystemComp->GiveAbility(FGameplayAbilitySpec(newAbility, 1, inputID));
@@ -115,9 +153,29 @@ void ACharacter_Base::DrainStamina()
 	}
 }
 
+void ACharacter_Base::CharacterDied(const FOnAttributeChangeData& AttributeData)
+{
+
+
+	if (AttributeData.NewValue == 0)
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(onDeadMontage);
+		isDead = true;
+		SetActorEnableCollision(false);
+	}
+}
+
 void ACharacter_Base::Attack()
 {
 	equippedWeapon->bFireButtonPressed = true;
+
+
+	if (equippedWeapon->GetInAttackEvent())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("In attack event"));
+		return;
+	}
+
 	if (bIsAiming)
 	{
 		equippedWeapon->Attack();
@@ -128,6 +186,12 @@ void ACharacter_Base::StopAttack()
 {
 	equippedWeapon->bFireButtonPressed = false;
 
+}
+
+void ACharacter_Base::StopFiring()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Trying to stop firing"));
+	GetCurrentWeapon()->SetPlayerWantsToStopFiring(true);
 }
 
 
@@ -191,6 +255,8 @@ void ACharacter_Base::Aim()
 
 void ACharacter_Base::StopAiming()
 {
+
+	
 	bIsAiming = false;
 	GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
 	StopAttack();

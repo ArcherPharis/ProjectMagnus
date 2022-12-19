@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "InGameUI.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnButtonPressed);
+
 /**
  * 
  */
@@ -18,6 +20,10 @@ protected:
 	virtual void NativeConstruct() override;
 
 public:
+
+	FOnButtonPressed onButtonPressed;
+
+
 	UFUNCTION()
 	void GetNewWeaponInfo(class AWeapon* weapon);
 
@@ -48,6 +54,12 @@ public:
 	UFUNCTION()
 	void ClearForecast();
 
+	UFUNCTION()
+	void UnhideButton();
+
+	UFUNCTION()
+	void StopFiring();
+
 private:
 
 	UFUNCTION()
@@ -69,6 +81,9 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UImage* firearmForecastImage;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* stopFiringOverlayButton;
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* shotsToKillText;

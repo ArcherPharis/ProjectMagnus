@@ -3,6 +3,7 @@
 
 #include "MPlayerController.h"
 #include "PlayerCharacter.h"
+#include "Character_Base.h"
 #include "InGameUI.h"
 #include "Weapon.h"
 #include "StatComponent.h"
@@ -18,6 +19,7 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 	if (playerCharacter)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("You possessed the player actor!"));
+		SetViewTargetWithBlend(playerCharacter, 1.5f);
 		OnPossessEffect();
 		playerCharacter->onUnitGiven.AddDynamic(inGameUI, &UInGameUI::NewUnitGiven);
 		playerCharacter->onWeaponEquipped.AddDynamic(inGameUI, &UInGameUI::GetNewWeaponInfo);
@@ -30,13 +32,15 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 		playerCharacter->onUpdateHealthStamRange.AddDynamic(inGameUI, &UInGameUI::UpdateRanges);
 		playerCharacter->GetCurrentWeapon()->onForecastInfo.AddDynamic(inGameUI, &UInGameUI::SetForecast);
 		playerCharacter->GetCurrentWeapon()->onClearForecast.AddDynamic(inGameUI, &UInGameUI::ClearForecast);
+		playerCharacter->GetCurrentWeapon()->onBeginAttackEvent.AddDynamic(inGameUI, &UInGameUI::UnhideButton);
+		inGameUI->onButtonPressed.AddDynamic(this, &AMPlayerController::FiringEventStop);
 		playerCharacter->OnDeployed();
 	
 	}
 	else
 	{
-		SetViewTarget(newPawn);
-		UE_LOG(LogTemp, Warning, TEXT("You possessed the tactics actor!"));
+		SetViewTargetWithBlend(newPawn, 1.5f);
+		UE_LOG(LogTemp, Warning, TEXT("You possessed the some other actor!"));
 	}
 
 }
@@ -65,3 +69,16 @@ void AMPlayerController::APUpdated(const FOnAttributeChangeData& AttributeData)
 {
 	inGameUI->SetAPText(AttributeData.NewValue);
 }
+
+void AMPlayerController::FiringEventStop()
+{
+	if (playerCharacter->GetCurrentWeapon()->GetInAttackEvent())
+	{
+		if (playerCharacter->GetCurrentWeapon()->GetPlayerWantsToStopFiring() == false)
+		{
+			playerCharacter->GetCurrentWeapon()->SetPlayerWantsToStopFiring(true);
+		}
+	}
+	
+}
+

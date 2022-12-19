@@ -8,6 +8,7 @@
 #include "StatComponent.h"
 #include "AbilitySystemComponent.h"
 #include "PRAttributeSet.h"
+#include "Firearm.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -52,6 +53,7 @@ void APlayerCharacter::BeginPlay()
 	onUnitGiven.Broadcast(this);
 	
 	
+	
 }
 
 void APlayerCharacter::OnDeployed()
@@ -63,6 +65,7 @@ void APlayerCharacter::OnDeployed()
 
 void APlayerCharacter::MoveForward(float value)
 {
+
 	if (IsCharacterOutOfStamina())
 	{
 		StopSprint();
@@ -74,6 +77,7 @@ void APlayerCharacter::MoveForward(float value)
 
 void APlayerCharacter::MoveRight(float value)
 {
+
 	if (IsCharacterOutOfStamina())
 	{
 		StopSprint();
@@ -85,11 +89,13 @@ void APlayerCharacter::MoveRight(float value)
 
 void APlayerCharacter::LookRight(float value)
 {
+
 	AddControllerYawInput(value);
 }
 
 void APlayerCharacter::LookUp(float value)
 {
+
 	AddControllerPitchInput(value);
 }
 
@@ -115,6 +121,12 @@ void APlayerCharacter::StopAiming()
 	
 	Super::StopAiming();
 	playerEye->SetFieldOfView(nonAimFOV);
+}
+
+void APlayerCharacter::OnUnitDeath(ACharacter_Base* characterToDie)
+{
+	DeathEvent();
+	Super::OnUnitDeath(characterToDie);
 }
 
 void APlayerCharacter::Attack()

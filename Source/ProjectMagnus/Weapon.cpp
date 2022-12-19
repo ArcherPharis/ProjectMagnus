@@ -18,6 +18,19 @@ AWeapon::AWeapon()
 
 }
 
+
+void AWeapon::SetPlayerWantsToStopFiring(bool value)
+{
+	playersWantsToStopFiring = value;
+}
+
+void AWeapon::SetInAttackEvent(bool value)
+{
+	inAttackEvent = value;
+}
+
+
+
 // Called when the game starts or when spawned
 void AWeapon::BeginPlay()
 {
@@ -26,6 +39,7 @@ void AWeapon::BeginPlay()
 	
 	
 }
+
 
 void AWeapon::PlayWeaponSound(USceneComponent* firePoint)
 {

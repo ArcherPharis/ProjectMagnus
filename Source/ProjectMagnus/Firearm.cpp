@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Character_Base.h"
 #include "PRAttributeSet.h"
+#include "Components/CapsuleComponent.h"
 
 AFirearm::AFirearm()
 {
@@ -14,6 +15,7 @@ AFirearm::AFirearm()
 
 void AFirearm::FirearmAim()
 {
+	wielderControlPercent = ((10 + 24) * Handleability) / 10;
 	FHitResult result;
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FVector CameraEnd = cameraManager->GetCameraLocation() + cameraManager->GetActorForwardVector() * weaponRange;
@@ -47,8 +49,39 @@ void AFirearm::StopFirearmAim()
 	GetWorldTimerManager().ClearTimer(aimCastTimerHandle);
 }
 
+bool AFirearm::TryStopFiring()
+{
+
+	if (!GetPlayerWantsToStopFiring()) return false;
+	onBeginAttackEvent.Broadcast();
+	int randomRoll = FMath::RandRange(1, 150);
+
+	if (wielderControlPercent <= 10)
+	{
+		wielderControlPercent = 15;
+	}
+
+	if (wielderControlPercent > randomRoll)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Stopped Firing! : %i"), randomRoll);
+		SetPlayerWantsToStopFiring(false);
+		//SetInAttackEvent(false);
+		//APlayerController* pc = Cast<APlayerController>(GetWeaponOwner()->GetController());
+		//pc->SetInputMode(FInputModeGameOnly());
+		//GetWeaponOwner()->StopAiming();
+		
+		
+		return true;
+	}
+
+
+	return false;
+}
+
 void AFirearm::Attack()
 {
+	if (GetCurrentAmmo() == 0) return;
+
 	if (potentialActor)
 	{
 		if (GetWeaponOwner())
@@ -56,10 +89,15 @@ void AFirearm::Attack()
 		potentialActor = nullptr;
 		return;
 	}
+	SetInAttackEvent(true);
 	onClearForecast.Broadcast();
 	APlayerController* pc = Cast<APlayerController>(GetWeaponOwner()->GetController());
 	pc->SetInputMode(FInputModeUIOnly());
-	WeaponFire();
+	onBeginAttackEvent.Broadcast();
+	GetWeaponOwner()->PlayGunAttackClip();
+	FTimerHandle delayShootHandle;
+	GetWorldTimerManager().SetTimer(delayShootHandle, this, &AFirearm::BeginAttack, 0.5f, false);
+	
 
 }
 
@@ -82,6 +120,8 @@ FHitResult AFirearm::PotentialActorResult(FHitResult potResult)
 
 void AFirearm::WeaponFire()
 {
+
+	if (TryStopFiring()) return;
 	if (GetCurrentAmmo() > 0)
 	{		
 
@@ -106,14 +146,17 @@ void AFirearm::WeaponFire()
 
 		if (damagableChara)
 		{
-			damagableChara->GetAttributeSet()->SetHealth(damagableChara->GetAttributeSet()->GetHealth() - damage);
-			UE_LOG(LogTemp, Warning, TEXT("%i"), damagableChara->GetAttributeSet()->GetHealth());
+			
+			damagableChara->GetAttributeSet()->SetHealth(FMath::Clamp(damagableChara->GetAttributeSet()->GetHealth() - damage, 0, damagableChara->GetAttributeSet()->GetMaxHealth()));
+			if (damagableChara == targetedActor && damagableChara->GetIsDead())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Gun killed something"));
+				GetWorldTimerManager().SetTimer(GunKilledHandle, this, &AFirearm::GunKilledTarget, 1.f, false);
+				
+			}
+			//damagableChara->GetAbilitySystemComponent()->ApplyGameplayEffectToSelf()
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("wtf?"));
 
-		}
 
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
 		SpawnImpactEffects(result);
@@ -122,11 +165,25 @@ void AFirearm::WeaponFire()
 	}
 	PlayWeaponSound(firePoint);
 	ChangeCurrentAmmo(-1);
+
+	if (GetCurrentAmmo() == 0)
+	{
+		//need to return the character back to their camera, after a small delay.
+		//but we also need to check if the attack event is still true, just in case the
+		//gun killed something on the last bullet.
+		//SetInAttackEvent(false);		
+		SetPlayerWantsToStopFiring(false);
+	}
 	onForecastInfo.Broadcast(GetBulletsToKill(targetedActor), GetCurrentAmmo());
 	onWeaponUse.Broadcast(GetCurrentAmmo());
 	GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / fireRate);
 }
 
+}
+
+void AFirearm::BeginAttack()
+{
+	WeaponFire();
 }
 
 void AFirearm::AfterFireCheck()
@@ -152,4 +209,15 @@ int AFirearm::GetBulletsToKill(AActor* currentTarget)
 	}
 	return 0;
 	
+}
+
+void AFirearm::GunKilledTarget()
+{
+
+
+	ACharacter_Base* chr = Cast<ACharacter_Base>(targetedActor);
+
+	if (chr == nullptr) return;
+	GetWeaponOwner()->OnUnitDeath(chr);
+	targetedActor = nullptr;
 }
