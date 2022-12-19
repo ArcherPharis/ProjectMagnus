@@ -58,6 +58,11 @@ private:
 	USceneComponent* firePoint;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	USoundBase* hitMarkerSound;
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	USoundBase* impactSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UParticleSystem* muzzleEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
@@ -89,6 +94,7 @@ private:
 
 	AActor* targetedActor;
 	AActor* potentialActor;
+	TArray<ACharacter_Base*>killedEnemies;
 
 	FHitResult PotentialActorResult(FHitResult potResult);
 

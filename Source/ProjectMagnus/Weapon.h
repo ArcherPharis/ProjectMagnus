@@ -58,6 +58,7 @@ public:
 
 	virtual void Attack();
 
+	UAnimMontage* GetAttackMontage() const { return attackMontage; }
 
 	bool bFireButtonPressed = false;
 
@@ -82,6 +83,9 @@ private:
 	USoundBase* attackAudio;
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FName socketName;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UAnimMontage* attackMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UTexture2D* crossHair;

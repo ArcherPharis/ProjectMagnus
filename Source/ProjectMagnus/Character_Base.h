@@ -74,6 +74,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void HandleCharacterDeath();
+
 	void PlayGunAttackClip();
 
 	// Called to bind functionality to input
@@ -175,6 +177,7 @@ private:
 	void GiveAbility(const TSubclassOf<class UGameplayAbility>& newAbility, int inputID = -1, bool broadCast = false);
 	void DrainStamina();
 	void CharacterDied(const FOnAttributeChangeData& AttributeData);
+	
 	
 
 	

@@ -148,9 +148,13 @@ void AFirearm::WeaponFire()
 		{
 			
 			damagableChara->GetAttributeSet()->SetHealth(FMath::Clamp(damagableChara->GetAttributeSet()->GetHealth() - damage, 0, damagableChara->GetAttributeSet()->GetMaxHealth()));
-			if (damagableChara == targetedActor && damagableChara->GetIsDead())
+			UGameplayStatics::PlaySound2D(this, hitMarkerSound, 1.5f);
+			UGameplayStatics::PlaySound2D(this, impactSound, 0.5f);
+
+			if (damagableChara->GetIsDead())
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Gun killed something"));
+				killedEnemies.Add(damagableChara);
 				GetWorldTimerManager().SetTimer(GunKilledHandle, this, &AFirearm::GunKilledTarget, 1.f, false);
 				
 			}
@@ -164,6 +168,7 @@ void AFirearm::WeaponFire()
 
 	}
 	PlayWeaponSound(firePoint);
+	GetWeaponOwner()->GetMesh()->GetAnimInstance()->Montage_Play(GetAttackMontage());
 	ChangeCurrentAmmo(-1);
 
 	if (GetCurrentAmmo() == 0)
@@ -215,9 +220,35 @@ void AFirearm::GunKilledTarget()
 {
 
 
-	ACharacter_Base* chr = Cast<ACharacter_Base>(targetedActor);
+	//ACharacter_Base* chr = Cast<ACharacter_Base>(targetedActor);
 
-	if (chr == nullptr) return;
-	GetWeaponOwner()->OnUnitDeath(chr);
-	targetedActor = nullptr;
+	//if (chr == nullptr) return;
+
+	if (killedEnemies.Num() > 1)
+	{
+		for (int i = 0; i < killedEnemies.Num(); i++)
+		{
+			if (killedEnemies[i] == killedEnemies.Last())
+			{
+				GetWeaponOwner()->OnUnitDeath(killedEnemies[i]);
+				continue;
+
+			}
+			killedEnemies[i]->HandleCharacterDeath();
+		}
+	}
+	else
+	{
+		GetWeaponOwner()->OnUnitDeath(killedEnemies[0]);
+	}
+
+
+
+	//if the list of killed units is greater than 1, play a special methd for everything
+	//but the last, meaning they will spawn their death actor, but no go through the
+	//cam events. They will just die and award exp. The last actor in the list will 
+	//go through the OnUnitDeath method. Else, there is only 1 in the list, just carry
+	//on normally.
+	//make sure to empty the list after this event.
+	killedEnemies.Empty();
 }

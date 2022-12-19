@@ -57,6 +57,14 @@ void ACharacter_Base::Tick(float DeltaTime)
 
 }
 
+void ACharacter_Base::HandleCharacterDeath()
+{
+	SetActorHiddenInGame(true);
+	GetCurrentWeapon()->SetActorHiddenInGame(true);
+	APawn* DeathPawn = GetWorld()->SpawnActor<APawn>(GetDeathPawnClass(),GetTransform());
+
+}
+
 void ACharacter_Base::PlayGunAttackClip()
 {
 	if(GunAttackClip)
