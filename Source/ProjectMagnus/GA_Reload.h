@@ -17,4 +17,13 @@ class PROJECTMAGNUS_API UGA_Reload : public UPRGameplayAbilityBase
 private:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	
+	UPROPERTY(EditDefaultsOnly, Category = "GroundBlast")
+	UAnimMontage* reloadMontage;
+
+	UFUNCTION()
+	void ReloadMontageFinished();
+
+
+
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 };

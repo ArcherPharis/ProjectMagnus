@@ -34,6 +34,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Camera")
 	void DeathEvent();
 
+
 	void OnDeployed();
 
 	virtual void StopAiming() override;

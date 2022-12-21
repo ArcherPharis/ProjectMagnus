@@ -43,6 +43,7 @@ public:
 	void FirearmAim();
 	void StopFirearmAim();
 	bool TryStopFiring();
+	virtual void ReloadWeapon() override;
 	
 	
 

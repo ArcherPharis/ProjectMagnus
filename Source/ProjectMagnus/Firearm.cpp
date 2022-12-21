@@ -78,6 +78,43 @@ bool AFirearm::TryStopFiring()
 	return false;
 }
 
+void AFirearm::ReloadWeapon()
+{
+	if (GetCurrentAmmo() < GetMaxAmmo() && GetAmmoReserves() != 0)
+	{
+		int result = GetMaxAmmo() - GetCurrentAmmo();
+
+		if (result <= GetAmmoReserves())
+		{
+			SetCurrentAmmo(GetCurrentAmmo() + result);
+			SetAmmoReserves(GetAmmoReserves() + result);
+			onWeaponUse.Broadcast(GetCurrentAmmo());
+		}
+		else
+		{
+			ChangeAmmoReserves(GetAmmoReserves());
+			SetAmmoReserves(0);
+			onWeaponUse.Broadcast(GetCurrentAmmo());
+		}
+	}
+
+	//if (CurrentAmmo <= MaxAmmo && AmmoReserves != 0 && CurrentAmmo != MaxAmmo)
+	//{
+	//	int32 Result = MaxAmmo - CurrentAmmo;
+
+	//	if (Result <= AmmoReserves)
+	//	{
+	//		AmmoReserves -= Result;
+	//		CurrentAmmo += Result;
+	//	}
+	//	else
+	//	{
+	//		CurrentAmmo += AmmoReserves;
+	//		AmmoReserves = 0;
+	//	}
+	//}
+}
+
 void AFirearm::Attack()
 {
 	if (GetCurrentAmmo() == 0) return;
@@ -173,11 +210,9 @@ void AFirearm::WeaponFire()
 
 	if (GetCurrentAmmo() == 0)
 	{
-		//need to return the character back to their camera, after a small delay.
-		//but we also need to check if the attack event is still true, just in case the
-		//gun killed something on the last bullet.
 		//SetInAttackEvent(false);		
-		SetPlayerWantsToStopFiring(false);
+		//SetPlayerWantsToStopFiring(false);
+		//onEndAttackEvent.Broadcast();
 	}
 	onForecastInfo.Broadcast(GetBulletsToKill(targetedActor), GetCurrentAmmo());
 	onWeaponUse.Broadcast(GetCurrentAmmo());
@@ -235,11 +270,13 @@ void AFirearm::GunKilledTarget()
 
 			}
 			killedEnemies[i]->HandleCharacterDeath();
+			
 		}
 	}
 	else
 	{
 		GetWeaponOwner()->OnUnitDeath(killedEnemies[0]);
+		
 	}
 
 

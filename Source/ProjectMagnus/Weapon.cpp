@@ -68,10 +68,29 @@ void AWeapon::ChangeCurrentAmmo(int amt)
 	currentAmmo += amt;
 }
 
+void AWeapon::ChangeAmmoReserves(int amt)
+{
+	currentAmmo += amt;
+}
+
+void AWeapon::SetCurrentAmmo(int amt)
+{
+	currentAmmo = amt;
+}
+
+void AWeapon::SetAmmoReserves(int amt)
+{
+	ammoReserves = amt;
+}
+
 void AWeapon::SetWeaponOwner(ACharacter_Base* owner)
 {
 	SetOwner(owner);
 	myOwner = owner;
+}
+
+void AWeapon::ReloadWeapon()
+{
 }
 
 

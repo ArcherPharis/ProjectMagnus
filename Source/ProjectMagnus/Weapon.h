@@ -10,6 +10,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponUse, int, ammoCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnForecastInfo, int, shotsToKill, int, shotsLeft);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClearForecast);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBeginAttackEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEndAttackEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilledTargetWithGun, class ACharacter_Base*, charaThatDied);
 
 UCLASS()
@@ -25,6 +26,7 @@ public:
 	FOnForecastInfo onForecastInfo;
 	FOnClearForecast onClearForecast;
 	FOnBeginAttackEvent onBeginAttackEvent;
+	FOnEndAttackEvent onEndAttackEvent;
 	FOnKilledTargetWithGun onKilledTargetWithGun;
 
 	void SetPlayerWantsToStopFiring(bool value);
@@ -68,10 +70,17 @@ public:
 
 	UTexture2D* GetWeaponIcon() const { return weaponIcon; }
 
-	int GetCurrentAmmo() const { return currentAmmo; }
+	FORCEINLINE int GetCurrentAmmo() const { return currentAmmo; }
+	FORCEINLINE int GetMaxAmmo() const { return maxAmmo; }
+	FORCEINLINE int GetAmmoReserves() const { return ammoReserves; }
 	void ChangeCurrentAmmo(int amt);
+	void ChangeAmmoReserves(int amt);
+	void SetCurrentAmmo(int amt);
+	void SetAmmoReserves(int amt);
 
 	void SetWeaponOwner(ACharacter_Base* owner);
+
+	virtual void ReloadWeapon();
 
 private:
 

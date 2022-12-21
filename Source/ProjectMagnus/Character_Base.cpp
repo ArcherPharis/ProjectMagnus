@@ -99,6 +99,11 @@ float ACharacter_Base::GetCurrentWeight()
 	return equippedWeapon->GetWeight();
 }
 
+void ACharacter_Base::GunAttackEventEnd()
+{
+	PostFireEventEffects();
+}
+
 void ACharacter_Base::ChangeAP(int amount)
 {
 	GetAttributeSet()->SetActionPoints(GetAttributeSet()->GetActionPoints() + amount);
@@ -130,6 +135,7 @@ void ACharacter_Base::AfterUnitDeath()
 	cont->SetInputMode(FInputModeGameOnly());
 	GetCurrentWeapon()->SetInAttackEvent(false);
 	StopAiming();
+	GunAttackEventEnd();
 
 }
 

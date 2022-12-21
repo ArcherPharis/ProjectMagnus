@@ -44,6 +44,9 @@ public:
 	void GiveEquipment();
 	virtual void StopAiming();
 	TSubclassOf<APawn> GetDeathPawnClass() const { return deathPawnClass; }
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "After Firing Event")
+	void PostFireEventEffects();
 	
 	
 
@@ -88,6 +91,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "CharacterBase")
 	class AWeapon* GetCurrentWeapon() { return equippedWeapon; }
+
+	UFUNCTION()
+	void GunAttackEventEnd();
 
 	class UTexture2D* GetUnitPortrait() const { return unitPortrait; }
 	class FName GetUnitName() const { return unitName; }

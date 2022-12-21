@@ -23,8 +23,6 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 		OnPossessEffect();
 		playerCharacter->onUnitGiven.AddDynamic(inGameUI, &UInGameUI::NewUnitGiven);
 		playerCharacter->onWeaponEquipped.AddDynamic(inGameUI, &UInGameUI::GetNewWeaponInfo);
-		//playerCharacter->GetStatComponent()->onHealthChange.AddDynamic(inGameUI, &UInGameUI::UpdateHealth);
-		//playerCharacter->GetStatComponent()->onStamChange.AddDynamic(inGameUI, &UInGameUI::UpdateStamina);
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetHealthAttribute()).AddUObject(this, &AMPlayerController::HealthUpdated);
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetStaminaAttribute()).AddUObject(this, &AMPlayerController::StaminaUpdated);
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetActionPointsAttribute()).AddUObject(this, &AMPlayerController::APUpdated);
@@ -33,6 +31,7 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 		playerCharacter->GetCurrentWeapon()->onForecastInfo.AddDynamic(inGameUI, &UInGameUI::SetForecast);
 		playerCharacter->GetCurrentWeapon()->onClearForecast.AddDynamic(inGameUI, &UInGameUI::ClearForecast);
 		playerCharacter->GetCurrentWeapon()->onBeginAttackEvent.AddDynamic(inGameUI, &UInGameUI::UnhideButton);
+		//playerCharacter->GetCurrentWeapon()->onEndAttackEvent.AddDynamic(playerCharacter, &APlayerCharacter::GunAttackEventEnd);
 		inGameUI->onButtonPressed.AddDynamic(this, &AMPlayerController::FiringEventStop);
 		playerCharacter->OnDeployed();
 	
