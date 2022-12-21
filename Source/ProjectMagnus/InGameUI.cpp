@@ -138,3 +138,8 @@ void UInGameUI::StopFiring()
 	onButtonPressed.Broadcast();
 	stopFiringOverlayButton->bIsEnabled = false;
 }
+
+void UInGameUI::SetTipText(FString text)
+{
+	tipText->SetText(FText::FromString(text));
+}

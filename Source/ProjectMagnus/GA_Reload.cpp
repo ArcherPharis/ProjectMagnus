@@ -19,6 +19,7 @@ void UGA_Reload::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const 
 
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
+	
 
 	UAbilityTask_PlayMontageAndWait* ReloadMontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, reloadMontage);
 
@@ -30,6 +31,7 @@ void UGA_Reload::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const 
 		ReloadMontageTask->OnCompleted.AddDynamic(this, &UGA_Reload::ReloadMontageFinished);
 		ReloadMontageTask->ReadyForActivation();
 	}
+	GetAvatarAsCharacter()->onDisplayTip.Broadcast("Press Shift to cancel reload and save AP.");
 }
 
 void UGA_Reload::ReloadMontageFinished()
@@ -41,5 +43,6 @@ void UGA_Reload::ReloadMontageFinished()
 
 void UGA_Reload::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+	GetAvatarAsCharacter()->onDisplayTip.Broadcast("");
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }

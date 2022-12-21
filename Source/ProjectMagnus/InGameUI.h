@@ -60,6 +60,9 @@ public:
 	UFUNCTION()
 	void StopFiring();
 
+	UFUNCTION()
+	void SetTipText(FString text);
+
 private:
 
 	UFUNCTION()
@@ -84,6 +87,9 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* stopFiringOverlayButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* tipText;
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* shotsToKillText;

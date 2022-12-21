@@ -15,6 +15,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponEquipped, AWeapon*, weapon)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAPGauge, float, APAmount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAbilityAdded, UPRGameplayAbilityBase*, newAbility);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStoppedSprinting);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDisplayTip, FString, message);
+
+
 
 UCLASS()
 class PROJECTMAGNUS_API ACharacter_Base : public ACharacter, public IAbilitySystemInterface
@@ -38,6 +41,7 @@ public:
 	FOnAPGauge onAPGauge;
 	FOnAbilityAdded onAbilityAdded;
 	FOnStoppedSprinting onStoppedSprinting;
+	FOnDisplayTip onDisplayTip;
 
 	void Sprint();
 	void StopSprint();
