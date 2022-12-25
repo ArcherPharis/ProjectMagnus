@@ -43,6 +43,8 @@ void UInGameUI::GetNewWeaponInfo(AWeapon* weapon)
 	}
 	FString ammoText = FString::FromInt(weapon->GetCurrentAmmo());
 	ammoCount->SetText(FText::FromString(ammoText));
+	FString ammoReserves = FString::FromInt(weapon->GetAmmoReserves());
+	ammoReservesText->SetText(FText::FromString(ammoReserves));
 	
 }
 
@@ -63,10 +65,12 @@ void UInGameUI::UpdateStamina(float stam, float maxStam)
 
 }
 
-void UInGameUI::UpdateAmmoCount(int ammo)
+void UInGameUI::UpdateAmmoCount(int ammo, int ammoReserves)
 {
 	FString ammoText = FString::FromInt(ammo);
 	ammoCount->SetText(FText::FromString(ammoText));
+	FString ammoReservesT = FString::FromInt(ammoReserves);
+	ammoReservesText->SetText(FText::FromString(ammoReservesT));
 }
 
 void UInGameUI::NewUnitGiven(APlayerCharacter* unit)

@@ -34,7 +34,7 @@ public:
 	void UpdateStamina(float health, float maxHealth);
 
 	UFUNCTION()
-	void UpdateAmmoCount(int ammo);
+	void UpdateAmmoCount(int ammo, int ammoReserves);
 
 	UFUNCTION()
 	void NewUnitGiven(class APlayerCharacter* unit);
@@ -92,11 +92,13 @@ private:
 	class UTextBlock* tipText;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* shotsToKillText;
+	UTextBlock* shotsToKillText;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ammoLeftText;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ammoCount;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ammoReservesText;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* APCount;
 	UPROPERTY(meta = (BindWidget))

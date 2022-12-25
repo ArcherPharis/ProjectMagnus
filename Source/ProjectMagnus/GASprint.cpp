@@ -9,6 +9,13 @@
 
 void UGASprint::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	if (GetAvatarActorFromActorInfo()->GetVelocity().Length() == 0)
+	{
+		K2_EndAbility();
+		return;
+	}
+		
+
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 	character = Cast<ACharacter_Base>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	character->onStoppedSprinting.AddDynamic(this, &UGASprint::StopSprinting);

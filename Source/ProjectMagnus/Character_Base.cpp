@@ -12,6 +12,7 @@
 #include "PRAttributeSet.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "TacticalGear.h"
 
 // Sets default values
 ACharacter_Base::ACharacter_Base()
@@ -33,6 +34,21 @@ void ACharacter_Base::PossessedBy(AController* NewController)
 void ACharacter_Base::SetIsAiming(bool value)
 {
 	bIsAiming = value;
+}
+
+void ACharacter_Base::ToggleInput(bool enableInput)
+{
+
+	if (enableInput)
+	{
+		APlayerController* pc = Cast<APlayerController>(GetController());
+		pc->SetInputMode(FInputModeGameOnly());
+	}
+	else
+	{
+		APlayerController* pc = Cast<APlayerController>(GetController());
+		pc->SetInputMode(FInputModeUIOnly());
+	}
 }
 
 // Called when the game starts or when spawned
@@ -249,6 +265,15 @@ void ACharacter_Base::GiveEquipment()
 		equippedWeapon = weapon;
 		onWeaponEquipped.Broadcast(equippedWeapon);
 
+	}
+
+	if (tacticalGearClass)
+	{
+		ATacticalGear* tGear;
+		tGear = GetWorld()->SpawnActor<ATacticalGear>(tacticalGearClass);
+		tGear->SetOwner(this);
+		tGear->AttachToCharacterMesh(GetMesh());
+		CurrentlyEquippedTacticalGear = tGear;
 	}
 
 }

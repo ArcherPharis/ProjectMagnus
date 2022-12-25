@@ -51,6 +51,14 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "After Firing Event")
 	void PostFireEventEffects();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "After Firing Event")
+	void StopAimMovement();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "After Firing Event")
+	void BeginAimMovement();
+
+	void ToggleInput(bool enableInput);
 	
 	
 
@@ -80,6 +88,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	class ATacticalGear* GetTacticalGear() const { return CurrentlyEquippedTacticalGear; }
 
 	void HandleCharacterDeath();
 
@@ -122,6 +132,10 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Gear")
 	TSubclassOf<AWeapon> weaponClass;
+	UPROPERTY(EditDefaultsOnly, Category = "Gear")
+	TSubclassOf<class ATacticalGear> tacticalGearClass;
+	UPROPERTY(VisibleAnywhere, Category = "Gear")
+	ATacticalGear* CurrentlyEquippedTacticalGear;
 
 
 	UPROPERTY(EditDefaultsOnly, Category = "PossessablePawns")

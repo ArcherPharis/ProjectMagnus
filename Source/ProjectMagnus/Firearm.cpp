@@ -15,6 +15,8 @@ AFirearm::AFirearm()
 
 void AFirearm::FirearmAim()
 {
+	if (GetInAttackEvent()) return;
+
 	wielderControlPercent = ((10 + 24) * Handleability) / 10;
 	FHitResult result;
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
@@ -87,14 +89,14 @@ void AFirearm::ReloadWeapon()
 		if (result <= GetAmmoReserves())
 		{
 			SetCurrentAmmo(GetCurrentAmmo() + result);
-			SetAmmoReserves(GetAmmoReserves() + result);
-			onWeaponUse.Broadcast(GetCurrentAmmo());
+			SetAmmoReserves(GetAmmoReserves() - result);
+			onWeaponUse.Broadcast(GetCurrentAmmo(), GetAmmoReserves());
 		}
 		else
 		{
 			ChangeAmmoReserves(GetAmmoReserves());
 			SetAmmoReserves(0);
-			onWeaponUse.Broadcast(GetCurrentAmmo());
+			onWeaponUse.Broadcast(GetCurrentAmmo(), GetAmmoReserves());
 		}
 	}
 
@@ -215,7 +217,7 @@ void AFirearm::WeaponFire()
 		//onEndAttackEvent.Broadcast();
 	}
 	onForecastInfo.Broadcast(GetBulletsToKill(targetedActor), GetCurrentAmmo());
-	onWeaponUse.Broadcast(GetCurrentAmmo());
+	onWeaponUse.Broadcast(GetCurrentAmmo(), GetAmmoReserves());
 	GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / fireRate);
 }
 

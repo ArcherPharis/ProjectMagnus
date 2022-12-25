@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponUse, int, ammoCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponUse, int, ammoCount, int, ammoReserves);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnForecastInfo, int, shotsToKill, int, shotsLeft);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClearForecast);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBeginAttackEvent);
