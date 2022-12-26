@@ -17,7 +17,11 @@ class PROJECTMAGNUS_API ANoelle : public APlayerCharacter
 public:
 	ANoelle();
 
+	virtual void BeginPlay() override;
+
 private:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Class")
 	class UChaplainClass* chaplainClass;
 	
 };

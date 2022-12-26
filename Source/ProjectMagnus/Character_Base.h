@@ -80,7 +80,7 @@ protected:
 
 	void UseItem();
 
-
+	void GiveAbility(const TSubclassOf<class UGameplayAbility>& newAbility, int inputID = -1, bool broadCast = false);
 	
 
 
@@ -203,7 +203,7 @@ private:
 	TMap<EPRAbilityInputID, TSubclassOf<UGameplayAbility>> InitialAbilities;
 
 
-	void GiveAbility(const TSubclassOf<class UGameplayAbility>& newAbility, int inputID = -1, bool broadCast = false);
+	
 	void DrainStamina();
 	void CharacterDied(const FOnAttributeChangeData& AttributeData);
 	

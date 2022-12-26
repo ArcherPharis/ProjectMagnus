@@ -25,8 +25,14 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	class UPRAttributeSet* GetOwnersAttributeSet() const { return attributeSet; }
+	TSubclassOf<class UGameplayAbility> GetClassFieldAbility() const { return fieldAbility; }
+	
 
 private:
 	UPRAttributeSet* attributeSet;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "Field Ability")
+	TSubclassOf<UGameplayAbility> fieldAbility;
 		
 };

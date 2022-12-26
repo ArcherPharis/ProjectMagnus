@@ -26,7 +26,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	DisplayTargetInfo();
-	UE_LOG(LogTemp, Warning, TEXT("you"));
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
