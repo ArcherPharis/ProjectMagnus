@@ -28,6 +28,12 @@ public:
 	void GetNewWeaponInfo(class AWeapon* weapon);
 
 	UFUNCTION()
+	void DisplayTargetStats(class ACharacter_Base* target, float health, float maxHealth);
+
+	UFUNCTION()
+	void DisplayTargetInfo(bool displayOrNot);
+
+	UFUNCTION()
 	void UpdateHealth(float health, float maxHealth);
 
 	UFUNCTION()
@@ -86,10 +92,25 @@ private:
 	class UImage* firearmForecastImage;
 
 	UPROPERTY(meta = (BindWidget))
+	class UProgressBar* targetHealthBar;
+
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* targetCurrentHealthText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* targetMaxHealthText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* targetName;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* stopFiringOverlayButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* tipText;
+	class UOverlay* targetOverlay;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* tipText;
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* shotsToKillText;

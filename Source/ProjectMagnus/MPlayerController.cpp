@@ -32,6 +32,8 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 		playerCharacter->GetCurrentWeapon()->onForecastInfo.AddDynamic(inGameUI, &UInGameUI::SetForecast);
 		playerCharacter->GetCurrentWeapon()->onClearForecast.AddDynamic(inGameUI, &UInGameUI::ClearForecast);
 		playerCharacter->GetCurrentWeapon()->onBeginAttackEvent.AddDynamic(inGameUI, &UInGameUI::UnhideButton);
+		playerCharacter->onUnitTarget.AddDynamic(inGameUI, &UInGameUI::DisplayTargetStats);
+		playerCharacter->onDisplayTargetInfo.AddDynamic(inGameUI, &UInGameUI::DisplayTargetInfo);
 		//playerCharacter->GetCurrentWeapon()->onEndAttackEvent.AddDynamic(playerCharacter, &APlayerCharacter::GunAttackEventEnd);
 		inGameUI->onButtonPressed.AddDynamic(this, &AMPlayerController::FiringEventStop);
 		playerCharacter->OnDeployed();

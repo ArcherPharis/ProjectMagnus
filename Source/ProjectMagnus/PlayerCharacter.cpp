@@ -22,6 +22,13 @@ APlayerCharacter::APlayerCharacter()
 
 }
 
+void APlayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	DisplayTargetInfo();
+	UE_LOG(LogTemp, Warning, TEXT("you"));
+}
+
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -127,6 +134,28 @@ void APlayerCharacter::OnUnitDeath(ACharacter_Base* characterToDie)
 {
 	DeathEvent();
 	Super::OnUnitDeath(characterToDie);
+}
+
+void APlayerCharacter::DisplayTargetInfo()
+{
+
+
+	FHitResult result;
+	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+	FVector CameraEnd = cameraManager->GetCameraLocation() + cameraManager->GetActorForwardVector() * 5000;
+	FCollisionShape cyl = FCollisionShape::MakeSphere(100);
+	if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), CameraEnd, ECC_GameTraceChannel1))
+	{
+		onDisplayTargetInfo.Broadcast(true);
+		ACharacter_Base* target = Cast<ACharacter_Base>(result.GetActor());
+		onUnitTarget.Broadcast(target, target->GetAttributeSet()->GetHealth(), target->GetAttributeSet()->GetMaxHealth());
+	}
+	else
+	{
+		onDisplayTargetInfo.Broadcast(false);
+	}
+
+
 }
 
 void APlayerCharacter::Attack()

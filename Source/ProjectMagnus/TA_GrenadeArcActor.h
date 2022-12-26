@@ -23,7 +23,7 @@ private:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Arc")
-	float throwDistance = 1200.f;
+	float throwDistance = 2000.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Arc")
 	USceneComponent* rootComp;

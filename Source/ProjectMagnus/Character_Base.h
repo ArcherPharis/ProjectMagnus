@@ -90,6 +90,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	class ATacticalGear* GetTacticalGear() const { return CurrentlyEquippedTacticalGear; }
+	class ASupportGear* GetSupportGear() const { return CurrentlyEquippedSupportGear; }
 
 	void HandleCharacterDeath();
 
@@ -134,8 +135,12 @@ private:
 	TSubclassOf<AWeapon> weaponClass;
 	UPROPERTY(EditDefaultsOnly, Category = "Gear")
 	TSubclassOf<class ATacticalGear> tacticalGearClass;
+	UPROPERTY(EditDefaultsOnly, Category = "Gear")
+	TSubclassOf<class ASupportGear> supportGearClass;
 	UPROPERTY(VisibleAnywhere, Category = "Gear")
 	ATacticalGear* CurrentlyEquippedTacticalGear;
+	UPROPERTY(VisibleAnywhere, Category = "Gear")
+	ASupportGear* CurrentlyEquippedSupportGear;
 
 
 	UPROPERTY(EditDefaultsOnly, Category = "PossessablePawns")

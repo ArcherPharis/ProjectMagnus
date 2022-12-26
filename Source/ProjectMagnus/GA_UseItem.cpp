@@ -5,6 +5,7 @@
 #include "Character_Base.h"
 #include "Weapon.h"
 #include "TacticalGear.h"
+#include "PRAttributeSet.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
@@ -12,9 +13,15 @@
 
 void UGA_UseItem::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	if (!K2_CheckAbilityCost())
+	{
+		return;
+	}
+
+
+
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	
 	GetAvatarAsCharacter()->onDisplayTip.Broadcast("Using Tactical Gear costs 1 AP.");
 	ACharacter_Base* user = GetAvatarAsCharacter();
 	if (user)
@@ -29,7 +36,7 @@ void UGA_UseItem::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 
 		if (StartMontageTask)
 		{
-
+			StartMontageTask->OnCompleted.AddDynamic(this, &UGA_UseItem::CastStartMontageEnded);
 			StartMontageTask->ReadyForActivation();
 		}
 
@@ -53,7 +60,7 @@ void UGA_UseItem::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 
 void UGA_UseItem::CastStartMontageEnded()
 {
-	GetAvatarAsCharacter()->GetTacticalGear()->AttachToCharacterMesh(GetAvatarAsCharacter()->GetMesh());
+	
 
 }
 
@@ -105,24 +112,19 @@ void UGA_UseItem::StartTargetting(FGameplayEventData Payload)
 
 void UGA_UseItem::ThrowTactical(FGameplayEventData Payload)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Getting to throw tactical"));
+	abilityCommitted = true;
 	GetAvatarAsCharacter()->GetTacticalGear()->ThrowGear(powerToThrow, targetActorLocation);
 	GetAvatarAsCharacter()->GetCurrentWeapon()->SetInAttackEvent(false);
 }
 
 void UGA_UseItem::TargetInRadius(const FGameplayAbilityTargetDataHandle& Data)
 {
-	K2_CommitAbility();
+	
 	GetAvatarAsCharacter()->ToggleInput(false);
 	FVector actorLoc = Data.Get(0)->GetEndPoint();
 	targetActorLocation = actorLoc;
 	float distance = FVector::Dist(actorLoc, GetAvatarAsCharacter()->GetActorLocation());
 	powerToThrow = distance;
-
-	//todo, we'd want to throw the gear after a throwing montage instead. we can just store
-	//the distance here and then launch a montage event below. This montage would wait for
-	//tag data from the montage instead of just sending data over.
-
 
 
 
@@ -151,6 +153,7 @@ void UGA_UseItem::TargetInRadius(const FGameplayAbilityTargetDataHandle& Data)
 
 void UGA_UseItem::TargettingCanceled(const FGameplayAbilityTargetDataHandle& Data)
 {
+	GetAvatarAsCharacter()->GetAttributeSet()->SetActionPoints(GetAvatarAsCharacter()->GetAttributeSet()->GetActionPoints() + 1);
 	GetAvatarAsCharacter()->GetCurrentWeapon()->SetInAttackEvent(false);
 	K2_EndAbility();
 }
@@ -158,6 +161,12 @@ void UGA_UseItem::TargettingCanceled(const FGameplayAbilityTargetDataHandle& Dat
 void UGA_UseItem::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	//GetAvatarAsCharacter()->SetIsAiming(false);
+	if (!abilityCommitted)
+	{
+		GetAvatarAsCharacter()->GetAttributeSet()->SetActionPoints(GetAvatarAsCharacter()->GetAttributeSet()->GetActionPoints() + 1);
+	}
+
+	
 	GetAvatarAsCharacter()->StopAimMovement();
 	GetAvatarAsCharacter()->ToggleInput(true);
 	GetAvatarAsCharacter()->GetCurrentWeapon()->SetInAttackEvent(false);

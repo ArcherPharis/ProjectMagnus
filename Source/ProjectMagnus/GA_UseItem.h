@@ -51,6 +51,7 @@ private:
 
 	float powerToThrow;
 	FVector targetActorLocation;
+	bool abilityCommitted = false;
 
 	UFUNCTION()
 	void TargetInRadius(const FGameplayAbilityTargetDataHandle& Data);

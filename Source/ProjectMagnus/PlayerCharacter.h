@@ -7,8 +7,10 @@
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUnitGiven, APlayerCharacter*, unit);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUnitTarget, ACharacter_Base*, target, float, currentHealth, float, maxHealth);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateHealthStamRange, float, maxHealth, float, maxStam);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClickedDeploy, APlayerCharacter*, charaToDeploy);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDisplayTargetInfo, bool, display);
 
 /**
  * 
@@ -21,9 +23,13 @@ class PROJECTMAGNUS_API APlayerCharacter : public ACharacter_Base
 public:
 	APlayerCharacter();
 
+	virtual void Tick(float DeltaTime) override;
+
 	FOnUnitGiven onUnitGiven;
 	FOnUpdateHealthStamRange onUpdateHealthStamRange;
+	FOnUnitTarget onUnitTarget;
 	FOnClickedDeploy onUnitDeployed;
+	FOnDisplayTargetInfo onDisplayTargetInfo;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
@@ -37,6 +43,8 @@ public:
 
 	void OnDeployed();
 
+	
+
 	virtual void StopAiming() override;
 	virtual void OnUnitDeath(class ACharacter_Base* characterToDie) override;
 
@@ -45,7 +53,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	class UCameraComponent* playerEye;
 
-
+	void DisplayTargetInfo();
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	USpringArmComponent* springArm;

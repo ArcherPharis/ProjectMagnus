@@ -13,6 +13,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TacticalGear.h"
+#include "SupportGear.h"
+
 
 // Sets default values
 ACharacter_Base::ACharacter_Base()
@@ -274,6 +276,15 @@ void ACharacter_Base::GiveEquipment()
 		tGear->SetOwner(this);
 		tGear->AttachToCharacterMesh(GetMesh());
 		CurrentlyEquippedTacticalGear = tGear;
+	}
+
+	if (supportGearClass)
+	{
+		ASupportGear* sGear;
+		sGear = GetWorld()->SpawnActor<ASupportGear>(supportGearClass);
+		sGear->SetOwner(this);
+		sGear->AttachToCharacterMesh(GetMesh());
+		CurrentlyEquippedSupportGear = sGear;
 	}
 
 }

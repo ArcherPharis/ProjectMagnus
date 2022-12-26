@@ -13,8 +13,10 @@
 #include "Components/WidgetSwitcher.h"
 #include "Components/CanvasPanel.h"
 #include "Components/HorizontalBox.h"
+#include "Components/ProgressBar.h"
 #include "APValue.h"
 #include "Components/Button.h"
+#include "Components/Overlay.h"
 
 void UInGameUI::NativeConstruct()
 {
@@ -46,6 +48,30 @@ void UInGameUI::GetNewWeaponInfo(AWeapon* weapon)
 	FString ammoReserves = FString::FromInt(weapon->GetAmmoReserves());
 	ammoReservesText->SetText(FText::FromString(ammoReserves));
 	
+}
+
+void UInGameUI::DisplayTargetStats(ACharacter_Base* target, float health, float maxHealth)
+{
+	targetHealthBar->SetPercent(health / maxHealth);
+	targetCurrentHealthText->SetText(FText::FromString(FString::FromInt(health)));
+	targetMaxHealthText->SetText(FText::FromString(FString::FromInt(maxHealth)));
+	targetName->SetText(FText::FromName(target->GetUnitName()));
+
+
+}
+
+void UInGameUI::DisplayTargetInfo(bool displayOrNot)
+{
+	if (displayOrNot)
+	{
+		targetHealthBar->SetVisibility(ESlateVisibility::Visible);
+		targetOverlay->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		targetHealthBar->SetVisibility(ESlateVisibility::Hidden);
+		targetOverlay->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void UInGameUI::UpdateHealth(float health, float maxHealth)
