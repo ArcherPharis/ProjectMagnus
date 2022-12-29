@@ -20,6 +20,8 @@ public:
 
 	virtual void BeginPlay() override;
 
+	void SetFieldCanvas();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "ControllerEvent")
 	void OnPossessEffect();
 
@@ -35,6 +37,8 @@ private:
 	void StaminaUpdated(const FOnAttributeChangeData& AttributeData);
 
 	void APUpdated(const FOnAttributeChangeData& AttributeData);
+
+	void ExperienceUpdate(const FOnAttributeChangeData& AttributeData);
 
 	UFUNCTION()
 	void FiringEventStop();

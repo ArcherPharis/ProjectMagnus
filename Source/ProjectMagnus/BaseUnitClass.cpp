@@ -24,6 +24,8 @@ void UBaseUnitClass::BeginPlay()
 	if (owner)
 	{
 		attributeSet = owner->GetAttributeSet();
+
+		
 	}
 
 	// ...
@@ -38,4 +40,11 @@ void UBaseUnitClass::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 	// ...
 }
+
+void UBaseUnitClass::GiveClassBonuses(ACharacter_Base* ownerCharacter)
+{
+	FGameplayEffectContextHandle handle;
+	ownerCharacter->GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(classBonusEffect.GetDefaultObject(), -1, handle);
+}
+
 

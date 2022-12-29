@@ -22,6 +22,13 @@ void UGA_UseItem::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
+	if (GetAvatarAsCharacter()->GetTacticalGear()->GetUses() == 0)
+	{
+		
+		K2_EndAbility();
+		return;
+	}
+
 	GetAvatarAsCharacter()->onDisplayTip.Broadcast("Using Tactical Gear costs 1 AP.");
 	ACharacter_Base* user = GetAvatarAsCharacter();
 	if (user)
@@ -36,7 +43,10 @@ void UGA_UseItem::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 
 		if (StartMontageTask)
 		{
-			StartMontageTask->OnCompleted.AddDynamic(this, &UGA_UseItem::CastStartMontageEnded);
+			
+			//StartMontageTask->OnInterrupted.AddDynamic(this, &UGA_UseItem::CastStartMontageEnded);
+
+			//StartMontageTask->OnCompleted.AddDynamic(this, &UGA_UseItem::CastStartMontageEnded);
 			StartMontageTask->ReadyForActivation();
 		}
 
@@ -61,6 +71,7 @@ void UGA_UseItem::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 void UGA_UseItem::CastStartMontageEnded()
 {
 	
+	GetAvatarAsCharacter()->StopAimMovement();
 
 }
 
@@ -164,10 +175,15 @@ void UGA_UseItem::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGam
 	if (!abilityCommitted)
 	{
 		GetAvatarAsCharacter()->GetAttributeSet()->SetActionPoints(GetAvatarAsCharacter()->GetAttributeSet()->GetActionPoints() + 1);
+		if (GetAvatarAsCharacter()->GetTacticalGear()->GetUses() != 0)
+		GetAvatarAsCharacter()->StopAimMovement();
+	}
+	else
+	{
+		GetAvatarAsCharacter()->StopAimMovement();
 	}
 
-	
-	GetAvatarAsCharacter()->StopAimMovement();
+	GetAvatarAsCharacter()->GetTacticalGear()->AttachToCharacterMesh(GetAvatarAsCharacter()->GetMesh());
 	GetAvatarAsCharacter()->ToggleInput(true);
 	GetAvatarAsCharacter()->GetCurrentWeapon()->SetInAttackEvent(false);
 	GetAvatarAsCharacter()->onDisplayTip.Broadcast("");

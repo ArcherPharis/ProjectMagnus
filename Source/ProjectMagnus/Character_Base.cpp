@@ -6,6 +6,7 @@
 #include "Firearm.h"
 #include "StatComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "PMGameModeBase.h"
 #include "PRAbilitySystemComponent.h"
 #include "PRGameplayAbilityBase.h"
 #include "AbilitySystemBlueprintLibrary.h"
@@ -72,6 +73,15 @@ void ACharacter_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	DrainStamina();
+
+}
+
+void ACharacter_Base::SetKiller(AActor* killer)
+{
+	Killer = killer;
+	APMGameModeBase* gm = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(this));
+	gm->AddDownedUnits(this);
+
 
 }
 
@@ -148,7 +158,7 @@ UAbilitySystemComponent* ACharacter_Base::GetAbilitySystemComponent() const
 
 void ACharacter_Base::AfterUnitDeath()
 {
-	APlayerController* cont = Cast<APlayerController>(GetController());
+	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
 	cont->SetViewTargetWithBlend(this, 0.5f);
 	cont->SetInputMode(FInputModeGameOnly());
 	GetCurrentWeapon()->SetInAttackEvent(false);
@@ -187,13 +197,14 @@ void ACharacter_Base::DrainStamina()
 
 void ACharacter_Base::CharacterDied(const FOnAttributeChangeData& AttributeData)
 {
-
+	
 
 	if (AttributeData.NewValue == 0)
 	{
-		GetMesh()->GetAnimInstance()->Montage_Play(onDeadMontage);
+		//GetMesh()->GetAnimInstance()->Montage_Play(onDeadMontage);
 		isDead = true;
-		SetActorEnableCollision(false);
+		
+		//SetActorEnableCollision(false);
 	}
 }
 
@@ -224,6 +235,10 @@ void ACharacter_Base::StopFiring()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Trying to stop firing"));
 	GetCurrentWeapon()->SetPlayerWantsToStopFiring(true);
+}
+
+void ACharacter_Base::LevelUp()
+{
 }
 
 

@@ -4,8 +4,10 @@
 #include "Firearm.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character_Base.h"
+#include "BaseEnemy.h"
 #include "PRAttributeSet.h"
 #include "Components/CapsuleComponent.h"
+#include "PRAbilitySystemComponent.h"
 
 AFirearm::AFirearm()
 {
@@ -17,7 +19,7 @@ void AFirearm::FirearmAim()
 {
 	if (GetInAttackEvent()) return;
 
-	wielderControlPercent = ((10 + 24) * Handleability) / 10;
+	wielderControlPercent = ((10 + 24) * Handleability) / 10; //(level + dexterity)
 	FHitResult result;
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FVector CameraEnd = cameraManager->GetCameraLocation() + cameraManager->GetActorForwardVector() * weaponRange;
@@ -181,23 +183,39 @@ void AFirearm::WeaponFire()
 	if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), WeaponSpread(CameraEnd), ECC_GameTraceChannel1))
 	{
 		//TODO in the future, maybe a damagable interface? OR, simply if not damagable chara, use built in apply damnage.
-		ACharacter_Base* damagableChara = Cast<ACharacter_Base>(result.GetActor());
-
-		if (damagableChara)
+		
+		UPRAbilitySystemComponent* ASC = result.GetActor()->FindComponentByClass<UPRAbilitySystemComponent>();
+		if (ASC)
 		{
 			
-			damagableChara->GetAttributeSet()->SetHealth(FMath::Clamp(damagableChara->GetAttributeSet()->GetHealth() - damage, 0, damagableChara->GetAttributeSet()->GetMaxHealth()));
+			//damagableChara->GetAttributeSet()->SetHealth(FMath::Clamp(damagableChara->GetAttributeSet()->GetHealth() - damage, 0, damagableChara->GetAttributeSet()->GetMaxHealth()));
+			FGameplayEffectContextHandle handle;
+			ASC->ApplyGameplayEffectToSelf(damageEffect.GetDefaultObject(), -1, handle);
 			UGameplayStatics::PlaySound2D(this, hitMarkerSound, 1.5f);
 			UGameplayStatics::PlaySound2D(this, impactSound, 0.5f);
+			
+			ACharacter_Base* damagableChara = Cast<ACharacter_Base>(result.GetActor());
+			
 
-			if (damagableChara->GetIsDead())
+			if (damagableChara && damagableChara->GetAttributeSet()->GetHealth() == 0)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Gun killed something"));
-				killedEnemies.Add(damagableChara);
-				GetWorldTimerManager().SetTimer(GunKilledHandle, this, &AFirearm::GunKilledTarget, 1.f, false);
+				//killedEnemies.Add(damagableChara);
+				//GetWorldTimerManager().SetTimer(GunKilledHandle, this, &AFirearm::GunKilledTarget, 1.f, false);
 				
 			}
-			//damagableChara->GetAbilitySystemComponent()->ApplyGameplayEffectToSelf()
+			else if (!damagableChara)
+			{
+				ABaseEnemy* damagableEnemy = Cast<ABaseEnemy>(result.GetActor());
+				if (damagableEnemy && damagableEnemy->GetAttributeSet()->GetHealth() == 0)
+				{
+					damagableEnemy->SetKiller(GetWeaponOwner());
+					UE_LOG(LogTemp, Warning, TEXT("Gun killed enemy"));
+				}
+			}
+
+		
+
 		}
 
 
@@ -248,6 +266,14 @@ int AFirearm::GetBulletsToKill(AActor* currentTarget)
 		int shotsToKill =  FMath::CeilToInt(currentTargetHealth / damage);
 		shotsToKill = FMath::Clamp(shotsToKill, 0, 100);
 		return shotsToKill;
+	}
+	else
+	{
+		ABaseEnemy* enemy = Cast<ABaseEnemy>(currentTarget);
+		float currentTargetHealth = enemy->GetAttributeSet()->GetHealth();
+		int shotsToKillE = FMath::CeilToInt(currentTargetHealth / damage);
+		shotsToKillE = FMath::Clamp(shotsToKillE, 0, 100);
+		return shotsToKillE;
 	}
 	return 0;
 	

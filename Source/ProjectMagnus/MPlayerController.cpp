@@ -26,17 +26,21 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetHealthAttribute()).AddUObject(this, &AMPlayerController::HealthUpdated);
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetStaminaAttribute()).AddUObject(this, &AMPlayerController::StaminaUpdated);
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetActionPointsAttribute()).AddUObject(this, &AMPlayerController::APUpdated);
+		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetExperiencePointsAttribute()).AddUObject(this, &AMPlayerController::ExperienceUpdate);
 		playerCharacter->onAPGauge.AddDynamic(inGameUI, &UInGameUI::SetAPText);
 		playerCharacter->onUpdateHealthStamRange.AddDynamic(inGameUI, &UInGameUI::UpdateRanges);
 		playerCharacter->onDisplayTip.AddDynamic(inGameUI, &UInGameUI::SetTipText);
+		playerCharacter->onInitiateLevelUp.AddDynamic(inGameUI, &UInGameUI::ShowLevelUpScreen);
 		playerCharacter->GetCurrentWeapon()->onForecastInfo.AddDynamic(inGameUI, &UInGameUI::SetForecast);
 		playerCharacter->GetCurrentWeapon()->onClearForecast.AddDynamic(inGameUI, &UInGameUI::ClearForecast);
 		playerCharacter->GetCurrentWeapon()->onBeginAttackEvent.AddDynamic(inGameUI, &UInGameUI::UnhideButton);
 		playerCharacter->onUnitTarget.AddDynamic(inGameUI, &UInGameUI::DisplayTargetStats);
+		playerCharacter->onEnemyUnitTarget.AddDynamic(inGameUI, &UInGameUI::DisplayEnemyTargetStats);
 		playerCharacter->onDisplayTargetInfo.AddDynamic(inGameUI, &UInGameUI::DisplayTargetInfo);
 		//playerCharacter->GetCurrentWeapon()->onEndAttackEvent.AddDynamic(playerCharacter, &APlayerCharacter::GunAttackEventEnd);
 		inGameUI->onButtonPressed.AddDynamic(this, &AMPlayerController::FiringEventStop);
 		playerCharacter->OnDeployed();
+		
 	
 	}
 	else
@@ -57,6 +61,11 @@ void AMPlayerController::BeginPlay()
 
 }
 
+void AMPlayerController::SetFieldCanvas()
+{
+	inGameUI->EnableFieldCanvas();
+}
+
 void AMPlayerController::HealthUpdated(const FOnAttributeChangeData& AttributeData)
 {
 	inGameUI->UpdateHealth(AttributeData.NewValue, playerCharacter->GetAttributeSet()->GetMaxHealth());
@@ -70,6 +79,11 @@ void AMPlayerController::StaminaUpdated(const FOnAttributeChangeData& AttributeD
 void AMPlayerController::APUpdated(const FOnAttributeChangeData& AttributeData)
 {
 	inGameUI->SetAPText(AttributeData.NewValue);
+}
+
+void AMPlayerController::ExperienceUpdate(const FOnAttributeChangeData& AttributeData)
+{
+	inGameUI->UpdateExperience(AttributeData.NewValue, playerCharacter->GetAttributeSet()->GetMaxExperiencePoints());
 }
 
 void AMPlayerController::FiringEventStop()

@@ -58,6 +58,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "After Firing Event")
 	void BeginAimMovement();
 
+
 	void ToggleInput(bool enableInput);
 	
 	
@@ -69,6 +70,8 @@ protected:
 	virtual void Attack();
 	virtual void StopAttack();
 	void StopFiring();
+
+	virtual void LevelUp();
 
 	UFUNCTION(BlueprintCallable, Category = "GameplayAbilities")
 	void ApplyEffectToSelf(const TSubclassOf<class UGameplayEffect>& effectToApply);
@@ -89,8 +92,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void AfterUnitDeath();
+
 	class ATacticalGear* GetTacticalGear() const { return CurrentlyEquippedTacticalGear; }
 	class ASupportGear* GetSupportGear() const { return CurrentlyEquippedSupportGear; }
+
+	AActor* GetKiller() const { return Killer; }
+	void SetKiller(AActor* killer);
 
 	void HandleCharacterDeath();
 
@@ -194,8 +202,10 @@ private:
 	bool isDead = false;
 	bool isMoving;
 
+	AActor* Killer;
+
 	FTimerHandle returnToUnitHandle;
-	void AfterUnitDeath();
+	
 	void SpawnDeathUnit();
 
 

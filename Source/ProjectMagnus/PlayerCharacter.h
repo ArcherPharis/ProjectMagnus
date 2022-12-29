@@ -6,11 +6,15 @@
 #include "Character_Base.h"
 #include "PlayerCharacter.generated.h"
 
+class ABaseEnemy;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUnitGiven, APlayerCharacter*, unit);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUnitTarget, ACharacter_Base*, target, float, currentHealth, float, maxHealth);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateHealthStamRange, float, maxHealth, float, maxStam);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnEnemyUnitTarget, ABaseEnemy*, target, float, currentHealth, float, maxHealth);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnUpdateHealthStamRange, float, maxHealth, float, maxStam,float, exp, float, maxExp);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClickedDeploy, APlayerCharacter*, charaToDeploy);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDisplayTargetInfo, bool, display);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_SevenParams(FOnInitiateLevelUp, APlayerCharacter*, unitData, float, oldHealth, float, oldStam, float, oldStr, float, oldEnd, float, oldAgi, float, oldDex);
 
 /**
  * 
@@ -28,20 +32,25 @@ public:
 	FOnUnitGiven onUnitGiven;
 	FOnUpdateHealthStamRange onUpdateHealthStamRange;
 	FOnUnitTarget onUnitTarget;
+	FOnEnemyUnitTarget onEnemyUnitTarget;
 	FOnClickedDeploy onUnitDeployed;
 	FOnDisplayTargetInfo onDisplayTargetInfo;
+	FOnInitiateLevelUp onInitiateLevelUp;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintPure, Category = "Camera")
 	class USpringArmComponent* GetSpringArm() { return springArm; }
+	UFUNCTION(BlueprintPure, Category = "Camera")
+	class UCameraComponent* GetCameraEye() { return playerEye; }
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Camera")
 	void DeathEvent();
 
 
 	void OnDeployed();
+	virtual void LevelUp() override;
 
 	
 
@@ -58,6 +67,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	USpringArmComponent* springArm;
 
+	void GenerateHealthLevelUp(float& oldHealth);
+	void GenerateStaminaLevelUp(float& oldStam);
+	void GenerateStrengthLevelUp(float& oldStrength);
+	void GenerateEnduranceLevelUp(float& oldEnd);
+	void GenerateAgilityLevelUp(float& oldAgi);
+	void GenerateDexterityLevelUp(float& oldDex);
 
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
@@ -68,6 +83,45 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Character")
 	float aimOffset = 50.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int healthGrowthRate = 50;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int healthMinRoll = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int healthMaxRoll = 1;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int staminaGrowthRate = 50;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int staminaMinRoll = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int staminaMaxRoll = 1;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int strengthGrowthRate = 50;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int strengthMinRoll = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int strengthMaxRoll = 1;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int enduranceGrowthRate = 50;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int enduranceMinRoll = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int enduranceMaxRoll = 1;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int agilityGrowthRate = 50;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int agilityMinRoll = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int agilityMaxRoll = 1;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int dexterityGrowthRate = 50;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int dexterityMinRoll = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
+	int dexterityMaxRoll = 1;
+
+
 
 	UFUNCTION()
 	void MoveForward(float value);

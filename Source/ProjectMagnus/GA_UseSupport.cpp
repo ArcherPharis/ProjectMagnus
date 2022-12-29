@@ -30,6 +30,7 @@ void UGA_UseSupport::ActivateAbility(const FGameplayAbilitySpecHandle Handle, co
 
 
 	useGearMontage = GetAvatarAsCharacter()->GetSupportGear()->GetBeginUseMontage();
+	GetAvatarAsCharacter()->GetSupportGear()->AttatchToCharacterHand(GetAvatarAsCharacter()->GetMesh());
 	UAbilityTask_PlayMontageAndWait* UseItemMontage = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, useGearMontage);
 
 	if (UseItemMontage)
@@ -54,6 +55,8 @@ void UGA_UseSupport::UseStimMontageFinished()
 
 void UGA_UseSupport::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+
+	GetAvatarAsCharacter()->GetSupportGear()->AttachToCharacterMesh(GetAvatarAsCharacter()->GetMesh());
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
 }

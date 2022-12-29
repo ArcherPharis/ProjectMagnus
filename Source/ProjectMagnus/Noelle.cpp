@@ -14,4 +14,5 @@ void ANoelle::BeginPlay()
 {
 	Super::BeginPlay();
 	GiveAbility(chaplainClass->GetClassFieldAbility(), 6, false);
+	chaplainClass->GiveClassBonuses(this);
 }

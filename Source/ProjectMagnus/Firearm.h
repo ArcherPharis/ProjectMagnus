@@ -54,6 +54,9 @@ private:
 	virtual void Attack() override;
 
 	FVector WeaponSpread(FVector Endpoint);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<class UGameplayEffect> damageEffect;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	USceneComponent* firePoint;

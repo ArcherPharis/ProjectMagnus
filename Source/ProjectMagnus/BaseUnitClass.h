@@ -27,12 +27,22 @@ public:
 	class UPRAttributeSet* GetOwnersAttributeSet() const { return attributeSet; }
 	TSubclassOf<class UGameplayAbility> GetClassFieldAbility() const { return fieldAbility; }
 	
+	void GiveClassBonuses(class ACharacter_Base* ownerCharacter);
 
 private:
+
+
+
+
 	UPRAttributeSet* attributeSet;
 
 
 	UPROPERTY(EditDefaultsOnly, Category = "Field Ability")
 	TSubclassOf<UGameplayAbility> fieldAbility;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Class Specific Bonuses")
+	TSubclassOf<class UGameplayEffect> classBonusEffect;
+
+
 		
 };

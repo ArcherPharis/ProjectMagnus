@@ -18,20 +18,31 @@ class PROJECTMAGNUS_API APMGameModeBase : public AGameModeBase
 public:
 	void SpawnInitialUnits(class UInGameUI* aUI);
 
+	void AddDownedUnits(class ACharacter_Base* downedUnit);
+	void AddKilledUnits(class ABaseEnemy* killedUnit);
+
 private:
 
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	void GetAllSpawnLocations();
+
+	class APlayerCharacter* CharacterToReturnTo;
 	
 
 	UPROPERTY(EditDefaultsOnly, Category = "Deployable Units")
-	TArray<TSubclassOf<class APlayerCharacter>> deployablePlayerUnits;
+	TArray<TSubclassOf< APlayerCharacter>> deployablePlayerUnits;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Deployable Units")
 	TArray<AActor*> spawnPoints;
 	
 	TArray<APlayerCharacter*> currentPlayerUnits;
 
+	TArray<ACharacter_Base*> downedPlayerUnits;
+	TArray<ABaseEnemy*> killedEnemyUnits;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Deployable Units")
 	int numberOfUnitsAllowedForChapter = 3;
+
+	FTimerHandle killedOrDownedUnitHandle;
+	void ShowDownedDeadUnits();
 };
