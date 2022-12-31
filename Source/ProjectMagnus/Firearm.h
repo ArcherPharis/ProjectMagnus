@@ -55,6 +55,8 @@ private:
 
 	FVector WeaponSpread(FVector Endpoint);
 
+	virtual void AttackPointAnimNotify() override;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<class UGameplayEffect> damageEffect;
 	
@@ -72,8 +74,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UParticleSystem* hitEffect;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-	float damage;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 	float weaponRange;
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
@@ -84,8 +85,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Fire Mode")
 	TEnumAsByte<Firetype> fireMode;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-	float fireRate = 2.0f;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Stats")
 	float Handleability = 5.0f;
 	UPROPERTY(EditAnywhere, Category = "Stats")

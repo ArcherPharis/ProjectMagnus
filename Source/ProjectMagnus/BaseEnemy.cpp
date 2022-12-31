@@ -9,6 +9,7 @@
 #include "PRGameplayAbilityBase.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Character_Base.h"
+#include "Weapon.h"
 #include "PRAttributeSet.h"
 
 // Sets default values
@@ -40,6 +41,7 @@ void ABaseEnemy::BeginPlay()
 	Super::BeginPlay();
 	GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(GetAttributeSet()->GetHealthAttribute()).AddUObject(this, &ABaseEnemy::CharacterDied);
 	ApplyInitialEffect();
+	SpawnWeapon();
 	
 }
 
@@ -56,6 +58,15 @@ void ABaseEnemy::Tick(float DeltaTime)
 
 }
 
+void ABaseEnemy::Attack()
+{
+	UE_LOG(LogTemp, Warning, TEXT("We be attacking bois, gimme my weapon already!"));
+	if (currentWeapon != nullptr)
+	{
+		currentWeapon->AttackAI();
+	}
+}
+
 void ABaseEnemy::SetKiller(AActor* killer)
 {
 	Killer = killer;
@@ -70,6 +81,19 @@ void ABaseEnemy::AwardKillerWithEXP()
 	{
 		FGameplayEffectContextHandle handle;
 		awardee->GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(experienceWorthEffect.GetDefaultObject(), -1, handle);
+	}
+}
+
+void ABaseEnemy::SpawnWeapon()
+{
+	if (weaponClass)
+	{
+		AWeapon* weapon;
+		weapon = GetWorld()->SpawnActor<AWeapon>(weaponClass);
+		weapon->SetOwner(this);
+		weapon->OnEquip(GetMesh());
+		currentWeapon = weapon;
+
 	}
 }
 

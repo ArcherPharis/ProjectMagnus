@@ -17,6 +17,8 @@ void UGA_Faye::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FG
 
 	if (FayeMontageTask)
 	{
+		FayeMontageTask->OnCancelled.AddDynamic(this, &UGA_Faye::InterruptedAbility);
+		FayeMontageTask->OnInterrupted.AddDynamic(this, &UGA_Faye::InterruptedAbility);
 		FayeMontageTask->OnCompleted.AddDynamic(this, &UGA_Faye::FayeMontageFinished);
 		FayeMontageTask->ReadyForActivation();
 	}
@@ -46,6 +48,12 @@ void UGA_Faye::FayeMontageFinished()
 
 
 }
+
+void UGA_Faye::InterruptedAbility()
+{
+	K2_EndAbility();
+}
+
 
 void UGA_Faye::FinishAbility(const FGameplayAbilityTargetDataHandle& Data)
 {

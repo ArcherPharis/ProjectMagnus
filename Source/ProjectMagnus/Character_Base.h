@@ -7,6 +7,7 @@
 #include "AbilitySystemInterface.h"
 #include "GameplayEffectTypes.h"
 #include "PRAbilityTypes.h"
+#include "GenericTeamAgentInterface.h"
 #include "Character_Base.generated.h"
 
 class UPRGameplayAbilityBase;
@@ -20,7 +21,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDisplayTip, FString, message);
 
 
 UCLASS()
-class PROJECTMAGNUS_API ACharacter_Base : public ACharacter, public IAbilitySystemInterface
+class PROJECTMAGNUS_API ACharacter_Base : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -60,6 +61,8 @@ public:
 
 
 	void ToggleInput(bool enableInput);
+
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamID; }
 	
 	
 
@@ -91,6 +94,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintPure, Category = "AttributeSet")
+	void GetArmorValue(float& armor, float& maxArmor);
 
 	void AfterUnitDeath();
 
@@ -139,6 +145,10 @@ public:
 	
 
 private:
+
+	UPROPERTY(EditAnywhere, Category = "Team")
+	FGenericTeamId TeamID;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Gear")
 	TSubclassOf<AWeapon> weaponClass;
 	UPROPERTY(EditDefaultsOnly, Category = "Gear")

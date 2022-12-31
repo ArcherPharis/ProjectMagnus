@@ -156,6 +156,12 @@ UAbilitySystemComponent* ACharacter_Base::GetAbilitySystemComponent() const
 	return abilitySystemComp;
 }
 
+void ACharacter_Base::GetArmorValue(float& armor, float& maxArmor)
+{
+	armor = GetAttributeSet()->GetArmor();
+	maxArmor = GetAttributeSet()->GetMaxArmor();
+}
+
 void ACharacter_Base::AfterUnitDeath()
 {
 	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);

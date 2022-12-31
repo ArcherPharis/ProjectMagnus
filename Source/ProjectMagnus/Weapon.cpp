@@ -4,6 +4,7 @@
 #include "Weapon.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character_Base.h"
+#include "BaseEnemy.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -40,6 +41,11 @@ void AWeapon::BeginPlay()
 	
 }
 
+bool AWeapon::CanAttack() const
+{
+	return !GetWorldTimerManager().IsTimerActive(FiringTimer);
+}
+
 
 void AWeapon::PlayWeaponSound(USceneComponent* firePoint)
 {
@@ -61,6 +67,29 @@ void AWeapon::OnEquip(USkeletalMeshComponent* ownerMesh)
 void AWeapon::Attack()
 {
 	
+}
+
+void AWeapon::AttackAI()
+{
+	if (CanAttack())
+	{
+		GetWorldTimerManager().SetTimer(FiringTimer, 1 / fireRate, false);
+
+		if (myOwner)
+		{
+			myOwner->GetMesh()->GetAnimInstance()->Montage_Play(asAIUnitAttackMontage);
+
+		}
+		else
+		{
+			ABaseEnemy* enemy = Cast<ABaseEnemy>(GetOwner());
+			enemy->GetMesh()->GetAnimInstance()->Montage_Play(asAIUnitAttackMontage);
+		}
+	}
+}
+
+void AWeapon::AttackPointAnimNotify()
+{
 }
 
 void AWeapon::ChangeCurrentAmmo(int amt)

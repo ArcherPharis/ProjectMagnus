@@ -95,8 +95,19 @@ public:
 	ATTRIBUTE_ACCESSORS(UPRAttributeSet, Level);
 
 	UPROPERTY()
-		FGameplayAttributeData MaxLevel;
+	FGameplayAttributeData MaxLevel;
 	ATTRIBUTE_ACCESSORS(UPRAttributeSet, MaxLevel);
+
+	UPROPERTY()
+	FGameplayAttributeData Armor;
+	ATTRIBUTE_ACCESSORS(UPRAttributeSet, Armor);
+
+	UPROPERTY()
+	FGameplayAttributeData MaxArmor;
+	ATTRIBUTE_ACCESSORS(UPRAttributeSet, MaxArmor);
+
+
+
 
 };
 	

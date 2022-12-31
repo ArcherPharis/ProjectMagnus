@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayEffectTypes.h"
+#include "GenericTeamAgentInterface.h"
+#include "UnitAIInterface.h"
 #include "BaseEnemy.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyAbilityAdded, UPRGameplayAbilityBase*, newAbility);
@@ -13,7 +15,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyAbilityAdded, UPRGameplayAbi
 class UPRGameplayAbilityBase;
 
 UCLASS()
-class PROJECTMAGNUS_API ABaseEnemy : public ACharacter, public IAbilitySystemInterface
+class PROJECTMAGNUS_API ABaseEnemy : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface, public IUnitAIInterface
 {
 	GENERATED_BODY()
 
@@ -30,6 +32,8 @@ public:
 
 	TSubclassOf<APawn> GetDeathPawnClass() const { return deathPawnClass; }
 
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamID; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -41,13 +45,22 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void Attack();
+
 	AActor* GetKiller() const { return Killer; }
 
 	UFUNCTION(BlueprintCallable, Category = "BaseEnemy")
 	void SetKiller(AActor* killer);
 	void AwardKillerWithEXP();
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	class AWeapon* GetCurrentWeapon() const { return currentWeapon; }
 
 private:
+	UPROPERTY(EditAnywhere, Category = "Team")
+	FGenericTeamId TeamID;
+
+	void SpawnWeapon();
+
 	void GiveAbility(const TSubclassOf<class UGameplayAbility>& newAbility, int inputID = -1, bool broadCast = false);
 	void CharacterDied(const FOnAttributeChangeData& AttributeData);
 
@@ -68,6 +81,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Unit Info")
 	TSubclassOf<UGameplayEffect> experienceWorthEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Unit Info")
+	TSubclassOf<AWeapon> weaponClass;
+	AWeapon* currentWeapon;
 
 	UPROPERTY(EditDefaultsOnly, Category = "PossessablePawns")
 	TSubclassOf<APawn> deathPawnClass;

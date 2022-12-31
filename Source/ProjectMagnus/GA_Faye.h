@@ -34,6 +34,11 @@ private:
 	void FayeMontageFinished();
 
 	UFUNCTION()
+	void InterruptedAbility();
+
+
+
+	UFUNCTION()
 	void FinishAbility(const FGameplayAbilityTargetDataHandle& Data);
 
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;

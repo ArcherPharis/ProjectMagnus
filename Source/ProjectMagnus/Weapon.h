@@ -42,9 +42,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual bool CanAttack() const;
 	
-	
-
+	float GetFireRate() const { return fireRate; }
+	float GetDamage() const { return damage; }
 
 	void PlayWeaponSound(USceneComponent* firePoint);
 
@@ -54,11 +55,18 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+
+
 	void OnEquip(USkeletalMeshComponent* ownerMesh);
 
 	float GetWeight() const { return weight; }
 
 	virtual void Attack();
+
+	virtual void AttackAI();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	virtual void AttackPointAnimNotify();
 
 	UAnimMontage* GetAttackMontage() const { return attackMontage; }
 
@@ -82,7 +90,11 @@ public:
 
 	virtual void ReloadWeapon();
 
+
 private:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animations")
+	UAnimMontage* asAIUnitAttackMontage;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
 	USceneComponent* root;
@@ -112,6 +124,14 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "WeaponStats")
 	float weight = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	float fireRate = 2.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stats")
+	float damage;
+
+	FTimerHandle FiringTimer;
 
 	bool playersWantsToStopFiring = false;
 

@@ -153,6 +153,30 @@ FVector AFirearm::WeaponSpread(FVector EndPoint)
 
 }
 
+void AFirearm::AttackPointAnimNotify()
+{
+	Super::AttackPointAnimNotify();
+
+	FHitResult result;
+	FVector ownerViewLoc;
+	FRotator ownerViewRot;
+	GetOwner()->GetActorEyesViewPoint(ownerViewLoc, ownerViewRot);
+	FVector Start = firePoint->GetComponentLocation();
+	if (GetWorld()->LineTraceSingleByChannel(result, Start, ownerViewLoc + ownerViewRot.Vector() * weaponRange, ECC_Camera))
+	{
+		//UGameplayStatics::ApplyDamage(result.GetActor(), GetDamage(), nullptr, GetOwner(), nullptr);
+		UGameplayStatics::PlaySoundAtLocation(this, impactSound, result.ImpactPoint, 0.1f);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
+		UPRAbilitySystemComponent* ASC = result.GetActor()->FindComponentByClass<UPRAbilitySystemComponent>();
+		if (ASC)
+		{
+			FGameplayEffectContextHandle handle;
+			ASC->ApplyGameplayEffectToSelf(damageEffect.GetDefaultObject(), -1, handle);
+		}
+		
+	}
+}
+
 FHitResult AFirearm::PotentialActorResult(FHitResult potResult)
 {
 	return potResult;
@@ -236,7 +260,7 @@ void AFirearm::WeaponFire()
 	}
 	onForecastInfo.Broadcast(GetBulletsToKill(targetedActor), GetCurrentAmmo());
 	onWeaponUse.Broadcast(GetCurrentAmmo(), GetAmmoReserves());
-	GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / fireRate);
+	GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / GetFireRate());
 }
 
 }
@@ -263,7 +287,7 @@ int AFirearm::GetBulletsToKill(AActor* currentTarget)
 	{
 		float currentTargetHealth = character->GetAttributeSet()->GetHealth();
 
-		int shotsToKill =  FMath::CeilToInt(currentTargetHealth / damage);
+		int shotsToKill =  FMath::CeilToInt(currentTargetHealth / GetDamage());
 		shotsToKill = FMath::Clamp(shotsToKill, 0, 100);
 		return shotsToKill;
 	}
@@ -271,7 +295,7 @@ int AFirearm::GetBulletsToKill(AActor* currentTarget)
 	{
 		ABaseEnemy* enemy = Cast<ABaseEnemy>(currentTarget);
 		float currentTargetHealth = enemy->GetAttributeSet()->GetHealth();
-		int shotsToKillE = FMath::CeilToInt(currentTargetHealth / damage);
+		int shotsToKillE = FMath::CeilToInt(currentTargetHealth / GetDamage());
 		shotsToKillE = FMath::Clamp(shotsToKillE, 0, 100);
 		return shotsToKillE;
 	}
@@ -306,14 +330,5 @@ void AFirearm::GunKilledTarget()
 		GetWeaponOwner()->OnUnitDeath(killedEnemies[0]);
 		
 	}
-
-
-
-	//if the list of killed units is greater than 1, play a special methd for everything
-	//but the last, meaning they will spawn their death actor, but no go through the
-	//cam events. They will just die and award exp. The last actor in the list will 
-	//go through the OnUnitDeath method. Else, there is only 1 in the list, just carry
-	//on normally.
-	//make sure to empty the list after this event.
 	killedEnemies.Empty();
 }

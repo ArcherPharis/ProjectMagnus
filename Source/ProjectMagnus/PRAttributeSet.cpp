@@ -53,4 +53,11 @@ void UPRAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallback
     {
         SetLevel(FMath::Clamp(GetLevel(), 0.f, GetMaxLevel()));
     }
+
+    if (Data.EvaluatedData.Attribute == GetArmorAttribute())
+    {
+        SetArmor(FMath::Clamp(GetArmor(), 0.f, GetMaxArmor()));
+    }
 }
+
+
