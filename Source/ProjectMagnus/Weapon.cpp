@@ -5,6 +5,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Character_Base.h"
 #include "BaseEnemy.h"
+#include "PRAttributeSet.h"
+
 
 // Sets default values
 AWeapon::AWeapon()
@@ -41,6 +43,10 @@ void AWeapon::BeginPlay()
 	
 }
 
+void AWeapon::Reload()
+{
+}
+
 bool AWeapon::CanAttack() const
 {
 	return !GetWorldTimerManager().IsTimerActive(FiringTimer);
@@ -59,6 +65,35 @@ void AWeapon::Tick(float DeltaTime)
 
 }
 
+void AWeapon::GetDamageInfo(ABaseEnemy* enemy, int& toBreak, int& toKill)
+{
+	if (enemy->GetAttributeSet()->GetArmor() == 0)
+	{
+		toBreak = 0;
+		float currentTargetHealth = enemy->GetAttributeSet()->GetHealth();
+		int shotsToKill = FMath::CeilToInt(currentTargetHealth / GetDamage());
+		shotsToKill = FMath::Clamp(shotsToKill, 0, 100);
+		toKill = shotsToKill;
+	}
+	else
+	{
+		if (weaponType == WeaponType::Rifle)
+		{
+			float currentArmor = enemy->GetAttributeSet()->GetArmor();
+			int shotsToBreakArmor = FMath::CeilToInt(currentArmor / (GetDamage() / 2));
+
+			float currentTargetHealth = enemy->GetAttributeSet()->GetHealth();
+			int shotsToKill = FMath::CeilToInt(currentTargetHealth / (GetDamage()/4));
+			shotsToKill = FMath::Clamp(shotsToKill, 0, 100);
+			toBreak = shotsToBreakArmor;
+			toKill = shotsToKill;
+		}
+	}
+	
+
+
+}
+
 void AWeapon::OnEquip(USkeletalMeshComponent* ownerMesh)
 {
 	AttachToComponent(ownerMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, socketName);
@@ -71,6 +106,8 @@ void AWeapon::Attack()
 
 void AWeapon::AttackAI()
 {
+	if (currentAmmo == 0)  return;
+
 	if (CanAttack())
 	{
 		GetWorldTimerManager().SetTimer(FiringTimer, 1 / fireRate, false);

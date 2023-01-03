@@ -6,6 +6,8 @@
 #include "Character_Base.h"
 #include "BaseEnemy.h"
 #include "PRAttributeSet.h"
+#include "MPlayerController.h"
+#include "PMGameModeBase.h"
 #include "Components/CapsuleComponent.h"
 #include "PRAbilitySystemComponent.h"
 
@@ -28,7 +30,6 @@ void AFirearm::FirearmAim()
 	{
 		potentialActor = nullptr;
 		targetedActor = result.GetActor();
-		onForecastInfo.Broadcast(GetBulletsToKill(targetedActor), GetCurrentAmmo());
 
 	}
 	else if (GetWorld()->SweepSingleByChannel(result, cameraManager->GetCameraLocation(), CameraEnd, FQuat::Identity, ECC_GameTraceChannel1, cyl))
@@ -37,10 +38,7 @@ void AFirearm::FirearmAim()
 		potentialActor = result.GetActor();
 		PotentialActorResult(result);
 	}
-	else
-	{
-		onClearForecast.Broadcast();
-	}
+
 
 
 	GetWorldTimerManager().SetTimer(aimCastTimerHandle, this, &AFirearm::FirearmAim, 0.1f, true);
@@ -68,13 +66,7 @@ bool AFirearm::TryStopFiring()
 	if (wielderControlPercent > randomRoll)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Stopped Firing! : %i"), randomRoll);
-		SetPlayerWantsToStopFiring(false);
-		//SetInAttackEvent(false);
-		//APlayerController* pc = Cast<APlayerController>(GetWeaponOwner()->GetController());
-		//pc->SetInputMode(FInputModeGameOnly());
-		//GetWeaponOwner()->StopAiming();
-		
-		
+		SetPlayerWantsToStopFiring(false);		
 		return true;
 	}
 
@@ -101,22 +93,43 @@ void AFirearm::ReloadWeapon()
 			onWeaponUse.Broadcast(GetCurrentAmmo(), GetAmmoReserves());
 		}
 	}
+}
 
-	//if (CurrentAmmo <= MaxAmmo && AmmoReserves != 0 && CurrentAmmo != MaxAmmo)
-	//{
-	//	int32 Result = MaxAmmo - CurrentAmmo;
+void AFirearm::Reload()
+{
+	Super::Reload();
+	if (IsReloading()) return;
 
-	//	if (Result <= AmmoReserves)
-	//	{
-	//		AmmoReserves -= Result;
-	//		CurrentAmmo += Result;
-	//	}
-	//	else
-	//	{
-	//		CurrentAmmo += AmmoReserves;
-	//		AmmoReserves = 0;
-	//	}
-	//}
+	ABaseEnemy* enemy = Cast<ABaseEnemy>(GetOwner());
+	if (enemy)
+	{
+		float reloadDuration = enemy->GetMesh()->GetAnimInstance()->Montage_Play(ReloadMontage);
+		GetWorldTimerManager().SetTimer(reloadHandle, this, &AFirearm::ReloadTimePoint, reloadDuration, false);
+	}
+
+
+	
+}
+
+bool AFirearm::IsReloading()
+{
+	ABaseEnemy* enemy = Cast<ABaseEnemy>(GetOwner());
+	return enemy->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontage);
+}
+
+void AFirearm::ReloadTimePoint()
+{
+	SetCurrentAmmo(GetMaxAmmo());
+}
+
+void AFirearm::DecrementAmmo()
+{
+	ChangeCurrentAmmo(-1);
+	UE_LOG(LogTemp, Warning, TEXT("%i"), GetCurrentAmmo());
+	if (GetCurrentAmmo() == 0)
+	{
+		Reload();
+	}
 }
 
 void AFirearm::Attack()
@@ -131,7 +144,6 @@ void AFirearm::Attack()
 		return;
 	}
 	SetInAttackEvent(true);
-	onClearForecast.Broadcast();
 	APlayerController* pc = Cast<APlayerController>(GetWeaponOwner()->GetController());
 	pc->SetInputMode(FInputModeUIOnly());
 	onBeginAttackEvent.Broadcast();
@@ -155,6 +167,8 @@ FVector AFirearm::WeaponSpread(FVector EndPoint)
 
 void AFirearm::AttackPointAnimNotify()
 {
+	if (IsReloading() || GetCurrentAmmo() == 0) return;
+
 	Super::AttackPointAnimNotify();
 
 	FHitResult result;
@@ -162,9 +176,8 @@ void AFirearm::AttackPointAnimNotify()
 	FRotator ownerViewRot;
 	GetOwner()->GetActorEyesViewPoint(ownerViewLoc, ownerViewRot);
 	FVector Start = firePoint->GetComponentLocation();
-	if (GetWorld()->LineTraceSingleByChannel(result, Start, ownerViewLoc + ownerViewRot.Vector() * weaponRange, ECC_Camera))
+	if (GetWorld()->LineTraceSingleByChannel(result, Start, WeaponSpread(ownerViewLoc + ownerViewRot.Vector() * weaponRange) , ECC_Camera))
 	{
-		//UGameplayStatics::ApplyDamage(result.GetActor(), GetDamage(), nullptr, GetOwner(), nullptr);
 		UGameplayStatics::PlaySoundAtLocation(this, impactSound, result.ImpactPoint, 0.1f);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
 		UPRAbilitySystemComponent* ASC = result.GetActor()->FindComponentByClass<UPRAbilitySystemComponent>();
@@ -175,6 +188,7 @@ void AFirearm::AttackPointAnimNotify()
 		}
 		
 	}
+	DecrementAmmo();
 }
 
 FHitResult AFirearm::PotentialActorResult(FHitResult potResult)
@@ -185,19 +199,19 @@ FHitResult AFirearm::PotentialActorResult(FHitResult potResult)
 
 void AFirearm::WeaponFire()
 {
-
+	
 	if (TryStopFiring()) return;
 	if (GetCurrentAmmo() > 0)
 	{		
 
-	if (canfire)
-	{
-		canfire = false;
-	}
-	else
-	{
-		return;
-	}
+		if (canfire)
+		{
+			canfire = false;
+		}
+		else
+		{
+			return;
+		}
 	FHitResult result;
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 
@@ -206,7 +220,6 @@ void AFirearm::WeaponFire()
 	OnAttack();
 	if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), WeaponSpread(CameraEnd), ECC_GameTraceChannel1))
 	{
-		//TODO in the future, maybe a damagable interface? OR, simply if not damagable chara, use built in apply damnage.
 		
 		UPRAbilitySystemComponent* ASC = result.GetActor()->FindComponentByClass<UPRAbilitySystemComponent>();
 		if (ASC)
@@ -224,6 +237,7 @@ void AFirearm::WeaponFire()
 			if (damagableChara && damagableChara->GetAttributeSet()->GetHealth() == 0)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Gun killed something"));
+				killedSomething = true;
 				//killedEnemies.Add(damagableChara);
 				//GetWorldTimerManager().SetTimer(GunKilledHandle, this, &AFirearm::GunKilledTarget, 1.f, false);
 				
@@ -231,18 +245,20 @@ void AFirearm::WeaponFire()
 			else if (!damagableChara)
 			{
 				ABaseEnemy* damagableEnemy = Cast<ABaseEnemy>(result.GetActor());
+				if (engagedEnemy == nullptr)
+				{
+					engagedEnemy = damagableEnemy;
+				}
+				
 				if (damagableEnemy && damagableEnemy->GetAttributeSet()->GetHealth() == 0)
 				{
+					killedSomething = true;
 					damagableEnemy->SetKiller(GetWeaponOwner());
 					UE_LOG(LogTemp, Warning, TEXT("Gun killed enemy"));
 				}
+
 			}
-
-		
-
 		}
-
-
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
 		SpawnImpactEffects(result);
 		//DrawDebugPoint(GetWorld(), result.Location, 10, FColor::Red, true, 2.f);
@@ -251,18 +267,51 @@ void AFirearm::WeaponFire()
 	PlayWeaponSound(firePoint);
 	GetWeaponOwner()->GetMesh()->GetAnimInstance()->Montage_Play(GetAttackMontage());
 	ChangeCurrentAmmo(-1);
-
-	if (GetCurrentAmmo() == 0)
-	{
-		//SetInAttackEvent(false);		
-		//SetPlayerWantsToStopFiring(false);
-		//onEndAttackEvent.Broadcast();
-	}
-	onForecastInfo.Broadcast(GetBulletsToKill(targetedActor), GetCurrentAmmo());
 	onWeaponUse.Broadcast(GetCurrentAmmo(), GetAmmoReserves());
 	GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / GetFireRate());
 }
+	else
+	{
+		if (GetInAttackEvent() && !killedSomething)
+		{
 
+			if (engagedEnemy->GetAttributeSet()->GetHealth() > 0)
+			{
+
+				FTimerHandle delayFireHandle;
+				GetWorldTimerManager().SetTimer(delayFireHandle, this, &AFirearm::GoToRetaliate, 1.5f);
+
+
+
+			}
+
+
+			
+		}
+	}
+
+}
+
+void AFirearm::ReturnToInit()
+{
+	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
+	cont->SetInputMode(FInputModeGameOnly());
+	cont->SetViewTargetWithBlend(GetWeaponOwner(), 0.5f);
+	SetInAttackEvent(false);
+	GetWeaponOwner()->StopAiming();
+	GetWeaponOwner()->StopAimMovement();
+	killedSomething = false;
+	engagedEnemy = nullptr;
+}
+
+void AFirearm::GoToRetaliate()
+{
+	engagedEnemy->RotateTowardsAttackerAndRetaliate(GetWeaponOwner());
+	engagedEnemy->SetLogicEnabled(true);
+	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
+	cont->SetViewTargetWithBlend(engagedEnemy, 0.f);
+	FTimerHandle changeBackHandle;
+	GetWorldTimerManager().SetTimer(changeBackHandle, this, &AFirearm::ReturnToInit, 3.0f);
 }
 
 void AFirearm::BeginAttack()
@@ -280,36 +329,9 @@ void AFirearm::AfterFireCheck()
 
 }
 
-int AFirearm::GetBulletsToKill(AActor* currentTarget)
-{
-	ACharacter_Base* character = Cast<ACharacter_Base>(currentTarget);
-	if (character)
-	{
-		float currentTargetHealth = character->GetAttributeSet()->GetHealth();
-
-		int shotsToKill =  FMath::CeilToInt(currentTargetHealth / GetDamage());
-		shotsToKill = FMath::Clamp(shotsToKill, 0, 100);
-		return shotsToKill;
-	}
-	else
-	{
-		ABaseEnemy* enemy = Cast<ABaseEnemy>(currentTarget);
-		float currentTargetHealth = enemy->GetAttributeSet()->GetHealth();
-		int shotsToKillE = FMath::CeilToInt(currentTargetHealth / GetDamage());
-		shotsToKillE = FMath::Clamp(shotsToKillE, 0, 100);
-		return shotsToKillE;
-	}
-	return 0;
-	
-}
 
 void AFirearm::GunKilledTarget()
 {
-
-
-	//ACharacter_Base* chr = Cast<ACharacter_Base>(targetedActor);
-
-	//if (chr == nullptr) return;
 
 	if (killedEnemies.Num() > 1)
 	{

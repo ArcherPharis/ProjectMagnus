@@ -8,6 +8,7 @@
 #include "MPlayerController.h"
 #include "BaseEnemy.h"
 #include "InGameUI.h"
+#include "TacticsPawn.h"
 
 
 void APMGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -20,7 +21,24 @@ void APMGameModeBase::InitGame(const FString& MapName, const FString& Options, F
 void APMGameModeBase::GetAllSpawnLocations()
 {
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATargetPoint::StaticClass(), spawnPoints);
+	TArray<AActor*> potEnems;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseEnemy::StaticClass(), potEnems);
+
+	for (AActor* a : potEnems)
+	{
+		ABaseEnemy* enemy = Cast<ABaseEnemy>(a);
+		currentEnemyUnits.Add(enemy);
+	}
+
+	TacticsPawn = Cast<APawn>(UGameplayStatics::GetActorOfClass(GetWorld(), ATacticsPawn::StaticClass()));
 	
+}
+
+void APMGameModeBase::PossessTacticsActor()
+{
+	APlayerController* controller = UGameplayStatics::GetPlayerController(this, 0);
+	controller->Possess(TacticsPawn);
+	ui->EnableTacticsCanvas();
 }
 
 void APMGameModeBase::ShowDownedDeadUnits()
@@ -52,7 +70,9 @@ void APMGameModeBase::ShowDownedDeadUnits()
 		killedEnemyUnits[0]->AwardKillerWithEXP();
 		CharacterToReturnTo = Cast<APlayerCharacter>(killedEnemyUnits[0]->GetKiller());
 
+		RemoveEnemyFromList(killedEnemyUnits[0]);
 		killedEnemyUnits.RemoveAt(0);
+		
 
 	}
 	else
@@ -74,6 +94,7 @@ void APMGameModeBase::SpawnInitialUnits(UInGameUI* aUI)
 		APlayerCharacter* initCharacter =  GetWorld()->SpawnActor<APlayerCharacter>(character);
 		currentPlayerUnits.Add(initCharacter);
 		aUI->NewUnitGiven(initCharacter);
+		ui = aUI;
 		
 	}
 	
@@ -119,4 +140,33 @@ void APMGameModeBase::AddKilledUnits(ABaseEnemy* killedUnit)
 	if (GetWorldTimerManager().IsTimerActive(killedOrDownedUnitHandle)) return;
 
 	GetWorldTimerManager().SetTimer(killedOrDownedUnitHandle, this, &APMGameModeBase::ShowDownedDeadUnits, 1.f, false);
+}
+
+void APMGameModeBase::ReturnToTacticsPawn()
+{
+	APlayerController* controller = UGameplayStatics::GetPlayerController(this, 0);
+	controller->SetInputMode(FInputModeUIOnly());
+	controller->bShowMouseCursor = true;
+	UGameplayStatics::SetGamePaused(this, false);
+	controller->SetViewTargetWithBlend(TacticsPawn, 0.5f);
+	FTimerHandle handle;
+	GetWorldTimerManager().SetTimer(handle, this, &APMGameModeBase::PossessTacticsActor, 0.5f);
+		
+}
+
+void APMGameModeBase::ToggleEnemyLogic(bool bStopLogic)
+{
+
+	if (currentEnemyUnits.Num() > 0)
+	{
+		for (ABaseEnemy* enemy : currentEnemyUnits)
+		{
+			enemy->SetLogicEnabled(bStopLogic);
+		}
+	}
+}
+
+void APMGameModeBase::RemoveEnemyFromList(ABaseEnemy* enemyToRemove)
+{
+	currentEnemyUnits.Remove(enemyToRemove);
 }

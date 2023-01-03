@@ -27,7 +27,7 @@ class PROJECTMAGNUS_API AFirearm : public AWeapon
 
 public:
 	AFirearm();
-
+	virtual void AttackPointAnimNotify() override;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Gun Events")
 	void OnAttack();
@@ -44,6 +44,8 @@ public:
 	void StopFirearmAim();
 	bool TryStopFiring();
 	virtual void ReloadWeapon() override;
+	virtual void Reload() override;
+
 	
 	
 
@@ -51,11 +53,23 @@ public:
 
 private:
 
+	bool IsReloading();
+	FTimerHandle reloadHandle;
+	void ReloadTimePoint();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Anims")
+	UAnimMontage* ReloadMontage;
+
+	void DecrementAmmo();
+
+	bool killedSomething = false;
+	class ABaseEnemy* engagedEnemy;
+
 	virtual void Attack() override;
 
 	FVector WeaponSpread(FVector Endpoint);
 
-	virtual void AttackPointAnimNotify() override;
+	
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<class UGameplayEffect> damageEffect;
@@ -103,9 +117,10 @@ private:
 	FHitResult PotentialActorResult(FHitResult potResult);
 
 	void WeaponFire();
+	void ReturnToInit();
+	void GoToRetaliate();
 	void BeginAttack();
 	void AfterFireCheck();
-	int GetBulletsToKill(AActor* currentTarget);
 
 	FTimerHandle GunKilledHandle;
 	void GunKilledTarget();

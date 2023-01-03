@@ -21,11 +21,19 @@ public:
 	void AddDownedUnits(class ACharacter_Base* downedUnit);
 	void AddKilledUnits(class ABaseEnemy* killedUnit);
 
+	void ReturnToTacticsPawn();
+
+	void ToggleEnemyLogic(bool bStopLogic);
+	void RemoveEnemyFromList(ABaseEnemy* enemyToRemove);
+	
+
+	APawn* GetTacticsPawn() const { return TacticsPawn; }
+
 private:
 
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	void GetAllSpawnLocations();
-
+	void PossessTacticsActor();
 	class APlayerCharacter* CharacterToReturnTo;
 	
 
@@ -34,11 +42,15 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Deployable Units")
 	TArray<AActor*> spawnPoints;
+
+	APawn* TacticsPawn;
 	
 	TArray<APlayerCharacter*> currentPlayerUnits;
+	TArray<ABaseEnemy*> currentEnemyUnits;
 
 	TArray<ACharacter_Base*> downedPlayerUnits;
 	TArray<ABaseEnemy*> killedEnemyUnits;
+	class UInGameUI* ui;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Deployable Units")
 	int numberOfUnitsAllowedForChapter = 3;

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
+#include "GameplayEffectTypes.h"
 #include "UnitListEntry.generated.h"
 
 
@@ -26,9 +27,13 @@ public:
 	void SetUnitEntryAP(float value);
 
 
+
+
 private:
 
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject);
+
+	void APUpdated(const FOnAttributeChangeData& AttributeData);
 
 	UPROPERTY(meta = (BindWidget))
 	class UImage* unitPortrait;

@@ -45,7 +45,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	class APMGameModeBase* GetGameMode() const { return gameMode; }
+
+	void SetLogicEnabled(bool bIsLogicEnabled);
+
 	void Attack();
+
+	void RotateTowardsAttackerAndRetaliate(AActor* attacker);
 
 	AActor* GetKiller() const { return Killer; }
 
@@ -85,6 +91,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Unit Info")
 	TSubclassOf<AWeapon> weaponClass;
 	AWeapon* currentWeapon;
+
+	APMGameModeBase* gameMode;
 
 	UPROPERTY(EditDefaultsOnly, Category = "PossessablePawns")
 	TSubclassOf<APawn> deathPawnClass;

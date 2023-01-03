@@ -11,6 +11,8 @@
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
+#include "PMGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/CanvasPanel.h"
 #include "Components/HorizontalBox.h"
@@ -23,10 +25,9 @@
 void UInGameUI::NativeConstruct()
 {
 	Super::NativeConstruct();
-	firearmForecastImage->SetVisibility(ESlateVisibility::Hidden);
-	forecastHoriBox->SetVisibility(ESlateVisibility::Hidden);
 	stopFiringOverlayButton->bIsEnabled = false;
 	stopFiringOverlayButton->OnPressed.AddDynamic(this, &UInGameUI::StopFiring);
+	endUnitTurnButton->OnPressed.AddDynamic(this, &UInGameUI::ReturnToTacticsPawn);
 }
 
 void UInGameUI::ShowVigorText(float oldValue, float newValue)
@@ -88,9 +89,17 @@ void UInGameUI::ShowLevelUpScreen(APlayerCharacter* unit, float oldV, float oldS
 
 }
 
-void UInGameUI::DisplayTargetStats(ACharacter_Base* target, float health, float maxHealth)
+void UInGameUI::ShowUnitMenu()
 {
+	UISwitcher->SetActiveWidget(unitMenuCanvas);
+}
+
+void UInGameUI::DisplayTargetStats(ACharacter_Base* target, float health, float maxHealth, float armor, float maxArmor)
+{
+	shotsToKillText->SetText(FText::FromString("--"));
+	shotsToBreakText->SetText(FText::FromString("--"));
 	targetHealthBar->SetPercent(health / maxHealth);
+	armorTargetBar->SetPercent(armor / maxArmor);
 	targetCurrentHealthText->SetText(FText::FromString(FString::FromInt(health)));
 	targetMaxHealthText->SetText(FText::FromString(FString::FromInt(maxHealth)));
 	targetName->SetText(FText::FromName(target->GetUnitName()));
@@ -98,9 +107,12 @@ void UInGameUI::DisplayTargetStats(ACharacter_Base* target, float health, float 
 
 }
 
-void UInGameUI::DisplayEnemyTargetStats(ABaseEnemy* target, float health, float maxHealth)
+void UInGameUI::DisplayEnemyTargetStats(ABaseEnemy* target, float health, float maxHealth, float armor, float maxArmor, int toKill, int toBreak)
 {
+	shotsToKillText->SetText(FText::FromString(FString::FromInt(toKill)));
+	shotsToBreakText->SetText(FText::FromString(FString::FromInt(toBreak)));
 	targetHealthBar->SetPercent(health / maxHealth);
+	armorTargetBar->SetPercent(armor / maxArmor);
 	targetCurrentHealthText->SetText(FText::FromString(FString::FromInt(health)));
 	targetMaxHealthText->SetText(FText::FromString(FString::FromInt(maxHealth)));
 	targetName->SetText(FText::FromName(target->GetUnitName()));
@@ -111,11 +123,13 @@ void UInGameUI::DisplayTargetInfo(bool displayOrNot)
 	if (displayOrNot)
 	{
 		targetHealthBar->SetVisibility(ESlateVisibility::Visible);
+		armorTargetBar->SetVisibility(ESlateVisibility::Visible);
 		targetOverlay->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
 		targetHealthBar->SetVisibility(ESlateVisibility::Hidden);
+		armorTargetBar->SetVisibility(ESlateVisibility::Hidden);
 		targetOverlay->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
@@ -189,19 +203,6 @@ void UInGameUI::PossessNewUnit(APlayerCharacter* newUnit)
 }
 
 
-void UInGameUI::SetForecast(int STK, int ammoLeft)
-{
-	firearmForecastImage->SetVisibility(ESlateVisibility::Visible);
-	forecastHoriBox->SetVisibility(ESlateVisibility::Visible);
-	shotsToKillText->SetText(FText::FromString(FString::FromInt(STK)));
-	ammoLeftText->SetText(FText::FromString(FString::FromInt(ammoLeft)));
-}
-
-void UInGameUI::ClearForecast()
-{
-	firearmForecastImage->SetVisibility(ESlateVisibility::Hidden);
-	forecastHoriBox->SetVisibility(ESlateVisibility::Hidden);
-}
 
 void UInGameUI::UnhideButton()
 {
@@ -223,6 +224,12 @@ void UInGameUI::StopFiring()
 	
 	onButtonPressed.Broadcast();
 	stopFiringOverlayButton->bIsEnabled = false;
+}
+
+void UInGameUI::ReturnToTacticsPawn()
+{
+	APMGameModeBase* gm = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(this));
+	gm->ReturnToTacticsPawn();
 }
 
 void UInGameUI::SetTipText(FString text)
@@ -251,4 +258,9 @@ void UInGameUI::HideLevelUpTextPair(UTextBlock* one, UTextBlock* two)
 	one->SetVisibility(ESlateVisibility::Hidden);
 	two->SetVisibility(ESlateVisibility::Hidden);
 
+}
+
+void UInGameUI::EnableTacticsCanvas()
+{
+	UISwitcher->SetActiveWidget(tacticsCanvas);
 }

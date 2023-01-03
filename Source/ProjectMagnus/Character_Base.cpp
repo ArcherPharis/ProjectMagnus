@@ -58,6 +58,7 @@ void ACharacter_Base::ToggleInput(bool enableInput)
 void ACharacter_Base::BeginPlay()
 {
 	Super::BeginPlay();
+	gameMode = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(this));
 	GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(GetAttributeSet()->GetHealthAttribute()).AddUObject(this, &ACharacter_Base::CharacterDied);
 	ApplyInitialEffect();
 	GiveAbility(SprintAbility);
@@ -336,7 +337,6 @@ void ACharacter_Base::StopAiming()
 	{
 		fireArm->StopFirearmAim();
 	}
-	GetCurrentWeapon()->onClearForecast.Broadcast();
 
 	
 }

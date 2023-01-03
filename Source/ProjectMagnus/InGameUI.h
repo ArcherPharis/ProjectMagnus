@@ -35,11 +35,13 @@ public:
 	void GetNewWeaponInfo(class AWeapon* weapon);
 	UFUNCTION()
 	void ShowLevelUpScreen(class APlayerCharacter* unit, float oldV, float oldS, float oldStr, float oldE, float oldA, float oldD);
+	UFUNCTION()
+	void ShowUnitMenu();
 
 	UFUNCTION()
-	void DisplayTargetStats(class ACharacter_Base* target, float health, float maxHealth);
+	void DisplayTargetStats(class ACharacter_Base* target, float health, float maxHealth, float armor, float maxArmor);
 	UFUNCTION()
-	void DisplayEnemyTargetStats(class ABaseEnemy* target, float health, float maxHealth);
+	void DisplayEnemyTargetStats(class ABaseEnemy* target, float health, float maxHealth, float armor, float maxArmor, int toKill, int toBreak);
 
 	UFUNCTION()
 	void DisplayTargetInfo(bool displayOrNot);
@@ -68,11 +70,6 @@ public:
 	UFUNCTION()
 	void UpdateRanges(float maxHealth, float maxStam, float exp, float mExp);
 
-	UFUNCTION()
-	void SetForecast(int STK, int ammoLeft);
-
-	UFUNCTION()
-	void ClearForecast();
 
 	UFUNCTION()
 	void UnhideButton();
@@ -81,17 +78,21 @@ public:
 	void StopFiring();
 
 	UFUNCTION()
+	void ReturnToTacticsPawn();
+
+	UFUNCTION()
 	void SetTipText(FString text);
 
 	void EnableFieldCanvas();
 	void HideLevelUpTextPair(UTextBlock* one, UTextBlock* two);
+	void EnableTacticsCanvas();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UTextBlock* oldHealthLevelUpText;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* newHealthLevelUpText;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UTextBlock* oldStaminaText;
+	UTextBlock* oldStaminaText;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		UTextBlock* newStaminaText;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -140,6 +141,9 @@ private:
 	class UCanvasPanel* levelUpCanvas;
 
 	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* unitMenuCanvas;
+
+	UPROPERTY(meta = (BindWidget))
 	class UImage* levelUpPanelImage;
 
 	UPROPERTY(meta = (BindWidget))
@@ -152,11 +156,12 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UImage* crossHair;
 
-	UPROPERTY(meta = (BindWidget))
-	UImage* firearmForecastImage;
 
 	UPROPERTY(meta = (BindWidget))
 	class UProgressBar* targetHealthBar;
+
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* armorTargetBar;
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* targetCurrentHealthText;
@@ -169,6 +174,10 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* stopFiringOverlayButton;
+	UPROPERTY(meta = (BindWidget))
+	UButton* returnToBattleButton;
+	UPROPERTY(meta = (BindWidget))
+	UButton* endUnitTurnButton;
 
 	UPROPERTY(meta = (BindWidget))
 	class UOverlay* targetOverlay;
@@ -179,7 +188,7 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* shotsToKillText;
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* ammoLeftText;
+	UTextBlock* shotsToBreakText;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ammoCount;
 	UPROPERTY(meta = (BindWidget))
@@ -188,8 +197,6 @@ private:
 	UTextBlock* APCount;
 	UPROPERTY(meta = (BindWidget))
 	UImage* weaponIcon;
-	UPROPERTY(meta = (BindWidget))
-	class UHorizontalBox* forecastHoriBox;
 
 
 	//UPROPERTY(meta = (BindWIdget))

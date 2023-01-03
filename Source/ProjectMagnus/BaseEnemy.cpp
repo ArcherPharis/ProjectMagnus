@@ -5,6 +5,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PMGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "AIController.h"
+#include "BrainComponent.h"
 #include "PRAbilitySystemComponent.h"
 #include "PRGameplayAbilityBase.h"
 #include "AbilitySystemBlueprintLibrary.h"
@@ -39,6 +41,7 @@ UAbilitySystemComponent* ABaseEnemy::GetAbilitySystemComponent() const
 void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+	gameMode = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(this));
 	GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(GetAttributeSet()->GetHealthAttribute()).AddUObject(this, &ABaseEnemy::CharacterDied);
 	ApplyInitialEffect();
 	SpawnWeapon();
@@ -58,12 +61,41 @@ void ABaseEnemy::Tick(float DeltaTime)
 
 }
 
+void ABaseEnemy::SetLogicEnabled(bool bIsLogicEnabled)
+{
+	AAIController* AIC = GetController<AAIController>();
+	if (AIC)
+	{
+		UBrainComponent* braincomp = AIC->GetBrainComponent();
+		if (braincomp)
+		{
+			if (bIsLogicEnabled)
+			{
+				braincomp->StartLogic();
+			}
+			else
+			{
+				braincomp->StopLogic("Dead");
+			}
+
+		}
+	}
+}
+
 void ABaseEnemy::Attack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("We be attacking bois, gimme my weapon already!"));
 	if (currentWeapon != nullptr)
 	{
 		currentWeapon->AttackAI();
+	}
+}
+
+void ABaseEnemy::RotateTowardsAttackerAndRetaliate(AActor* attacker)
+{
+	AAIController* AIC = GetController<AAIController>();
+	if (AIC)
+	{
+		AIC->SetFocus(attacker);
 	}
 }
 
@@ -115,6 +147,7 @@ void ABaseEnemy::CharacterDied(const FOnAttributeChangeData& AttributeData)
 	{
 		GetMesh()->GetAnimInstance()->Montage_Play(onDeadMontage);
 		//isDead = true;
+		SetLogicEnabled(false);
 		SetActorEnableCollision(false);
 	}
 }

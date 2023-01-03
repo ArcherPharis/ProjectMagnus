@@ -29,6 +29,7 @@ public:
 	// Sets default values for this character's properties
 	ACharacter_Base();
 
+	class APMGameModeBase* GetGameMode() const { return gameMode; }
 	void ApplyInitialEffect();
 	virtual void PossessedBy(AController* NewController) override;
 
@@ -208,6 +209,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
 	TSubclassOf<UGameplayAbility> SprintAbility;
 
+
 	bool isSprinting = false;
 	bool isDead = false;
 	bool isMoving;
@@ -216,8 +218,7 @@ private:
 
 	FTimerHandle returnToUnitHandle;
 	
-	void SpawnDeathUnit();
-
+	APMGameModeBase* gameMode;
 
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
 	TMap<EPRAbilityInputID, TSubclassOf<UGameplayAbility>> InitialAbilities;

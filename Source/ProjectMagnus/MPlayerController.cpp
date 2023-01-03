@@ -19,6 +19,8 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 	if (playerCharacter)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("You possessed the player actor!"));
+		SetInputMode(FInputModeGameOnly());
+		bShowMouseCursor = false;
 		SetViewTargetWithBlend(playerCharacter, 1.5f);
 		OnPossessEffect();
 		playerCharacter->onUnitGiven.AddDynamic(inGameUI, &UInGameUI::NewUnitGiven);
@@ -27,12 +29,11 @@ void AMPlayerController::OnPossess(APawn* newPawn)
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetStaminaAttribute()).AddUObject(this, &AMPlayerController::StaminaUpdated);
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetActionPointsAttribute()).AddUObject(this, &AMPlayerController::APUpdated);
 		playerCharacter->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(playerCharacter->GetAttributeSet()->GetExperiencePointsAttribute()).AddUObject(this, &AMPlayerController::ExperienceUpdate);
+		playerCharacter->onShowUnitMenu.AddDynamic(inGameUI, &UInGameUI::ShowUnitMenu);
 		playerCharacter->onAPGauge.AddDynamic(inGameUI, &UInGameUI::SetAPText);
 		playerCharacter->onUpdateHealthStamRange.AddDynamic(inGameUI, &UInGameUI::UpdateRanges);
 		playerCharacter->onDisplayTip.AddDynamic(inGameUI, &UInGameUI::SetTipText);
 		playerCharacter->onInitiateLevelUp.AddDynamic(inGameUI, &UInGameUI::ShowLevelUpScreen);
-		playerCharacter->GetCurrentWeapon()->onForecastInfo.AddDynamic(inGameUI, &UInGameUI::SetForecast);
-		playerCharacter->GetCurrentWeapon()->onClearForecast.AddDynamic(inGameUI, &UInGameUI::ClearForecast);
 		playerCharacter->GetCurrentWeapon()->onBeginAttackEvent.AddDynamic(inGameUI, &UInGameUI::UnhideButton);
 		playerCharacter->onUnitTarget.AddDynamic(inGameUI, &UInGameUI::DisplayTargetStats);
 		playerCharacter->onEnemyUnitTarget.AddDynamic(inGameUI, &UInGameUI::DisplayEnemyTargetStats);
@@ -68,6 +69,7 @@ void AMPlayerController::SetFieldCanvas()
 
 void AMPlayerController::HealthUpdated(const FOnAttributeChangeData& AttributeData)
 {
+	if(playerCharacter)
 	inGameUI->UpdateHealth(AttributeData.NewValue, playerCharacter->GetAttributeSet()->GetMaxHealth());
 }
 

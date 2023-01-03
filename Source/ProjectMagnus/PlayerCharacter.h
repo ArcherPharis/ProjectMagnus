@@ -9,12 +9,13 @@
 class ABaseEnemy;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUnitGiven, APlayerCharacter*, unit);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUnitTarget, ACharacter_Base*, target, float, currentHealth, float, maxHealth);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnEnemyUnitTarget, ABaseEnemy*, target, float, currentHealth, float, maxHealth);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FOnUnitTarget, ACharacter_Base*, target, float, currentHealth, float, maxHealth, float, currentArmor, float, maxArmor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_SevenParams(FOnEnemyUnitTarget, ABaseEnemy*, target, float, currentHealth, float, maxHealth, float, currentArmor, float, maxArmor, int, toKill, int, toBreak);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnUpdateHealthStamRange, float, maxHealth, float, maxStam,float, exp, float, maxExp);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClickedDeploy, APlayerCharacter*, charaToDeploy);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDisplayTargetInfo, bool, display);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SevenParams(FOnInitiateLevelUp, APlayerCharacter*, unitData, float, oldHealth, float, oldStam, float, oldStr, float, oldEnd, float, oldAgi, float, oldDex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnShowUnitMenu);
 
 /**
  * 
@@ -36,6 +37,7 @@ public:
 	FOnClickedDeploy onUnitDeployed;
 	FOnDisplayTargetInfo onDisplayTargetInfo;
 	FOnInitiateLevelUp onInitiateLevelUp;
+	FOnShowUnitMenu onShowUnitMenu;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
@@ -62,6 +64,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	class UCameraComponent* playerEye;
 
+	void ReenableAILogic();
 	void DisplayTargetInfo();
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
@@ -140,6 +143,8 @@ private:
 	FRotator GetControlRotator();
 
 	virtual void Aim() override;
+
+	void OpenUnitMenu();
 	
 	virtual void Attack() override;
 	virtual void StopAttack() override;

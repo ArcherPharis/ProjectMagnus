@@ -18,6 +18,7 @@ void UUnitListEntry::NativeOnListItemObjectSet(UObject* ListItemObject)
 	unitName->SetText(FText::FromString(character->GetUnitName().ToString()));
 	unitSelectButton->OnReleased.AddDynamic(this, &UUnitListEntry::UnitButtonPressed);
 	APCount->SetText(FText::FromString(FString::FromInt(character->GetAttributeSet()->GetActionPoints())));
+	character->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(character->GetAttributeSet()->GetActionPointsAttribute()).AddUObject(this, &UUnitListEntry::APUpdated);
 }
 
 void UUnitListEntry::UnitButtonPressed()
@@ -28,6 +29,11 @@ void UUnitListEntry::UnitButtonPressed()
 		character->onUnitDeployed.Broadcast(character);
 		character->ChangeAP(-1);
 	}
+}
+
+void UUnitListEntry::APUpdated(const FOnAttributeChangeData& AttributeData)
+{
+	APCount->SetText(FText::FromString(FString::FromInt(AttributeData.NewValue)));
 }
 
 void UUnitListEntry::SetUnitEntryAP(float value)

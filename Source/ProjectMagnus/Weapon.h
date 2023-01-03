@@ -7,11 +7,22 @@
 #include "Weapon.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponUse, int, ammoCount, int, ammoReserves);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnForecastInfo, int, shotsToKill, int, shotsLeft);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClearForecast);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBeginAttackEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEndAttackEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnKilledTargetWithGun, class ACharacter_Base*, charaThatDied);
+
+
+UENUM()
+enum WeaponType
+{
+	Rifle UMETA(DisplayName = "Rifle"),
+	Pistol UMETA(DisplayName = "Pistol"),
+	MachineGun UMETA(DisplayName = "MachineGun"),
+	Sniper UMETA(DisplayName = "Sniper"),
+	Shotgun UMETA(DisplayName = "Shotgun"),
+	Explosive UMETA(DisplayName = "Explosive"),
+	OtherMelee UMETA(DisplayName = "Other/Melee")
+};
 
 UCLASS()
 class PROJECTMAGNUS_API AWeapon : public AActor
@@ -23,8 +34,6 @@ public:
 	AWeapon();
 
 	FOnWeaponUse onWeaponUse;
-	FOnForecastInfo onForecastInfo;
-	FOnClearForecast onClearForecast;
 	FOnBeginAttackEvent onBeginAttackEvent;
 	FOnEndAttackEvent onEndAttackEvent;
 	FOnKilledTargetWithGun onKilledTargetWithGun;
@@ -41,6 +50,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Reload();
 
 	virtual bool CanAttack() const;
 	
@@ -55,7 +65,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-
+	void GetDamageInfo(class ABaseEnemy* enemy, int& toBreak, int& toKill);
 
 	void OnEquip(USkeletalMeshComponent* ownerMesh);
 
@@ -92,6 +102,9 @@ public:
 
 
 private:
+
+	UPROPERTY(EditDefaultsOnly, Category = "WeaponType")
+	TEnumAsByte<WeaponType> weaponType;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animations")
 	UAnimMontage* asAIUnitAttackMontage;

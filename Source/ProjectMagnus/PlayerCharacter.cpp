@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "StatComponent.h"
+#include "PMGameModeBase.h"
 #include "AbilitySystemComponent.h"
 #include "PRAttributeSet.h"
 #include "Firearm.h"
@@ -42,6 +43,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &APlayerCharacter::StopAiming);
 	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &APlayerCharacter::Attack);
 	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Released, this, &APlayerCharacter::StopAttack);
+	PlayerInputComponent->BindAction("OpenUnitMenu", EInputEvent::IE_Pressed, this, &APlayerCharacter::OpenUnitMenu);
 	GetAbilitySystemComponent()->BindAbilityActivationToInputComponent(PlayerInputComponent, FGameplayAbilityInputBinds("Confirm",
 		"Cancel",
 		"EPRAbilityInputID",
@@ -86,7 +88,7 @@ void APlayerCharacter::LevelUp()
 void APlayerCharacter::MoveForward(float value)
 {
 
-	if (IsCharacterOutOfStamina())
+	if (IsCharacterOutOfStamina() || GetIsAiming())
 	{
 		StopSprint();
 		return;
@@ -98,7 +100,7 @@ void APlayerCharacter::MoveForward(float value)
 void APlayerCharacter::MoveRight(float value)
 {
 
-	if (IsCharacterOutOfStamina())
+	if (IsCharacterOutOfStamina() || GetIsAiming())
 	{
 		StopSprint();
 		return;
@@ -132,8 +134,20 @@ void APlayerCharacter::Aim()
 
 	Super::Aim();
 	playerEye->SetFieldOfView(aimFOV);
+	GetGameMode()->ToggleEnemyLogic(false);
+	SetIsAiming(true);
 	
 
+}
+
+void APlayerCharacter::OpenUnitMenu()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Opening Unit Menu..."));
+	onShowUnitMenu.Broadcast();
+	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
+	cont->SetInputMode(FInputModeUIOnly());
+	cont->bShowMouseCursor = true;
+	UGameplayStatics::SetGamePaused(this, true);
 }
 
 void APlayerCharacter::StopAiming()
@@ -141,12 +155,22 @@ void APlayerCharacter::StopAiming()
 	
 	Super::StopAiming();
 	playerEye->SetFieldOfView(nonAimFOV);
+	SetIsAiming(false);
+	FTimerHandle handle;
+	GetWorldTimerManager().SetTimer(handle, this, &APlayerCharacter::ReenableAILogic, 0.3f);
+
+	
 }
 
 void APlayerCharacter::OnUnitDeath(ACharacter_Base* characterToDie)
 {
 	DeathEvent();
 	Super::OnUnitDeath(characterToDie);
+}
+
+void APlayerCharacter::ReenableAILogic()
+{
+	GetGameMode()->ToggleEnemyLogic(true);
 }
 
 void APlayerCharacter::DisplayTargetInfo()
@@ -157,19 +181,23 @@ void APlayerCharacter::DisplayTargetInfo()
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FVector CameraEnd = cameraManager->GetCameraLocation() + cameraManager->GetActorForwardVector() * 5000;
 	FCollisionShape cyl = FCollisionShape::MakeSphere(100);
-	if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), CameraEnd, ECC_GameTraceChannel1))
+	FCollisionQueryParams CollisionParameters;
+	CollisionParameters.AddIgnoredActor(this);
+	if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), CameraEnd, ECC_GameTraceChannel2, CollisionParameters))
 	{
 		onDisplayTargetInfo.Broadcast(true);
 		ACharacter_Base* target = Cast<ACharacter_Base>(result.GetActor());
-
+		
 		if (target)
 		{
-			onUnitTarget.Broadcast(target, target->GetAttributeSet()->GetHealth(), target->GetAttributeSet()->GetMaxHealth());
+			onUnitTarget.Broadcast(target, target->GetAttributeSet()->GetHealth(), target->GetAttributeSet()->GetMaxHealth(), target->GetAttributeSet()->GetArmor(), target->GetAttributeSet()->GetMaxArmor());
 		}
 		else
 		{
 			ABaseEnemy* enemy = Cast<ABaseEnemy>(result.GetActor());
-			onEnemyUnitTarget.Broadcast(enemy, enemy->GetAttributeSet()->GetHealth(), enemy->GetAttributeSet()->GetMaxHealth());
+			int toKill, toBreak;
+			GetCurrentWeapon()->GetDamageInfo(enemy, toBreak, toKill);
+			onEnemyUnitTarget.Broadcast(enemy, enemy->GetAttributeSet()->GetHealth(), enemy->GetAttributeSet()->GetMaxHealth(), enemy->GetAttributeSet()->GetArmor(), enemy->GetAttributeSet()->GetMaxArmor(), toKill, toBreak);
 		}
 
 		

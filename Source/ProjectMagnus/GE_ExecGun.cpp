@@ -61,7 +61,7 @@ void UGE_ExecGun::Execute_Implementation(const FGameplayEffectCustomExecutionPar
 
 	if (OutArmor > 0)
 	{
-		OutHealth = HealthMagnitude - GunDamage / 2;
+		OutHealth = HealthMagnitude - GunDamage / 4;
 		ExecOutputs.AddOutputModifier(FGameplayModifierEvaluatedData(GetDamageCapture().HealthProperty, EGameplayModOp::Override, OutHealth));
 
 	}
