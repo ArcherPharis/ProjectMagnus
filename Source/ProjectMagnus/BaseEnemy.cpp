@@ -72,13 +72,16 @@ void ABaseEnemy::SetLogicEnabled(bool bIsLogicEnabled)
 		UBrainComponent* braincomp = AIC->GetBrainComponent();
 		if (braincomp)
 		{
-			if (bIsLogicEnabled)
+			if (GetAttributeSet()->GetHealth() > 0)
 			{
-				braincomp->StartLogic();
-			}
-			else
-			{
-				braincomp->StopLogic("Dead");
+				if (bIsLogicEnabled)
+				{
+					braincomp->StartLogic();
+				}
+				else
+				{
+					braincomp->StopLogic("Dead");
+				}
 			}
 
 		}
@@ -202,6 +205,7 @@ void ABaseEnemy::CharacterDied(const FOnAttributeChangeData& AttributeData)
 		//isDead = true; 
 		SetLogicEnabled(false);
 		SetActorEnableCollision(false);
+
 	}
 }
 

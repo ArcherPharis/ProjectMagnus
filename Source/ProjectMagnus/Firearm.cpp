@@ -240,6 +240,7 @@ void AFirearm::WeaponFire()
 		}
 		else
 		{
+			
 			return;
 		}
 	FHitResult result;
@@ -307,20 +308,19 @@ void AFirearm::WeaponFire()
 	{
 		if (GetInAttackEvent() && !killedSomething)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("got here"));
+			
 			if (engagedEnemy && engagedEnemy->GetAttributeSet()->GetHealth() > 0)
 			{
 
 				FTimerHandle delayFireHandle;
 				GetWorldTimerManager().SetTimer(delayFireHandle, this, &AFirearm::GoToRetaliate, 1.5f);
-
-
-
+				return;
 			}
 
 
 			
 		}
+		ReturnToInit();
 	}
 
 }
