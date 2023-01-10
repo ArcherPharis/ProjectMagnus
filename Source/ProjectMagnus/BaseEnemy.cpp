@@ -5,6 +5,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PMGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blueprint/UserWidget.h"
+#include "PRAIControllerBase.h"
 #include "AIController.h"
 #include "BrainComponent.h"
 #include "PRAbilitySystemComponent.h"
@@ -45,6 +47,7 @@ void ABaseEnemy::BeginPlay()
 	GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(GetAttributeSet()->GetHealthAttribute()).AddUObject(this, &ABaseEnemy::CharacterDied);
 	ApplyInitialEffect();
 	SpawnWeapon();
+	aiController = Cast<APRAIControllerBase>(GetOwner());
 	
 }
 
@@ -90,6 +93,26 @@ void ABaseEnemy::Attack()
 	}
 }
 
+void ABaseEnemy::BeginEnemyTurn()
+{
+	GetAttributeSet()->SetStamina(GetAttributeSet()->GetMaxStamina());
+	ApplyEffectToSelf(staminaDrainEffect);
+	GetCurrentWeapon()->SetCurrentAmmo(GetCurrentWeapon()->GetMaxAmmo());
+	aiController->SetMovingBehaviorTree();
+}
+
+void ABaseEnemy::EnemyTurnAttack()
+{
+	GetAbilitySystemComponent()->RemoveActiveEffectsWithTags(staminaEffectTag);
+	GetCurrentWeapon()->AttackAI();
+
+	if (GetCurrentWeapon()->IsWeaponEmpty())
+	{
+		EndTurn();
+	}
+
+}
+
 void ABaseEnemy::RotateTowardsAttackerAndRetaliate(AActor* attacker)
 {
 	AAIController* AIC = GetController<AAIController>();
@@ -97,6 +120,23 @@ void ABaseEnemy::RotateTowardsAttackerAndRetaliate(AActor* attacker)
 	{
 		AIC->SetFocus(attacker);
 	}
+}
+
+void ABaseEnemy::EndTurn()
+{
+	GetAbilitySystemComponent()->RemoveActiveEffectsWithTags(staminaEffectTag);
+	aiController->SetStandingBehaviorTree();
+	SetLogicEnabled(false);
+	gameMode->CycleThroughEnemyUnitTurns(this);
+}
+
+void ABaseEnemy::EndGame()
+{
+	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
+	gameMode->ToggleEnemyLogic(false);
+	endGameScreen = CreateWidget<UUserWidget>(cont, endGameScreenClass);
+	endGameScreen->AddToViewport();
+	UGameplayStatics::SetGamePaused(this, true);
 }
 
 void ABaseEnemy::SetKiller(AActor* killer)
@@ -109,11 +149,24 @@ void ABaseEnemy::SetKiller(AActor* killer)
 void ABaseEnemy::AwardKillerWithEXP()
 {
 	ACharacter_Base* awardee = Cast<ACharacter_Base>(Killer);
+	
 	if (awardee)
 	{
 		FGameplayEffectContextHandle handle;
+		if (gameMode->IsEnemyPhase())
+		{
+			FName name = awardee->GetUnitName();
+			FString string = "Unit has gained experience: " + name.ToString();
+			awardee->onDisplayTip.Broadcast(string);
+			awardee->ToggleMessageOffWTimer(3.5f);
+		}
 		awardee->GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(experienceWorthEffect.GetDefaultObject(), -1, handle);
 	}
+}
+
+void ABaseEnemy::SetKillerOnly(AActor* killer)
+{
+	Killer = killer;
 }
 
 void ABaseEnemy::SpawnWeapon()
@@ -146,11 +199,12 @@ void ABaseEnemy::CharacterDied(const FOnAttributeChangeData& AttributeData)
 	if (AttributeData.NewValue == 0)
 	{
 		GetMesh()->GetAnimInstance()->Montage_Play(onDeadMontage);
-		//isDead = true;
+		//isDead = true; 
 		SetLogicEnabled(false);
 		SetActorEnableCollision(false);
 	}
 }
+
 
 
 

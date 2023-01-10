@@ -20,11 +20,14 @@ class PROJECTMAGNUS_API UUnitListEntry : public UUserWidget, public IUserObjectL
 	GENERATED_BODY()
 
 public:
+
 	UFUNCTION()
 	void UnitButtonPressed();
 
 	UFUNCTION()
 	void SetUnitEntryAP(float value);
+
+	
 
 
 

@@ -3,13 +3,14 @@
 
 #include "BaseUnitClass.h"
 #include "Character_Base.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "PRGameplayAbilityBase.h"
+#include "BaseAbilityToolTip.h"
 #include "PRAttributeSet.h"
 
 // Sets default values for this component's properties
 UBaseUnitClass::UBaseUnitClass()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
@@ -24,8 +25,10 @@ void UBaseUnitClass::BeginPlay()
 	if (owner)
 	{
 		attributeSet = owner->GetAttributeSet();
+		GiveFieldAbility(owner);
+		GiveClassAbilityOne(owner);
 
-		
+
 	}
 
 	// ...
@@ -38,13 +41,32 @@ void UBaseUnitClass::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+
 	// ...
 }
+
+
 
 void UBaseUnitClass::GiveClassBonuses(ACharacter_Base* ownerCharacter)
 {
 	FGameplayEffectContextHandle handle;
 	ownerCharacter->GetAbilitySystemComponent()->ApplyGameplayEffectToSelf(classBonusEffect.GetDefaultObject(), -1, handle);
+}
+
+
+void UBaseUnitClass::GiveFieldAbility(ACharacter_Base* owner)
+{
+	FieldAbilitySpecHandle = owner->GetAbilitySystemComponent()->GiveAbility(FGameplayAbilitySpec(fieldAbility, 1, 6));
+	fieldAbilityObj = Cast<UPRGameplayAbilityBase>(owner->GetAbilitySystemComponent()->FindAbilitySpecFromHandle(FieldAbilitySpecHandle)->Ability);
+	owner->AddSkillToList(fieldAbilityObj);
+
+}
+
+void UBaseUnitClass::GiveClassAbilityOne(ACharacter_Base* owner)
+{
+	AbilityOneSpecHandle = owner->GetAbilitySystemComponent()->GiveAbility(classAbilityOne);
+	abilityOneObj = Cast<UPRGameplayAbilityBase>(owner->GetAbilitySystemComponent()->FindAbilitySpecFromHandle(AbilityOneSpecHandle)->Ability);
+	owner->AddSkillToList(abilityOneObj);
 }
 
 

@@ -7,8 +7,12 @@
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "PlayerHQ.h"
 #include "Kismet/GameplayStatics.h"
 #include "BaseEnemy.h"
+#include "PlayerCharacter.h"
+#include "PRAttributeSet.h"
+#include "PRAbilitySystemComponent.h"
 
 APRAIControllerBase::APRAIControllerBase()
 {
@@ -64,16 +68,48 @@ void APRAIControllerBase::BeginPlay()
 	Super::BeginPlay();
 	RunBehaviorTree(behviorTree);
 	ABaseEnemy* chara = Cast<ABaseEnemy>(GetPawn());
+	AActor* PHQ = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerHQ::StaticClass());
 	if (chara)
 	{
+		enemy = chara;
 		TeamID = FGenericTeamId(chara->GetGenericTeamId());
+		if (PHQ)
+		{
+			GetBlackboardComponent()->SetValueAsObject(PlayerHQKeyName, PHQ);
+		}
+	}
+	else
+	{
+		APlayerCharacter* pChara = Cast<APlayerCharacter>(GetPawn());
+		player = pChara;
+		TeamID = 1;
 	}
 }
 
 void APRAIControllerBase::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if (enemy)
+	{
+		GetBlackboardComponent()->SetValueAsFloat(StaminaPropertyKeyName, enemy->GetAttributeSet()->GetStamina());
+	}
+
 }
+
+void APRAIControllerBase::SetStandingBehaviorTree()
+{
+	RunBehaviorTree(behviorTree);
+
+}
+
+void APRAIControllerBase::SetMovingBehaviorTree()
+{
+	RunBehaviorTree(movingAIBehaviorTree);
+
+}
+
+
 
 void APRAIControllerBase::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
@@ -86,6 +122,19 @@ void APRAIControllerBase::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulu
 	else
 	{
 		const FActorPerceptionInfo* perceptionInfo = PerceptionComp->GetActorInfo(*Actor);
+
+		if (Actor == enemy)
+		{
+			if(enemy->GetAttributeSet()->GetHealth() == 0)
+			GetBlackboardComponent()->ClearValue(TargetBlackboardKeyName);
+		}
+
+		if (Actor == player)
+		{
+			if (player->GetAttributeSet()->GetHealth() == 0)
+				GetBlackboardComponent()->ClearValue(TargetBlackboardKeyName);
+		}
+
 
 		if (!perceptionInfo->HasAnyCurrentStimulus())
 		{

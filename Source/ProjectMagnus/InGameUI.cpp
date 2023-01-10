@@ -13,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PMGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "PMGameModeBase.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/CanvasPanel.h"
 #include "Components/HorizontalBox.h"
@@ -21,6 +22,7 @@
 #include "APValue.h"
 #include "Components/Button.h"
 #include "Components/Overlay.h"
+#include "StatBoxEntry.h"
 
 void UInGameUI::NativeConstruct()
 {
@@ -28,6 +30,29 @@ void UInGameUI::NativeConstruct()
 	stopFiringOverlayButton->bIsEnabled = false;
 	stopFiringOverlayButton->OnPressed.AddDynamic(this, &UInGameUI::StopFiring);
 	endUnitTurnButton->OnPressed.AddDynamic(this, &UInGameUI::ReturnToTacticsPawn);
+	returnToBattleButton->OnPressed.AddDynamic(this, &UInGameUI::ReturnToBattle);
+	endPlayerTurnButton->OnPressed.AddDynamic(this, &UInGameUI::BeginEnemyPhase);
+
+}
+
+void UInGameUI::HideHUD()
+{
+	UISwitcher->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UInGameUI::ShowHUD()
+{
+	UISwitcher->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UInGameUI::UpdateTacticsStatBox(APlayerCharacter* unit)
+{
+	statBox->ShowStatBox(unit);
+}
+
+void UInGameUI::HideTacticsStatBox()
+{
+	statBox->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UInGameUI::ShowVigorText(float oldValue, float newValue)
@@ -92,6 +117,8 @@ void UInGameUI::ShowLevelUpScreen(APlayerCharacter* unit, float oldV, float oldS
 void UInGameUI::ShowUnitMenu()
 {
 	UISwitcher->SetActiveWidget(unitMenuCanvas);
+	APMGameModeBase* gm = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(this));
+	unitMenuStatBox->ShowStatBox(gm->GetCurrentDeployedUnit());
 }
 
 void UInGameUI::DisplayTargetStats(ACharacter_Base* target, float health, float maxHealth, float armor, float maxArmor)
@@ -184,10 +211,12 @@ void UInGameUI::SetAPText(float newValue)
 	APCount->SetText(FText::FromString(FString::FromInt(newValue)));
 }
 
-void UInGameUI::UpdateRanges(float maxHealth, float maxStam, float exp, float mExp)
+void UInGameUI::UpdateRanges(float maxHealth, float maxStam, float exp, float mExp, float health, float stam)
 {
 	healthGauge->SetHealthRange(maxHealth);
 	staminaGauge->SetStamRange(maxStam);
+	healthGauge->SetValue(health, maxHealth);
+	staminaGauge->SetValue(stam, maxStam);
 	experienceGauge->SetValue(exp, mExp);
 }
 
@@ -226,10 +255,28 @@ void UInGameUI::StopFiring()
 	stopFiringOverlayButton->bIsEnabled = false;
 }
 
+void UInGameUI::ReturnToBattle()
+{
+	UISwitcher->SetActiveWidget(inGameCanvas);
+	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
+	cont->SetInputMode(FInputModeGameOnly());
+	cont->bShowMouseCursor = false;
+	UGameplayStatics::SetGamePaused(this, false);
+}
+
 void UInGameUI::ReturnToTacticsPawn()
 {
 	APMGameModeBase* gm = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(this));
 	gm->ReturnToTacticsPawn();
+}
+
+void UInGameUI::BeginEnemyPhase()
+{
+	APMGameModeBase* gamemode = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(this));
+	gamemode->BeginEnemyTurn();
+	HideHUD();
+	//would like to set up a new canvas that just plays  animations via events. 
+	//ENEMY PHASE and PLAYER PHASE banners.
 }
 
 void UInGameUI::SetTipText(FString text)

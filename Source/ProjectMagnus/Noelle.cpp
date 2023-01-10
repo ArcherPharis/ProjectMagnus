@@ -13,6 +13,10 @@ ANoelle::ANoelle()
 void ANoelle::BeginPlay()
 {
 	Super::BeginPlay();
-	GiveAbility(chaplainClass->GetClassFieldAbility(), 6, false);
 	chaplainClass->GiveClassBonuses(this);
+}
+
+UBaseUnitClass* ANoelle::GetBaseUnitClass()
+{
+	return chaplainClass;
 }

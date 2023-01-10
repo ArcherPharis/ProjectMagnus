@@ -9,12 +9,16 @@
 #include "PMGameModeBase.h"
 #include "PRAbilitySystemComponent.h"
 #include "PRGameplayAbilityBase.h"
+#include "Interacter.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "InteractableComponent.h"
 #include "PRAttributeSet.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TacticalGear.h"
 #include "SupportGear.h"
+#include "AIController.h"
+#include "BrainComponent.h"
 
 
 // Sets default values
@@ -24,7 +28,14 @@ ACharacter_Base::ACharacter_Base()
 	PrimaryActorTick.bCanEverTick = true;
 	abilitySystemComp = CreateDefaultSubobject<UPRAbilitySystemComponent>(TEXT("Ability System Comp"));
 	attributeSet = CreateDefaultSubobject<UPRAttributeSet>(TEXT("Attribute Set"));
+	interacter = CreateDefaultSubobject<UInteracter>(TEXT("Interacter"));
+	interacter->SetupAttachment(GetRootComponent());
 
+}
+
+void ACharacter_Base::ToggleUseControlRotationYaw(bool usesYaw)
+{
+	bUseControllerRotationYaw = usesYaw;
 }
 
 
@@ -32,11 +43,33 @@ ACharacter_Base::ACharacter_Base()
 void ACharacter_Base::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	abilitySystemComp->InitAbilityActorInfo(this, this);}
+	abilitySystemComp->InitAbilityActorInfo(this, this);
+}
 
 void ACharacter_Base::SetIsAiming(bool value)
 {
 	bIsAiming = value;
+}
+
+void ACharacter_Base::SetLogicEnabled(bool bIsLogicEnabled)
+{
+	AAIController* AIC = GetController<AAIController>();
+	if (AIC)
+	{
+		UBrainComponent* braincomp = AIC->GetBrainComponent();
+		if (braincomp)
+		{
+			if (bIsLogicEnabled)
+			{
+				braincomp->StartLogic();
+			}
+			else
+			{
+				braincomp->StopLogic("Dead");
+			}
+
+		}
+	}
 }
 
 void ACharacter_Base::ToggleInput(bool enableInput)
@@ -54,6 +87,22 @@ void ACharacter_Base::ToggleInput(bool enableInput)
 	}
 }
 
+void ACharacter_Base::ToggleMessageOffWTimer(float time)
+{
+	FTimerHandle turnOffTipHandle;
+	GetWorldTimerManager().SetTimer(turnOffTipHandle, this, &ACharacter_Base::TurnOffMessage, time);
+}
+
+void ACharacter_Base::TurnOffMessage()
+{
+	onDisplayTip.Broadcast("");
+}
+
+void ACharacter_Base::SetIsUsingGear(bool newValue)
+{
+	isUsingAbilityGear = newValue;
+}
+
 // Called when the game starts or when spawned
 void ACharacter_Base::BeginPlay()
 {
@@ -66,6 +115,9 @@ void ACharacter_Base::BeginPlay()
 	{
 		GiveAbility(abilityKeyValuePair.Value, static_cast<int>(abilityKeyValuePair.Key), true);
 	}
+
+	aiController = Cast<AAIController>(GetController());
+
 	
 }
 
@@ -100,12 +152,23 @@ void ACharacter_Base::PlayGunAttackClip()
 	UGameplayStatics::PlaySoundAtLocation(this, GunAttackClip, GetActorLocation(), 1.f);
 }
 
+void ACharacter_Base::AIControllerRepossess()
+{
+	//aiController->Possess(this);
+}
+
+
 // Called to bind functionality to input
 void ACharacter_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 
+}
+
+void ACharacter_Base::ReturnToTacActor()
+{
+	gameMode->ReturnToTacticsPawn();
 }
 
 void ACharacter_Base::OnUnitDeath(ACharacter_Base* characterToDie)
@@ -152,9 +215,19 @@ void ACharacter_Base::SetSprinting(bool value)
 	isSprinting = value;
 }
 
+UBaseUnitClass* ACharacter_Base::GetBaseUnitClass()
+{
+	return nullptr;
+}
+
 UAbilitySystemComponent* ACharacter_Base::GetAbilitySystemComponent() const
 {
 	return abilitySystemComp;
+}
+
+void ACharacter_Base::AddSkillToList(UPRGameplayAbilityBase* ability)
+{
+	currentSkills.Add(ability);
 }
 
 void ACharacter_Base::GetArmorValue(float& armor, float& maxArmor)
@@ -184,6 +257,18 @@ void ACharacter_Base::GiveAbility(const TSubclassOf<class UGameplayAbility>& new
 	}
 }
 
+void ACharacter_Base::UseSkillsOnDeploy()
+{
+	for (UPRGameplayAbilityBase* skill  : currentSkills)
+	{
+		if (skill->IsASkillUsedOnDeploy())
+		{
+			GetAbilitySystemComponent()->TryActivateAbilityByClass(skill->GetClass());
+		}
+	}
+
+}
+
 void ACharacter_Base::DrainStamina()
 {
 	if (isSprinting) return;
@@ -205,17 +290,32 @@ void ACharacter_Base::DrainStamina()
 void ACharacter_Base::CharacterDied(const FOnAttributeChangeData& AttributeData)
 {
 	
-
 	if (AttributeData.NewValue == 0)
 	{
-		//GetMesh()->GetAnimInstance()->Montage_Play(onDeadMontage);
 		isDead = true;
+		TeamID = 5;
+		SetLogicEnabled(false);
+		SetActorEnableCollision(false);
+		float time = GetMesh()->GetAnimInstance()->Montage_Play(onDeadMontage);
+		if (GetGameMode()->IsPlayerPhase())
+		{
+			APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
+			cont->SetInputMode(FInputModeUIOnly());
+			FTimerHandle returnToTacPawnHandle;
+			GetWorldTimerManager().SetTimer(returnToTacPawnHandle, this, &ACharacter_Base::ReturnToTacActor, time + 2.5);
+		}
+		else if (GetGameMode()->IsEnemyPhase())
+		{
+			gameMode->AddDownedUnits(this);
+		}
+
+
 		
-		//SetActorEnableCollision(false);
 	}
+
 }
 
-void ACharacter_Base::Attack()
+void ACharacter_Base::PlayerAttack()
 {
 	equippedWeapon->bFireButtonPressed = true;
 
@@ -242,6 +342,15 @@ void ACharacter_Base::StopFiring()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Trying to stop firing"));
 	GetCurrentWeapon()->SetPlayerWantsToStopFiring(true);
+}
+
+void ACharacter_Base::Interact()
+{
+
+	if (interacter->GetInteractable())
+	{
+		interacter->InitiateInteract();
+	}
 }
 
 void ACharacter_Base::LevelUp()
@@ -341,6 +450,19 @@ void ACharacter_Base::StopAiming()
 	
 }
 
+void ACharacter_Base::Attack()
+{
+	if (equippedWeapon != nullptr)
+	{
+		
+		equippedWeapon->AttackAI();
+	}
+}
+
+void ACharacter_Base::EnemyTurnAttack()
+{
+}
+
 void ACharacter_Base::Sprint()
 {
 	if (!bIsAiming)
@@ -353,6 +475,7 @@ void ACharacter_Base::StopSprint()
 	if (!bIsAiming)
 	onStoppedSprinting.Broadcast();
 	GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
+	
 
 }
 

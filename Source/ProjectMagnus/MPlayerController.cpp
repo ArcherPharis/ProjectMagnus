@@ -75,17 +75,25 @@ void AMPlayerController::HealthUpdated(const FOnAttributeChangeData& AttributeDa
 
 void AMPlayerController::StaminaUpdated(const FOnAttributeChangeData& AttributeData)
 {
+	if (playerCharacter)
 	inGameUI->UpdateStamina(AttributeData.NewValue, playerCharacter->GetAttributeSet()->GetMaxStamina());
 }
 
 void AMPlayerController::APUpdated(const FOnAttributeChangeData& AttributeData)
 {
+	if (playerCharacter)
 	inGameUI->SetAPText(AttributeData.NewValue);
 }
 
 void AMPlayerController::ExperienceUpdate(const FOnAttributeChangeData& AttributeData)
 {
+	if (playerCharacter)
 	inGameUI->UpdateExperience(AttributeData.NewValue, playerCharacter->GetAttributeSet()->GetMaxExperiencePoints());
+}
+
+void AMPlayerController::DisplayTacticsStatBox(APlayerCharacter* charaToShow)
+{
+	inGameUI->UpdateTacticsStatBox(charaToShow);
 }
 
 void AMPlayerController::FiringEventStop()

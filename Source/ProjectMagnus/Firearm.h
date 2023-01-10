@@ -45,6 +45,7 @@ public:
 	bool TryStopFiring();
 	virtual void ReloadWeapon() override;
 	virtual void Reload() override;
+	
 
 	
 	

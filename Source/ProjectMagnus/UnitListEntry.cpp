@@ -5,8 +5,11 @@
 #include "Components/TextBlock.h"
 #include "PlayerCharacter.h"
 #include "Components/Image.h"
+#include "Kismet/GameplayStatics.h"
+#include "MPlayerController.h"
 #include "Components/Button.h"
 #include "PRAttributeSet.h"
+#include "StatBoxEntry.h"
 
 
 
@@ -23,12 +26,17 @@ void UUnitListEntry::NativeOnListItemObjectSet(UObject* ListItemObject)
 
 void UUnitListEntry::UnitButtonPressed()
 {
+
+	//when this button is pressed, we let the controller know that we did and send it this
+	//character tied to this entry. the controller then shows the statbox with the updated info.
+
+
+	AMPlayerController* cont = Cast<AMPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	APlayerCharacter* character = GetListItem<APlayerCharacter>();
-	if (character->CharacterCanAct())
-	{
-		character->onUnitDeployed.Broadcast(character);
-		character->ChangeAP(-1);
-	}
+	cont->DisplayTacticsStatBox(character);
+	
+	
+
 }
 
 void UUnitListEntry::APUpdated(const FOnAttributeChangeData& AttributeData)

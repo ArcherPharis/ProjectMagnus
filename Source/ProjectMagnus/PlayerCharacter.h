@@ -11,7 +11,7 @@ class ABaseEnemy;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUnitGiven, APlayerCharacter*, unit);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FOnUnitTarget, ACharacter_Base*, target, float, currentHealth, float, maxHealth, float, currentArmor, float, maxArmor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SevenParams(FOnEnemyUnitTarget, ABaseEnemy*, target, float, currentHealth, float, maxHealth, float, currentArmor, float, maxArmor, int, toKill, int, toBreak);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnUpdateHealthStamRange, float, maxHealth, float, maxStam,float, exp, float, maxExp);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnUpdateHealthStamRange, float, maxHealth, float, maxStam, float, exp, float, maxExp, float, health, float, stam);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClickedDeploy, APlayerCharacter*, charaToDeploy);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDisplayTargetInfo, bool, display);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SevenParams(FOnInitiateLevelUp, APlayerCharacter*, unitData, float, oldHealth, float, oldStam, float, oldStr, float, oldEnd, float, oldAgi, float, oldDex);
@@ -51,6 +51,10 @@ public:
 	void DeathEvent();
 
 
+
+	UPROPERTY(EditDefaultsOnly, Category = "UnitPersonalInfo")
+	FName unitClassName = "Class Name";
+
 	void OnDeployed();
 	virtual void LevelUp() override;
 
@@ -59,10 +63,17 @@ public:
 	virtual void StopAiming() override;
 	virtual void OnUnitDeath(class ACharacter_Base* characterToDie) override;
 
+	FORCEINLINE FName GetPlayerUnitClassName() const { return unitClassName; }
+
+protected:
+	void SetClassName(FName name);
+
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Camera")
 	class UCameraComponent* playerEye;
+
+	virtual void CharacterDied(const FOnAttributeChangeData& AttributeData) override;
 
 	void ReenableAILogic();
 	void DisplayTargetInfo();
@@ -146,9 +157,10 @@ private:
 
 	void OpenUnitMenu();
 	
-	virtual void Attack() override;
+	virtual void PlayerAttack() override;
 	virtual void StopAttack() override;
 	bool bHasAlreadyStartedMoving;
+	
 
 
 };

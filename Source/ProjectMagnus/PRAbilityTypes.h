@@ -14,5 +14,5 @@ enum class EPRAbilityInputID : uint8
 	UseItem,
 	Reload,
 	UseSupport,
-	FieldAbility
+	FieldAbility,
 };

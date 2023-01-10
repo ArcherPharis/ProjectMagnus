@@ -37,11 +37,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::LookUp);
 	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::LookRight);
+	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this, &ACharacter_Base::Interact);
 	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Pressed, this, &ACharacter_Base::Sprint);
 	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Released, this, &ACharacter_Base::StopSprint);
 	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &APlayerCharacter::Aim);
 	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &APlayerCharacter::StopAiming);
-	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &APlayerCharacter::Attack);
+	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &APlayerCharacter::PlayerAttack);
 	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Released, this, &APlayerCharacter::StopAttack);
 	PlayerInputComponent->BindAction("OpenUnitMenu", EInputEvent::IE_Pressed, this, &APlayerCharacter::OpenUnitMenu);
 	GetAbilitySystemComponent()->BindAbilityActivationToInputComponent(PlayerInputComponent, FGameplayAbilityInputBinds("Confirm",
@@ -65,11 +66,19 @@ void APlayerCharacter::BeginPlay()
 	
 }
 
+
+
 void APlayerCharacter::OnDeployed()
 {
 	onWeaponEquipped.Broadcast(GetCurrentWeapon());
 	onAPGauge.Broadcast(GetAttributeSet()->GetActionPoints());
-	onUpdateHealthStamRange.Broadcast(GetAttributeSet()->GetMaxHealth(), GetAttributeSet()->GetMaxStamina(), GetAttributeSet()->GetExperiencePoints(), GetAttributeSet()->GetMaxExperiencePoints());
+	onUpdateHealthStamRange.Broadcast(GetAttributeSet()->GetMaxHealth(), GetAttributeSet()->GetMaxStamina(), GetAttributeSet()->GetExperiencePoints(), GetAttributeSet()->GetMaxExperiencePoints(), GetAttributeSet()->GetHealth(), GetAttributeSet()->GetStamina());
+	ToggleUseControlRotationYaw(false);
+	GetGameMode()->SetCurrentDeployedPlayerUnit(this);
+	GetGameMode()->ToggleEnemyLogic(true);
+	GetGameMode()->TogglePlayerLogic(false);
+	UseSkillsOnDeploy();
+
 }
 
 void APlayerCharacter::LevelUp()
@@ -88,7 +97,7 @@ void APlayerCharacter::LevelUp()
 void APlayerCharacter::MoveForward(float value)
 {
 
-	if (IsCharacterOutOfStamina() || GetIsAiming())
+	if (IsCharacterOutOfStamina() || GetIsAiming() || GetIsDead() || GetIsUsingGear())
 	{
 		StopSprint();
 		return;
@@ -100,7 +109,7 @@ void APlayerCharacter::MoveForward(float value)
 void APlayerCharacter::MoveRight(float value)
 {
 
-	if (IsCharacterOutOfStamina() || GetIsAiming())
+	if (IsCharacterOutOfStamina() || GetIsAiming() || GetIsDead() || GetIsUsingGear())
 	{
 		StopSprint();
 		return;
@@ -135,6 +144,7 @@ void APlayerCharacter::Aim()
 	Super::Aim();
 	playerEye->SetFieldOfView(aimFOV);
 	GetGameMode()->ToggleEnemyLogic(false);
+	GetGameMode()->TogglePlayerLogic(false);
 	SetIsAiming(true);
 	
 
@@ -142,7 +152,6 @@ void APlayerCharacter::Aim()
 
 void APlayerCharacter::OpenUnitMenu()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Opening Unit Menu..."));
 	onShowUnitMenu.Broadcast();
 	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
 	cont->SetInputMode(FInputModeUIOnly());
@@ -168,9 +177,20 @@ void APlayerCharacter::OnUnitDeath(ACharacter_Base* characterToDie)
 	Super::OnUnitDeath(characterToDie);
 }
 
+void APlayerCharacter::SetClassName(FName name)
+{
+	unitClassName = name;
+}
+
+void APlayerCharacter::CharacterDied(const FOnAttributeChangeData& AttributeData)
+{
+	Super::CharacterDied(AttributeData);
+}
+
 void APlayerCharacter::ReenableAILogic()
 {
 	GetGameMode()->ToggleEnemyLogic(true);
+	GetGameMode()->TogglePlayerLogic(true);
 }
 
 void APlayerCharacter::DisplayTargetInfo()
@@ -319,9 +339,9 @@ void APlayerCharacter::GenerateDexterityLevelUp(float& oldD)
 	}
 }
 
-void APlayerCharacter::Attack()
+void APlayerCharacter::PlayerAttack()
 {
-	Super::Attack();
+	Super::PlayerAttack();
 }
 
 void APlayerCharacter::StopAttack()

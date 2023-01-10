@@ -30,8 +30,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "GameplayAbilityBase")
 	FORCEINLINE UTexture2D* GetIcon() const { return AbilityIcon; }
+	FORCEINLINE FText GetSkillName() const { return skillName; }
+	FORCEINLINE FText GetSkillDesc() const { return skillDescription; }
+	FORCEINLINE TSubclassOf<class UBaseAbilityToolTip> GetToolTipWidget() const { return toolTipWidget; }
+	FORCEINLINE UBaseAbilityToolTip* GetToolTip() const { return toolTip; }
+	void SetToolTip(UBaseAbilityToolTip* abilityTooltip);
 
 	class ACharacter_Base* AvatarCharacterBase;
+
+	bool IsASkillUsedOnDeploy() const{ return useSkillOnDeploy; }
 
 
 protected:
@@ -44,7 +51,23 @@ protected:
 
 private:
 	
+	
 
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbilityBase")
 	UTexture2D* AbilityIcon;
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbilityBase")
+	FText skillName;
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbilityBase", meta = (MultiLine = true))
+	FText skillDescription;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbilityBase")
+	TSubclassOf<class UBaseAbilityToolTip> toolTipWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbilityBase")
+	bool useSkillOnDeploy = false;
+
+	UBaseAbilityToolTip* toolTip;
 };

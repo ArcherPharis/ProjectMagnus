@@ -21,6 +21,8 @@ public:
 
 private:
 
+	virtual class UBaseUnitClass* GetBaseUnitClass() override;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Class")
 	class UChaplainClass* chaplainClass;
 	

@@ -5,6 +5,7 @@
 #include "PlayerCharacter.h"
 #include "PRAttributeSet.h"
 #include "Kismet/GameplayStatics.h"
+#include "PRAIControllerBase.h"
 #include "MPlayerController.h"
 #include "BaseEnemy.h"
 #include "InGameUI.h"
@@ -30,6 +31,14 @@ void APMGameModeBase::GetAllSpawnLocations()
 		currentEnemyUnits.Add(enemy);
 	}
 
+	for (ABaseEnemy* e : currentEnemyUnits)
+	{
+		if (e->ActorHasTag(TEXT("MovingEnemyUnit")))
+		{
+			movingEnemyUnits.Add(e);
+		}
+	}
+
 	TacticsPawn = Cast<APawn>(UGameplayStatics::GetActorOfClass(GetWorld(), ATacticsPawn::StaticClass()));
 	
 }
@@ -39,12 +48,84 @@ void APMGameModeBase::PossessTacticsActor()
 	APlayerController* controller = UGameplayStatics::GetPlayerController(this, 0);
 	controller->Possess(TacticsPawn);
 	ui->EnableTacticsCanvas();
+	TogglePlayerLogic(false);
+	currentlyDeployedPlayerUnit->AIControllerRepossess();
+	currentlyDeployedPlayerUnit = nullptr;
+}
+
+void APMGameModeBase::CycleThroughEnemyUnitTurns(ABaseEnemy* enemyDoneWithTurn)
+{
+	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
+	enemyDoneWithTurn->GetAIController()->SetStandingBehaviorTree();
+	enemyDoneWithTurn->SetLogicEnabled(false);
+	movingEnemyUnits.Remove(enemyDoneWithTurn);
+
+	//here we check if there are any dead ally units, if there is, play events and stuff for
+	//them before returning back here.
+
+	if (downedPlayerUnits.Num() > 0)
+	{
+		
+		cont->SetViewTargetWithBlend(downedPlayerUnits[0]);
+		downedPlayerUnits.RemoveAt(0);
+		FTimerHandle playerHandle;
+		if (movingEnemyUnits.Num() > 0)
+		{
+			GetWorldTimerManager().SetTimer(playerHandle, this, &APMGameModeBase::BeginEnemyTurn, 3.5f);
+		}
+		else
+		{
+			cont->SetInputMode(FInputModeUIOnly());
+			cont->SetViewTargetWithBlend(TacticsPawn, 0.5f);
+			ui->ShowHUD();
+			EndEnemyTurn();
+			currentPhase = Phase::PlayerPhase;
+		}
+		return;
+	}
+
+	if (movingEnemyUnits.Num() > 0)
+	{
+		cont->SetViewTargetWithBlend(TacticsPawn, 1.5f);
+		GetWorldTimerManager().SetTimer(toNextEnemyTurnHandle, this, &APMGameModeBase::GoToNextEnemy, 3.5f);
+	}
+	else
+	{
+		cont->SetInputMode(FInputModeUIOnly());
+		cont->SetViewTargetWithBlend(TacticsPawn, 0.5f);
+		ui->HideTacticsStatBox();
+		ui->ShowHUD();
+		EndEnemyTurn();
+		
+		currentPhase = Phase::PlayerPhase;
+	}
+}
+
+void APMGameModeBase::BeginEnemyTurn()
+{
+	currentPhase = Phase::EnemyPhase;
+	for (APlayerCharacter* playa : currentPlayerUnits)
+	{
+		playa->AIControllerRepossess();
+	}
+
+	for (APlayerCharacter* p : currentPlayerUnits)
+	{
+		p->GetAttributeSet()->SetActionPoints(p->GetAttributeSet()->GetActionPoints() + 1);
+	}
+
+	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
+	TogglePlayerLogic(true);
+	cont->SetInputMode(FInputModeUIOnly());
+	cont->SetViewTargetWithBlend(movingEnemyUnits[0], 0.5f);
+	movingEnemyUnits[0]->BeginEnemyTurn();
+
+
 }
 
 void APMGameModeBase::ShowDownedDeadUnits()
 {
 	APlayerController* controller =  UGameplayStatics::GetPlayerController(this, 0);
-	
 
 	if (CharacterToReturnTo && CharacterToReturnTo->GetAttributeSet()->GetExperiencePoints() == 100)
 	{
@@ -53,10 +134,9 @@ void APMGameModeBase::ShowDownedDeadUnits()
 		GetWorldTimerManager().ClearTimer(killedOrDownedUnitHandle);
 		CharacterToReturnTo->GetAttributeSet()->SetExperiencePoints(0);
 		CharacterToReturnTo->LevelUp();
-		//show level up stuff here. hide battle UI, etc.
 		GetWorldTimerManager().SetTimer(killedOrDownedUnitHandle, this, &APMGameModeBase::ShowDownedDeadUnits, 8.f, false);
 		return;
-		
+
 	}
 
 
@@ -72,17 +152,67 @@ void APMGameModeBase::ShowDownedDeadUnits()
 
 		RemoveEnemyFromList(killedEnemyUnits[0]);
 		killedEnemyUnits.RemoveAt(0);
-		
+
 
 	}
 	else
 	{
-		AMPlayerController* mCont = Cast<AMPlayerController>(controller);
-		CharacterToReturnTo->AfterUnitDeath();
-		mCont->SetFieldCanvas();
+
+		if(IsPlayerPhase())
+		{ 
+			AMPlayerController* mCont = Cast<AMPlayerController>(controller);
+			CharacterToReturnTo->AfterUnitDeath();
+			mCont->SetFieldCanvas();
+		}
+		else if (IsEnemyPhase())
+		{
+			BeginEnemyTurn();
+		}
 	}
+	
+
+}
+
+void APMGameModeBase::GoToNextEnemy()
+{
+	BeginEnemyTurn();
+
+}
+
+void APMGameModeBase::EndEnemyTurn()
+{
+	for (ABaseEnemy* e : currentEnemyUnits)
+	{
+		if (e->ActorHasTag(TEXT("MovingEnemyUnit")))
+		{
+			movingEnemyUnits.Add(e);
+		}
+	}
+	TogglePlayerLogic(false);
+
+	for (APlayerCharacter* p : currentPlayerUnits)
+	{
+		p->GetAttributeSet()->SetActionPoints(p->GetAttributeSet()->GetActionPoints() + 1);
+	}
+}
 
 
+bool APMGameModeBase::IsPlayerPhase()
+{
+	if (currentPhase == Phase::PlayerPhase)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool APMGameModeBase::IsEnemyPhase()
+{
+	if (currentPhase == Phase::EnemyPhase)
+	{
+		return true;
+	}
+	return false;
 }
 
 void APMGameModeBase::SpawnInitialUnits(UInGameUI* aUI)
@@ -126,11 +256,21 @@ void APMGameModeBase::SpawnInitialUnits(UInGameUI* aUI)
 	//todo, we also put up each initial ui on the list
 }
 
+void APMGameModeBase::SetCurrentDeployedPlayerUnit(APlayerCharacter* deployed)
+{
+	currentlyDeployedPlayerUnit = deployed;
+}
+
 void APMGameModeBase::AddDownedUnits(ACharacter_Base* downedUnit)
 {
 	downedPlayerUnits.Add(downedUnit);
 
 	
+}
+
+void APMGameModeBase::AddDeadEnemyUnit(ABaseEnemy* killedUnit)
+{
+	killedEnemyUnits.Add(killedUnit);
 }
 
 void APMGameModeBase::AddKilledUnits(ABaseEnemy* killedUnit)
@@ -148,10 +288,14 @@ void APMGameModeBase::ReturnToTacticsPawn()
 	controller->SetInputMode(FInputModeUIOnly());
 	controller->bShowMouseCursor = true;
 	UGameplayStatics::SetGamePaused(this, false);
+	ui->HideTacticsStatBox();
 	controller->SetViewTargetWithBlend(TacticsPawn, 0.5f);
 	FTimerHandle handle;
 	GetWorldTimerManager().SetTimer(handle, this, &APMGameModeBase::PossessTacticsActor, 0.5f);
-		
+	ToggleEnemyLogic(false);
+	TogglePlayerLogic(false);
+	currentlyDeployedPlayerUnit->ToggleUseControlRotationYaw(true);
+
 }
 
 void APMGameModeBase::ToggleEnemyLogic(bool bStopLogic)
@@ -162,6 +306,17 @@ void APMGameModeBase::ToggleEnemyLogic(bool bStopLogic)
 		for (ABaseEnemy* enemy : currentEnemyUnits)
 		{
 			enemy->SetLogicEnabled(bStopLogic);
+		}
+	}
+}
+
+void APMGameModeBase::TogglePlayerLogic(bool bStopLogic)
+{
+	if (currentPlayerUnits.Num() > 0)
+	{
+		for (APlayerCharacter* playa : currentPlayerUnits)
+		{
+			playa->SetLogicEnabled(bStopLogic);
 		}
 	}
 }

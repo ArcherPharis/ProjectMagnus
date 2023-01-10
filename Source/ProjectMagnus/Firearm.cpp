@@ -106,15 +106,30 @@ void AFirearm::Reload()
 		float reloadDuration = enemy->GetMesh()->GetAnimInstance()->Montage_Play(ReloadMontage);
 		GetWorldTimerManager().SetTimer(reloadHandle, this, &AFirearm::ReloadTimePoint, reloadDuration, false);
 	}
+	else
+	{
+		float reloadDuration = GetWeaponOwner()->GetMesh()->GetAnimInstance()->Montage_Play(ReloadMontage);
+		GetWorldTimerManager().SetTimer(reloadHandle, this, &AFirearm::ReloadTimePoint, reloadDuration, false);
+	}
 
 
 	
 }
 
+
+
 bool AFirearm::IsReloading()
 {
 	ABaseEnemy* enemy = Cast<ABaseEnemy>(GetOwner());
-	return enemy->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontage);
+	if (enemy)
+	{
+		return enemy->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontage);
+	}
+	else
+	{
+		return GetWeaponOwner()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontage);
+	}
+	
 }
 
 void AFirearm::ReloadTimePoint()
@@ -125,7 +140,6 @@ void AFirearm::ReloadTimePoint()
 void AFirearm::DecrementAmmo()
 {
 	ChangeCurrentAmmo(-1);
-	UE_LOG(LogTemp, Warning, TEXT("%i"), GetCurrentAmmo());
 	if (GetCurrentAmmo() == 0)
 	{
 		Reload();
@@ -171,6 +185,8 @@ void AFirearm::AttackPointAnimNotify()
 
 	Super::AttackPointAnimNotify();
 
+	UE_LOG(LogTemp, Warning, TEXT("event fired"));
+
 	FHitResult result;
 	FVector ownerViewLoc;
 	FRotator ownerViewRot;
@@ -185,6 +201,20 @@ void AFirearm::AttackPointAnimNotify()
 		{
 			FGameplayEffectContextHandle handle;
 			ASC->ApplyGameplayEffectToSelf(damageEffect.GetDefaultObject(), -1, handle);
+			
+			ABaseEnemy* damagableEnemy = Cast<ABaseEnemy>(result.GetActor());
+			if (engagedEnemy == nullptr)
+			{
+				engagedEnemy = damagableEnemy;
+			}
+
+			if (damagableEnemy && damagableEnemy->GetAttributeSet()->GetHealth() == 0)
+			{
+				killedSomething = true;
+				damagableEnemy->SetKiller(GetWeaponOwner());
+				UE_LOG(LogTemp, Warning, TEXT("Gun killed enemy"));
+			}
+
 		}
 		
 	}
@@ -237,7 +267,7 @@ void AFirearm::WeaponFire()
 			if (damagableChara && damagableChara->GetAttributeSet()->GetHealth() == 0)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Gun killed something"));
-				killedSomething = true;
+				//killedSomething = true;
 				//killedEnemies.Add(damagableChara);
 				//GetWorldTimerManager().SetTimer(GunKilledHandle, this, &AFirearm::GunKilledTarget, 1.f, false);
 				
@@ -254,14 +284,17 @@ void AFirearm::WeaponFire()
 				{
 					killedSomething = true;
 					damagableEnemy->SetKiller(GetWeaponOwner());
-					UE_LOG(LogTemp, Warning, TEXT("Gun killed enemy"));
+					
+				}
+				else
+				{
+					killedSomething = false;
 				}
 
 			}
 		}
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
 		SpawnImpactEffects(result);
-		//DrawDebugPoint(GetWorld(), result.Location, 10, FColor::Red, true, 2.f);
 
 	}
 	PlayWeaponSound(firePoint);
@@ -274,8 +307,8 @@ void AFirearm::WeaponFire()
 	{
 		if (GetInAttackEvent() && !killedSomething)
 		{
-
-			if (engagedEnemy->GetAttributeSet()->GetHealth() > 0)
+			UE_LOG(LogTemp, Warning, TEXT("got here"));
+			if (engagedEnemy && engagedEnemy->GetAttributeSet()->GetHealth() > 0)
 			{
 
 				FTimerHandle delayFireHandle;
@@ -316,6 +349,7 @@ void AFirearm::GoToRetaliate()
 
 void AFirearm::BeginAttack()
 {
+	engagedEnemy = nullptr;
 	WeaponFire();
 }
 

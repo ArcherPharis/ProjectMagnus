@@ -25,6 +25,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "ControllerEvent")
 	void OnPossessEffect();
 
+	void DisplayTacticsStatBox(class APlayerCharacter* charaToShow);
+
 private:
 
 	
@@ -40,12 +42,14 @@ private:
 
 	void ExperienceUpdate(const FOnAttributeChangeData& AttributeData);
 
+	
+
 	UFUNCTION()
 	void FiringEventStop();
 
 	UInGameUI* inGameUI;
 
-	class APlayerCharacter* playerCharacter;
+	APlayerCharacter* playerCharacter;
 
 	class APMGameModeBase* gameMode;
 	

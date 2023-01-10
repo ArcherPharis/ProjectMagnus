@@ -32,6 +32,16 @@ void AWeapon::SetInAttackEvent(bool value)
 	inAttackEvent = value;
 }
 
+bool AWeapon::IsWeaponEmpty()
+{
+	if (GetCurrentAmmo() == 0)
+	{
+		return true;
+	}
+	return false;
+	
+}
+
 
 
 // Called when the game starts or when spawned

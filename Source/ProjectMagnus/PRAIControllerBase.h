@@ -27,6 +27,9 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
+	void SetStandingBehaviorTree();
+	void SetMovingBehaviorTree();
+
 private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "AI")
 	class UAIPerceptionComponent* PerceptionComp;
@@ -38,14 +41,29 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	FName TargetBlackboardKeyName;
 
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	FName PlayerHQKeyName;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	FName StaminaPropertyKeyName;
+
+	//virtual void OnPossess(APawn* InPawn) override;
+
 	UFUNCTION()
 	void OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 
 	UPROPERTY(EditAnywhere, Category = "AI")
 	UBehaviorTree* behviorTree;
 
-	AActor* SensedActor;
+	UPROPERTY(EditAnywhere, Category = "AI")
+	UBehaviorTree* movingAIBehaviorTree;
 
+	AActor* SensedActor;
+	class ABaseEnemy* enemy;
+	class APlayerCharacter* player;
+
+
+	bool isEnemy = true;
 
 	virtual FGenericTeamId GetGenericTeamId() const override { return TeamID; }
 	

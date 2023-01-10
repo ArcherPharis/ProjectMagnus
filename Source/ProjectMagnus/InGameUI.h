@@ -23,6 +23,12 @@ public:
 
 	FOnButtonPressed onButtonPressed;
 
+	void HideHUD();
+	void ShowHUD();
+
+	void UpdateTacticsStatBox(class APlayerCharacter* unit);
+	void HideTacticsStatBox();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "LevelUpSequence")
 	void LevelUpEvent(float oldHValue, float newHValue, float oldSValue, float newSValue, float oldStrValue, float newStrValue, float oldEValue, float newEValue, float oldAValue, float newAValue, float oldDValue, float newDValue, float oldAPValue, float newAPValue, float oldLevelValue, float newLevelValue);
 	UFUNCTION(BlueprintCallable, Category = "LevelUpSequence")
@@ -34,7 +40,7 @@ public:
 	UFUNCTION()
 	void GetNewWeaponInfo(class AWeapon* weapon);
 	UFUNCTION()
-	void ShowLevelUpScreen(class APlayerCharacter* unit, float oldV, float oldS, float oldStr, float oldE, float oldA, float oldD);
+	void ShowLevelUpScreen(APlayerCharacter* unit, float oldV, float oldS, float oldStr, float oldE, float oldA, float oldD);
 	UFUNCTION()
 	void ShowUnitMenu();
 
@@ -68,7 +74,7 @@ public:
 	void SetAPText(float newValue);
 
 	UFUNCTION()
-	void UpdateRanges(float maxHealth, float maxStam, float exp, float mExp);
+	void UpdateRanges(float maxHealth, float maxStam, float exp, float mExp, float health, float stam);
 
 
 	UFUNCTION()
@@ -78,7 +84,13 @@ public:
 	void StopFiring();
 
 	UFUNCTION()
+	void ReturnToBattle();
+
+	UFUNCTION()
 	void ReturnToTacticsPawn();
+
+	UFUNCTION()
+	void BeginEnemyPhase();
 
 	UFUNCTION()
 	void SetTipText(FString text);
@@ -180,6 +192,9 @@ private:
 	UButton* endUnitTurnButton;
 
 	UPROPERTY(meta = (BindWidget))
+	UButton* endPlayerTurnButton;
+
+	UPROPERTY(meta = (BindWidget))
 	class UOverlay* targetOverlay;
 
 	UPROPERTY(meta = (BindWidget))
@@ -219,6 +234,11 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UListView* unitList;
+
+	UPROPERTY(meta = (BindWidget))
+	class UStatBoxEntry* statBox;
+	UPROPERTY(meta = (BindWidget))
+	UStatBoxEntry* unitMenuStatBox;
 
 	
 };

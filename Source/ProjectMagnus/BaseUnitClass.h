@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GameplayEffectTypes.h"
+#include "PRAbilityTypes.h"
 #include "BaseUnitClass.generated.h"
 
 
@@ -25,23 +28,39 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	class UPRAttributeSet* GetOwnersAttributeSet() const { return attributeSet; }
-	TSubclassOf<class UGameplayAbility> GetClassFieldAbility() const { return fieldAbility; }
+	class UPRGameplayAbilityBase* GetClassFieldAbility() const { return fieldAbilityObj; }
+	class UPRGameplayAbilityBase* GetClassAbilityOne() const { return abilityOneObj; }
+
 	
 	void GiveClassBonuses(class ACharacter_Base* ownerCharacter);
 
+	FORCEINLINE FName GetUnitClassName() const { return ClassName; }
+
 private:
 
+	void GiveFieldAbility(ACharacter_Base* owner);
+	void GiveClassAbilityOne(ACharacter_Base* owner);
 
+	FGameplayAbilitySpecHandle FieldAbilitySpecHandle;
+	FGameplayAbilitySpecHandle AbilityOneSpecHandle;
 
 
 	UPRAttributeSet* attributeSet;
 
+	UPRGameplayAbilityBase* fieldAbilityObj;
+	UPRGameplayAbilityBase* abilityOneObj;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Field Ability")
-	TSubclassOf<UGameplayAbility> fieldAbility;
+	TSubclassOf<class UGameplayAbility> fieldAbility;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ClassAbilities")
+	TSubclassOf<class UGameplayAbility> classAbilityOne;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Class Specific Bonuses")
 	TSubclassOf<class UGameplayEffect> classBonusEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Class Default Info")
+	FName ClassName = "Class Name";
 
 
 		

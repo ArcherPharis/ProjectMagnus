@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Abilities/GameplayAbility.h"
+#include "PRGameplayAbilityBase.h"
 #include "GA_Faye.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTMAGNUS_API UGA_Faye : public UGameplayAbility
+class PROJECTMAGNUS_API UGA_Faye : public UPRGameplayAbilityBase
 {
 	GENERATED_BODY()
 

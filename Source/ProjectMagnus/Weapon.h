@@ -42,7 +42,7 @@ public:
 	bool GetPlayerWantsToStopFiring() { return playersWantsToStopFiring; }
 	void SetInAttackEvent(bool value);
 
-
+	bool IsWeaponEmpty();
 
 	UFUNCTION(BlueprintPure, Category = "Weapon")
 	bool GetInAttackEvent() { return inAttackEvent; }
@@ -91,6 +91,7 @@ public:
 	FORCEINLINE int GetCurrentAmmo() const { return currentAmmo; }
 	FORCEINLINE int GetMaxAmmo() const { return maxAmmo; }
 	FORCEINLINE int GetAmmoReserves() const { return ammoReserves; }
+	FORCEINLINE FName GetWeaponName() const { return weaponName; }
 	void ChangeCurrentAmmo(int amt);
 	void ChangeAmmoReserves(int amt);
 	void SetCurrentAmmo(int amt);
@@ -125,6 +126,8 @@ private:
 	UTexture2D* crossHair;
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UTexture2D* weaponIcon;
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName weaponName;
 
 	ACharacter_Base* myOwner;
 

@@ -4,6 +4,7 @@
 #include "PRGameplayAbilityBase.h"
 #include "PRAttributeSet.h"
 #include "GameFramework/Character.h"
+#include "BaseAbilityToolTip.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Character_Base.h"
 
@@ -43,6 +44,12 @@ float UPRGameplayAbilityBase::GetCost() const
 	}
 
 	return APCost;
+}
+
+void UPRGameplayAbilityBase::SetToolTip(UBaseAbilityToolTip* abilityTooltip)
+{
+	toolTip = abilityTooltip;
+	toolTip->SetParameters(skillName, skillDescription, AbilityIcon);
 }
 
 bool UPRGameplayAbilityBase::CommitAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, OUT FGameplayTagContainer* OptionalRelevantTags)

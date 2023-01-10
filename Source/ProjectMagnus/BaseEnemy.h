@@ -12,6 +12,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyAbilityAdded, UPRGameplayAbilityBase*, newAbility);
 
+
 class UPRGameplayAbilityBase;
 
 UCLASS()
@@ -44,6 +45,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	class APRAIControllerBase* GetAIController() const { return aiController; }
 
 	class APMGameModeBase* GetGameMode() const { return gameMode; }
 
@@ -51,15 +53,26 @@ public:
 
 	void Attack();
 
+	void BeginEnemyTurn();
+
+	void EnemyTurnAttack();
+
 	void RotateTowardsAttackerAndRetaliate(AActor* attacker);
 
 	AActor* GetKiller() const { return Killer; }
 
+	void EndTurn();
+	void EndGame();
+
 	UFUNCTION(BlueprintCallable, Category = "BaseEnemy")
 	void SetKiller(AActor* killer);
 	void AwardKillerWithEXP();
+	void SetKillerOnly(AActor* killer);
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	class AWeapon* GetCurrentWeapon() const { return currentWeapon; }
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "EnemyEndGame")
+	void EndGameEvent();
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Team")
@@ -70,6 +83,7 @@ private:
 	void GiveAbility(const TSubclassOf<class UGameplayAbility>& newAbility, int inputID = -1, bool broadCast = false);
 	void CharacterDied(const FOnAttributeChangeData& AttributeData);
 
+
 	UPROPERTY()
 	class UPRAbilitySystemComponent* abilitySystemComp;
 
@@ -77,7 +91,18 @@ private:
 	UPRAttributeSet* attributeSet;
 
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
+	TSubclassOf<class UUserWidget> endGameScreenClass;
+
+	UUserWidget* endGameScreen;
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
 	TArray<TSubclassOf<class UGameplayEffect>> InitialEffects;
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
+	TSubclassOf<UGameplayEffect> staminaDrainEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
+	FGameplayTagContainer staminaEffectTag;
 
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
 	TArray<TSubclassOf<UGameplayAbility>> InitialAbilities;
@@ -91,6 +116,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Unit Info")
 	TSubclassOf<AWeapon> weaponClass;
 	AWeapon* currentWeapon;
+
+	APRAIControllerBase* aiController;
 
 	APMGameModeBase* gameMode;
 

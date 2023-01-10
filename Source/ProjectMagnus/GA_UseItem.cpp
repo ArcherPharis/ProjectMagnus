@@ -5,6 +5,7 @@
 #include "Character_Base.h"
 #include "Weapon.h"
 #include "TacticalGear.h"
+#include "PMGameModeBase.h"
 #include "PRAttributeSet.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
@@ -33,6 +34,7 @@ void UGA_UseItem::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 	ACharacter_Base* user = GetAvatarAsCharacter();
 	if (user)
 	{
+		GetAvatarAsCharacter()->SetIsUsingGear(true);
 		user->BeginAimMovement();
 		initMontage = user->GetTacticalGear()->GetBeginUseMontage();
 		finishMontage = user->GetTacticalGear()->GetConfirmUseMontage();
@@ -40,7 +42,7 @@ void UGA_UseItem::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 		user->GetCurrentWeapon()->SetInAttackEvent(true);
 
 		UAbilityTask_PlayMontageAndWait* StartMontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, initMontage);
-
+		GetAvatarAsCharacter()->GetGameMode()->ToggleEnemyLogic(false);
 		if (StartMontageTask)
 		{
 			
@@ -171,7 +173,9 @@ void UGA_UseItem::TargettingCanceled(const FGameplayAbilityTargetDataHandle& Dat
 
 void UGA_UseItem::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	//GetAvatarAsCharacter()->SetIsAiming(false);
+
+	GetAvatarAsCharacter()->GetGameMode()->ToggleEnemyLogic(true);
+	
 	if (!abilityCommitted)
 	{
 		GetAvatarAsCharacter()->GetAttributeSet()->SetActionPoints(GetAvatarAsCharacter()->GetAttributeSet()->GetActionPoints() + 1);
@@ -181,8 +185,9 @@ void UGA_UseItem::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGam
 	else
 	{
 		GetAvatarAsCharacter()->StopAimMovement();
+		
 	}
-
+	GetAvatarAsCharacter()->SetIsUsingGear(false);
 	GetAvatarAsCharacter()->GetTacticalGear()->AttachToCharacterMesh(GetAvatarAsCharacter()->GetMesh());
 	GetAvatarAsCharacter()->ToggleInput(true);
 	GetAvatarAsCharacter()->GetCurrentWeapon()->SetInAttackEvent(false);

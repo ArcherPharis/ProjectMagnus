@@ -24,4 +24,6 @@ class PROJECTMAGNUS_API IUnitAIInterface
 public:
 
 	virtual void Attack() = 0;
+
+	virtual void EnemyTurnAttack() = 0;
 };
