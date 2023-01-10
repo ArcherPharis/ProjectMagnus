@@ -25,7 +25,7 @@ private:
 	UFUNCTION()
 	void DeployCharacter();
 
-	void CreateToolTips(APlayerCharacter* character);
+	void CreateToolTips(APlayerCharacter* character, class UTexture2D* icon, TSubclassOf<class UBaseAbilityToolTip> widgetClass, class UImage* image, class UPRGameplayAbilityBase* ability);
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* unitName;
@@ -76,6 +76,9 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	UImage* classSkillOneImage;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* uniqueSkillOneImage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Checks")
 	bool isDeployableStatBox = true;

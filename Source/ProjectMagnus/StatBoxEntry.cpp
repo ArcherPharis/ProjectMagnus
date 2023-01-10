@@ -64,7 +64,11 @@ void UStatBoxEntry::ShowStatBox(APlayerCharacter* character)
 	fireArmName->SetText(FText::FromString((character->GetCurrentWeapon()->GetWeaponName().ToString())));
 	
 
-	CreateToolTips(character);
+	CreateToolTips(character, character->GetBaseUnitClass()->GetClassFieldAbility()->GetIcon(), character->GetBaseUnitClass()->GetClassFieldAbility()->GetToolTipWidget(), fieldAbilityImage, character->GetBaseUnitClass()->GetClassFieldAbility());
+	CreateToolTips(character, character->GetBaseUnitClass()->GetClassAbilityOne()->GetIcon(), character->GetBaseUnitClass()->GetClassAbilityOne()->GetToolTipWidget(), classSkillOneImage, character->GetBaseUnitClass()->GetClassAbilityOne());
+	CreateToolTips(character, character->GetUniqueSkillOne()->GetIcon(), character->GetUniqueSkillOne()->GetToolTipWidget(), uniqueSkillOneImage, character->GetUniqueSkillOne());
+
+
 
 }
 
@@ -81,16 +85,16 @@ void UStatBoxEntry::DeployCharacter()
 
 }
 
-void UStatBoxEntry::CreateToolTips(APlayerCharacter* character)
+void UStatBoxEntry::CreateToolTips(APlayerCharacter* character, UTexture2D* icon, TSubclassOf<UBaseAbilityToolTip> widgetClass, UImage* image, UPRGameplayAbilityBase* ability)
 {
-	fieldAbilityImage->SetBrushFromTexture(character->GetBaseUnitClass()->GetClassFieldAbility()->GetIcon());
-	UBaseAbilityToolTip* tooltip = CreateWidget<UBaseAbilityToolTip>(this, character->GetBaseUnitClass()->GetClassFieldAbility()->GetToolTipWidget());
-	character->GetBaseUnitClass()->GetClassFieldAbility()->SetToolTip(tooltip);
-	fieldAbilityImage->SetToolTip(character->GetBaseUnitClass()->GetClassFieldAbility()->GetToolTip());
+	image->SetBrushFromTexture(icon);
+	UBaseAbilityToolTip* tooltip = CreateWidget<UBaseAbilityToolTip>(this,widgetClass);
+	ability->SetToolTip(tooltip);
+	image->SetToolTip(ability->GetToolTip());
 
 
-	classSkillOneImage->SetBrushFromTexture(character->GetBaseUnitClass()->GetClassAbilityOne()->GetIcon());
-	UBaseAbilityToolTip* tt1 = CreateWidget<UBaseAbilityToolTip>(this, character->GetBaseUnitClass()->GetClassAbilityOne()->GetToolTipWidget());
-	character->GetBaseUnitClass()->GetClassAbilityOne()->SetToolTip(tt1);
-	classSkillOneImage->SetToolTip(character->GetBaseUnitClass()->GetClassAbilityOne()->GetToolTip());
+	//classSkillOneImage->SetBrushFromTexture(character->GetBaseUnitClass()->GetClassAbilityOne()->GetIcon());
+	//UBaseAbilityToolTip* tt1 = CreateWidget<UBaseAbilityToolTip>(this, character->GetBaseUnitClass()->GetClassAbilityOne()->GetToolTipWidget());
+	//character->GetBaseUnitClass()->GetClassAbilityOne()->SetToolTip(tt1);
+	//classSkillOneImage->SetToolTip(character->GetBaseUnitClass()->GetClassAbilityOne()->GetToolTip());
 }

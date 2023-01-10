@@ -39,6 +39,7 @@ public:
 	class ACharacter_Base* AvatarCharacterBase;
 
 	bool IsASkillUsedOnDeploy() const{ return useSkillOnDeploy; }
+	bool IsASkillUsedOnStaminaDepletion() const { return useSkillOnStaminaDepletion; }
 
 
 protected:
@@ -68,6 +69,8 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbilityBase")
 	bool useSkillOnDeploy = false;
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbilityBase")
+	bool useSkillOnStaminaDepletion = false;
 
 	UBaseAbilityToolTip* toolTip;
 };

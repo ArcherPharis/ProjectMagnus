@@ -79,6 +79,8 @@ public:
 
 	bool GetIsUsingGear() const { return isUsingAbilityGear; }
 	void SetIsUsingGear(bool newValue);
+
+	UPRGameplayAbilityBase* GetUniqueSkillOne() const { return uniqueSkillOneObj; }
 	
 	
 
@@ -93,6 +95,7 @@ protected:
 	
 
 	virtual void CharacterDied(const FOnAttributeChangeData& AttributeData);
+	virtual void StaminaChange(const FOnAttributeChangeData& AttributeData);
 
 	virtual void LevelUp();
 
@@ -243,6 +246,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
 	TSubclassOf<UGameplayAbility> SprintAbility;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Unique Skills")
+	TSubclassOf<UGameplayAbility> uniqueSkillOne;
+	UPRGameplayAbilityBase* uniqueSkillOneObj;
+
 
 	bool isSprinting = false;
 	bool isDead = false;
@@ -260,6 +267,7 @@ private:
 
 	
 	void DrainStamina();
+	void GiveUniqueClassSkills();
 	
 	
 	bool isUsingAbilityGear = false;

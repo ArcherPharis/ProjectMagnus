@@ -109,8 +109,10 @@ void ACharacter_Base::BeginPlay()
 	Super::BeginPlay();
 	gameMode = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(this));
 	GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(GetAttributeSet()->GetHealthAttribute()).AddUObject(this, &ACharacter_Base::CharacterDied);
+	GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(GetAttributeSet()->GetStaminaAttribute()).AddUObject(this, &ACharacter_Base::StaminaChange);
 	ApplyInitialEffect();
 	GiveAbility(SprintAbility);
+	GiveUniqueClassSkills();
 	for (auto& abilityKeyValuePair : InitialAbilities)
 	{
 		GiveAbility(abilityKeyValuePair.Value, static_cast<int>(abilityKeyValuePair.Key), true);
@@ -287,6 +289,13 @@ void ACharacter_Base::DrainStamina()
 	}
 }
 
+void ACharacter_Base::GiveUniqueClassSkills()
+{
+	FGameplayAbilitySpecHandle handle = GetAbilitySystemComponent()->GiveAbility(uniqueSkillOne);
+	uniqueSkillOneObj = Cast<UPRGameplayAbilityBase>(GetAbilitySystemComponent()->FindAbilitySpecFromHandle(handle)->Ability);
+	AddSkillToList(uniqueSkillOneObj);
+}
+
 void ACharacter_Base::CharacterDied(const FOnAttributeChangeData& AttributeData)
 {
 	
@@ -313,6 +322,20 @@ void ACharacter_Base::CharacterDied(const FOnAttributeChangeData& AttributeData)
 		
 	}
 
+}
+
+void ACharacter_Base::StaminaChange(const FOnAttributeChangeData& AttributeData)
+{
+	if (AttributeData.NewValue == 0)
+	{
+		for (UPRGameplayAbilityBase* skill : currentSkills)
+		{
+			if (skill->IsASkillUsedOnStaminaDepletion())
+			{
+				GetAbilitySystemComponent()->TryActivateAbilityByClass(skill->GetClass());
+			}
+		}
+	}
 }
 
 void ACharacter_Base::PlayerAttack()
