@@ -173,7 +173,7 @@ void APlayerCharacter::StopAiming()
 
 void APlayerCharacter::OnUnitDeath(ACharacter_Base* characterToDie)
 {
-	DeathEvent();
+	
 	Super::OnUnitDeath(characterToDie);
 }
 

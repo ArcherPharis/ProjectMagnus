@@ -44,6 +44,11 @@ bool AWeapon::IsWeaponEmpty()
 
 
 
+void AWeapon::SetCanFire(bool bCanFire)
+{
+	canfire = bCanFire;
+}
+
 // Called when the game starts or when spawned
 void AWeapon::BeginPlay()
 {
@@ -63,9 +68,9 @@ bool AWeapon::CanAttack() const
 }
 
 
-void AWeapon::PlayWeaponSound(USceneComponent* firePoint)
+void AWeapon::PlayWeaponSound(USceneComponent* fp)
 {
-	UGameplayStatics::SpawnSoundAttached(attackAudio, firePoint);
+	UGameplayStatics::SpawnSoundAttached(attackAudio, fp);
 }
 
 // Called every frame
@@ -157,6 +162,11 @@ void AWeapon::SetCurrentAmmo(int amt)
 void AWeapon::SetAmmoReserves(int amt)
 {
 	ammoReserves = amt;
+}
+
+void AWeapon::AddToAmmoReserves(int amt)
+{
+	ammoReserves += amt;
 }
 
 void AWeapon::SetWeaponOwner(ACharacter_Base* owner)

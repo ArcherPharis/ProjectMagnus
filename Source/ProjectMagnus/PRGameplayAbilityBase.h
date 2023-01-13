@@ -40,6 +40,7 @@ public:
 
 	bool IsASkillUsedOnDeploy() const{ return useSkillOnDeploy; }
 	bool IsASkillUsedOnStaminaDepletion() const { return useSkillOnStaminaDepletion; }
+	bool IsASkillUsedHealthThreshold() const { return useSkillOnHealthBelowHalf; }
 
 
 protected:
@@ -71,6 +72,8 @@ private:
 	bool useSkillOnDeploy = false;
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbilityBase")
 	bool useSkillOnStaminaDepletion = false;
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbilityBase")
+	bool useSkillOnHealthBelowHalf = false;
 
 	UBaseAbilityToolTip* toolTip;
 };

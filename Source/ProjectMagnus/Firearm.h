@@ -75,8 +75,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<class UGameplayEffect> damageEffect;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	USceneComponent* firePoint;
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	USoundBase* hitMarkerSound;
@@ -106,7 +105,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Stats")
 	float wielderControlPercent = 15.f;
 
-	bool canfire = true;
+	
 
 	FTimerHandle fireDelayTimer;
 	FTimerHandle aimCastTimerHandle;

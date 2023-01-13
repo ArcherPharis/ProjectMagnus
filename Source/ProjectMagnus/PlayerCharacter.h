@@ -47,8 +47,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Camera")
 	class UCameraComponent* GetCameraEye() { return playerEye; }
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Camera")
-	void DeathEvent();
+
 
 
 
@@ -64,6 +63,7 @@ public:
 	virtual void OnUnitDeath(class ACharacter_Base* characterToDie) override;
 
 	FORCEINLINE FName GetPlayerUnitClassName() const { return unitClassName; }
+	FORCEINLINE UTexture2D* GetFlairImage() const { return flairImage; }
 
 protected:
 	void SetClassName(FName name);
@@ -80,6 +80,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	USpringArmComponent* springArm;
+
+	UPROPERTY(EditAnywhere, Category = "Extras")
+	UTexture2D* flairImage;
 
 	void GenerateHealthLevelUp(float& oldHealth);
 	void GenerateStaminaLevelUp(float& oldStam);

@@ -28,6 +28,7 @@ public:
 
 	void UpdateTacticsStatBox(class APlayerCharacter* unit);
 	void HideTacticsStatBox();
+	void DisableEnemyTurnButton();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "LevelUpSequence")
 	void LevelUpEvent(float oldHValue, float newHValue, float oldSValue, float newSValue, float oldStrValue, float newStrValue, float oldEValue, float newEValue, float oldAValue, float newAValue, float oldDValue, float newDValue, float oldAPValue, float newAPValue, float oldLevelValue, float newLevelValue);
@@ -212,6 +213,7 @@ private:
 	UTextBlock* APCount;
 	UPROPERTY(meta = (BindWidget))
 	UImage* weaponIcon;
+
 
 
 	//UPROPERTY(meta = (BindWIdget))

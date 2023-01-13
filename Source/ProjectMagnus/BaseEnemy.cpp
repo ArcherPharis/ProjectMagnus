@@ -66,6 +66,11 @@ void ABaseEnemy::Tick(float DeltaTime)
 
 void ABaseEnemy::SetLogicEnabled(bool bIsLogicEnabled)
 {
+
+	if (attributeSet->GetHealth() == 0 && bIsLogicEnabled)
+	{
+		return;
+	}
 	AAIController* AIC = GetController<AAIController>();
 	if (AIC)
 	{
@@ -144,9 +149,12 @@ void ABaseEnemy::EndGame()
 
 void ABaseEnemy::SetKiller(AActor* killer)
 {
-	Killer = killer;
-	APMGameModeBase* gm = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(this));
-	gm->AddKilledUnits(this);
+	if (attributeSet->GetHealth() == 0)
+	{
+		Killer = killer;
+		APMGameModeBase* gm = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(this));
+		gm->AddKilledUnits(this);
+	}
 }
 
 void ABaseEnemy::AwardKillerWithEXP()
@@ -202,9 +210,12 @@ void ABaseEnemy::CharacterDied(const FOnAttributeChangeData& AttributeData)
 	if (AttributeData.NewValue == 0)
 	{
 		GetMesh()->GetAnimInstance()->Montage_Play(onDeadMontage);
+		GetCurrentWeapon()->SetActorHiddenInGame(true);
+		GetCurrentWeapon()->Destroy();
 		//isDead = true; 
 		SetLogicEnabled(false);
 		SetActorEnableCollision(false);
+		
 
 	}
 }

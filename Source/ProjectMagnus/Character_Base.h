@@ -42,6 +42,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PlayerAiming")
 	void SetIsAiming(bool value);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "BaseCharacter")
+	void DeathEvent();
+
 	FOnWeaponEquipped onWeaponEquipped;
 	FOnAPGauge onAPGauge;
 	FOnAbilityAdded onAbilityAdded;

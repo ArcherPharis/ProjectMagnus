@@ -192,7 +192,11 @@ void AFirearm::AttackPointAnimNotify()
 	FRotator ownerViewRot;
 	GetOwner()->GetActorEyesViewPoint(ownerViewLoc, ownerViewRot);
 	FVector Start = firePoint->GetComponentLocation();
-	if (GetWorld()->LineTraceSingleByChannel(result, Start, WeaponSpread(ownerViewLoc + ownerViewRot.Vector() * weaponRange) , ECC_Camera))
+	FCollisionQueryParams CollisionParameters;
+	TArray<AActor*> enemyActors;
+	UGameplayStatics::GetAllActorsWithTag(this, "Enemy", enemyActors);
+	CollisionParameters.AddIgnoredActors(enemyActors);
+	if (GetWorld()->LineTraceSingleByChannel(result, Start, WeaponSpread(ownerViewLoc + ownerViewRot.Vector() * weaponRange) , ECC_Camera, CollisionParameters))
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, impactSound, result.ImpactPoint, 0.1f);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
@@ -320,7 +324,10 @@ void AFirearm::WeaponFire()
 
 			
 		}
-		ReturnToInit();
+		if (engagedEnemy == nullptr)
+		{
+			ReturnToInit();
+		}
 	}
 
 }

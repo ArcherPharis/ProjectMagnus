@@ -47,10 +47,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Weapon")
 	bool GetInAttackEvent() { return inAttackEvent; }
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void SetCanFire(bool bCanFire);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void Reload();
+
+	bool canfire = true;
 
 	virtual bool CanAttack() const;
 	
@@ -60,6 +65,9 @@ protected:
 	void PlayWeaponSound(USceneComponent* firePoint);
 
 	class ACharacter_Base* GetWeaponOwner() const { return myOwner; }
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	USceneComponent* firePoint;
 
 public:	
 	// Called every frame
@@ -96,10 +104,18 @@ public:
 	void ChangeAmmoReserves(int amt);
 	void SetCurrentAmmo(int amt);
 	void SetAmmoReserves(int amt);
+	void AddToAmmoReserves(int amt);
 
 	void SetWeaponOwner(ACharacter_Base* owner);
 
 	virtual void ReloadWeapon();
+
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	USceneComponent* GetFirePoint() const { return firePoint; }
+
+
+
+	
 
 
 private:

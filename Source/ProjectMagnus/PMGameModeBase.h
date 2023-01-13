@@ -45,6 +45,7 @@ public:
 	void ToggleEnemyLogic(bool bStopLogic);
 	void TogglePlayerLogic(bool bStopLogic);
 	void RemoveEnemyFromList(ABaseEnemy* enemyToRemove);
+	void PopulateMovableUnits();
 	
 
 	APawn* GetTacticsPawn() const { return TacticsPawn; }

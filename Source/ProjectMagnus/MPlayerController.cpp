@@ -57,8 +57,7 @@ void AMPlayerController::BeginPlay()
 	inGameUI = CreateWidget<UInGameUI>(this, inGameUIClass);
 	inGameUI->AddToViewport();
 	gameMode = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	gameMode->SpawnInitialUnits(inGameUI); //I think eventually, the game is gonna start by possessing a special
-	//actor just for tactics mode selection rather than any player.
+	gameMode->SpawnInitialUnits(inGameUI);
 
 }
 

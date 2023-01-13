@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PRAIControllerBase.h"
 #include "MPlayerController.h"
+#include "Weapon.h"
 #include "BaseEnemy.h"
 #include "InGameUI.h"
 #include "TacticsPawn.h"
@@ -31,13 +32,6 @@ void APMGameModeBase::GetAllSpawnLocations()
 		currentEnemyUnits.Add(enemy);
 	}
 
-	for (ABaseEnemy* e : currentEnemyUnits)
-	{
-		if (e->ActorHasTag(TEXT("MovingEnemyUnit")))
-		{
-			movingEnemyUnits.Add(e);
-		}
-	}
 
 	TacticsPawn = Cast<APawn>(UGameplayStatics::GetActorOfClass(GetWorld(), ATacticsPawn::StaticClass()));
 	
@@ -103,22 +97,39 @@ void APMGameModeBase::CycleThroughEnemyUnitTurns(ABaseEnemy* enemyDoneWithTurn)
 
 void APMGameModeBase::BeginEnemyTurn()
 {
-	currentPhase = Phase::EnemyPhase;
-	for (APlayerCharacter* playa : currentPlayerUnits)
-	{
-		playa->AIControllerRepossess();
-	}
 
-	for (APlayerCharacter* p : currentPlayerUnits)
-	{
-		p->GetAttributeSet()->SetActionPoints(p->GetAttributeSet()->GetActionPoints() + 1);
-	}
 
-	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
-	TogglePlayerLogic(true);
-	cont->SetInputMode(FInputModeUIOnly());
-	cont->SetViewTargetWithBlend(movingEnemyUnits[0], 0.5f);
-	movingEnemyUnits[0]->BeginEnemyTurn();
+	if (movingEnemyUnits.Num() > 0)
+	{
+
+		currentPhase = Phase::EnemyPhase;
+		ui->HideHUD();
+
+		for (APlayerCharacter* playa : currentPlayerUnits)
+		{
+			playa->AIControllerRepossess();
+		}
+
+		for (APlayerCharacter* p : currentPlayerUnits)
+		{
+			if (p->GetAttributeSet()->GetActionPoints() < p->GetAttributeSet()->GetMaxActionPoints())
+				p->GetAttributeSet()->SetActionPoints(p->GetAttributeSet()->GetActionPoints() + 1);
+		}
+
+		APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
+		TogglePlayerLogic(true);
+		cont->SetInputMode(FInputModeUIOnly());
+		cont->SetViewTargetWithBlend(movingEnemyUnits[0], 0.5f);
+		movingEnemyUnits[0]->BeginEnemyTurn();
+	}
+	else
+	{
+		for (APlayerCharacter* p : currentPlayerUnits)
+		{
+			if (p->GetAttributeSet()->GetActionPoints() < p->GetAttributeSet()->GetMaxActionPoints() && p->GetAttributeSet()->GetHealth() > 0)
+				p->GetAttributeSet()->SetActionPoints(p->GetAttributeSet()->GetActionPoints() + 1);
+		}
+	}
 
 
 }
@@ -150,8 +161,10 @@ void APMGameModeBase::ShowDownedDeadUnits()
 		killedEnemyUnits[0]->AwardKillerWithEXP();
 		CharacterToReturnTo = Cast<APlayerCharacter>(killedEnemyUnits[0]->GetKiller());
 
-		RemoveEnemyFromList(killedEnemyUnits[0]);
+		ABaseEnemy* ene = killedEnemyUnits[0];
+		RemoveEnemyFromList(ene);
 		killedEnemyUnits.RemoveAt(0);
+		ene->Destroy();
 
 
 	}
@@ -181,17 +194,17 @@ void APMGameModeBase::GoToNextEnemy()
 
 void APMGameModeBase::EndEnemyTurn()
 {
-	for (ABaseEnemy* e : currentEnemyUnits)
-	{
-		if (e->ActorHasTag(TEXT("MovingEnemyUnit")))
-		{
-			movingEnemyUnits.Add(e);
-		}
-	}
+
 	TogglePlayerLogic(false);
+
+
 
 	for (APlayerCharacter* p : currentPlayerUnits)
 	{
+		p->GetAttributeSet()->SetStamina(p->GetAttributeSet()->GetMaxStamina());
+		p->GetCurrentWeapon()->AddToAmmoReserves(p->GetCurrentWeapon()->GetMaxAmmo());
+
+		if(p->GetAttributeSet()->GetActionPoints() < p->GetAttributeSet()->GetMaxActionPoints())
 		p->GetAttributeSet()->SetActionPoints(p->GetAttributeSet()->GetActionPoints() + 1);
 	}
 }
@@ -285,6 +298,12 @@ void APMGameModeBase::AddKilledUnits(ABaseEnemy* killedUnit)
 void APMGameModeBase::ReturnToTacticsPawn()
 {
 	APlayerController* controller = UGameplayStatics::GetPlayerController(this, 0);
+
+	//if (currentEnemyUnits.Num() == 0)
+	//{
+	//	ui->DisableEnemyTurnButton();
+	//}
+
 	controller->SetInputMode(FInputModeUIOnly());
 	controller->bShowMouseCursor = true;
 	UGameplayStatics::SetGamePaused(this, false);
@@ -324,4 +343,15 @@ void APMGameModeBase::TogglePlayerLogic(bool bStopLogic)
 void APMGameModeBase::RemoveEnemyFromList(ABaseEnemy* enemyToRemove)
 {
 	currentEnemyUnits.Remove(enemyToRemove);
+}
+
+void APMGameModeBase::PopulateMovableUnits()
+{
+	for (ABaseEnemy* e : currentEnemyUnits)
+	{
+		if (e->ActorHasTag(TEXT("MovingEnemyUnit")) && e->GetAttributeSet()->GetHealth() != 0)
+		{
+			movingEnemyUnits.Add(e);
+		}
+	}
 }

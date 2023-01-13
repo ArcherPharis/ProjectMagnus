@@ -298,11 +298,23 @@ void ACharacter_Base::GiveUniqueClassSkills()
 
 void ACharacter_Base::CharacterDied(const FOnAttributeChangeData& AttributeData)
 {
+	float perc = attributeSet->GetHealth() / attributeSet->GetMaxHealth();
+
+	if (AttributeData.NewValue != 0 && perc <= 0.5)
+	{
+		for (UPRGameplayAbilityBase* skill : currentSkills)
+		{
+			if (skill->IsASkillUsedHealthThreshold())
+			{
+				GetAbilitySystemComponent()->TryActivateAbilityByClass(skill->GetClass());
+			}
+		}
+	}
 	
 	if (AttributeData.NewValue == 0)
 	{
 		isDead = true;
-		TeamID = 5;
+		DeathEvent();
 		SetLogicEnabled(false);
 		SetActorEnableCollision(false);
 		float time = GetMesh()->GetAnimInstance()->Montage_Play(onDeadMontage);

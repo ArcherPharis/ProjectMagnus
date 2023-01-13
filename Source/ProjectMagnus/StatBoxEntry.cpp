@@ -62,7 +62,7 @@ void UStatBoxEntry::ShowStatBox(APlayerCharacter* character)
 	fireArmAmmoReserved->SetText(FText::FromString(FString::FromInt(character->GetCurrentWeapon()->GetAmmoReserves())));
 	firearmImage->SetBrushFromTexture(character->GetCurrentWeapon()->GetWeaponIcon());
 	fireArmName->SetText(FText::FromString((character->GetCurrentWeapon()->GetWeaponName().ToString())));
-	
+	unitFlairImage->SetBrushFromTexture(character->GetFlairImage());
 
 	CreateToolTips(character, character->GetBaseUnitClass()->GetClassFieldAbility()->GetIcon(), character->GetBaseUnitClass()->GetClassFieldAbility()->GetToolTipWidget(), fieldAbilityImage, character->GetBaseUnitClass()->GetClassFieldAbility());
 	CreateToolTips(character, character->GetBaseUnitClass()->GetClassAbilityOne()->GetIcon(), character->GetBaseUnitClass()->GetClassAbilityOne()->GetToolTipWidget(), classSkillOneImage, character->GetBaseUnitClass()->GetClassAbilityOne());

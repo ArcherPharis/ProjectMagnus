@@ -55,6 +55,11 @@ void UInGameUI::HideTacticsStatBox()
 	statBox->SetVisibility(ESlateVisibility::Hidden);
 }
 
+void UInGameUI::DisableEnemyTurnButton()
+{
+	endPlayerTurnButton->SetIsEnabled(false);
+}
+
 void UInGameUI::ShowVigorText(float oldValue, float newValue)
 {
 
@@ -273,8 +278,9 @@ void UInGameUI::ReturnToTacticsPawn()
 void UInGameUI::BeginEnemyPhase()
 {
 	APMGameModeBase* gamemode = Cast<APMGameModeBase>(UGameplayStatics::GetGameMode(this));
+	gamemode->PopulateMovableUnits();
 	gamemode->BeginEnemyTurn();
-	HideHUD();
+	
 	//would like to set up a new canvas that just plays  animations via events. 
 	//ENEMY PHASE and PLAYER PHASE banners.
 }
