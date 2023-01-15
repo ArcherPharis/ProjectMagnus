@@ -97,7 +97,7 @@ void APlayerCharacter::LevelUp()
 void APlayerCharacter::MoveForward(float value)
 {
 
-	if (IsCharacterOutOfStamina() || GetIsAiming() || GetIsDead() || GetIsUsingGear())
+	if (IsCharacterOutOfStamina() || GetIsDead())
 	{
 		StopSprint();
 		return;
@@ -109,7 +109,7 @@ void APlayerCharacter::MoveForward(float value)
 void APlayerCharacter::MoveRight(float value)
 {
 
-	if (IsCharacterOutOfStamina() || GetIsAiming() || GetIsDead() || GetIsUsingGear())
+	if (IsCharacterOutOfStamina() || GetIsDead())
 	{
 		StopSprint();
 		return;

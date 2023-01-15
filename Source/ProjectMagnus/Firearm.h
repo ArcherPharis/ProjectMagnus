@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Weapon.h"
+#include "GameplayEffectTypes.h"
 #include "Firearm.generated.h"
 
 
@@ -27,7 +28,6 @@ class PROJECTMAGNUS_API AFirearm : public AWeapon
 
 public:
 	AFirearm();
-	virtual void AttackPointAnimNotify() override;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Gun Events")
 	void OnAttack();
@@ -37,14 +37,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Gun Events")
 	void SpawnImpactEffects(const FHitResult result);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Gun Events")
-	void RotateCharacter(class ACharacter_Base* character, AActor* result);
 
 	void FirearmAim();
 	void StopFirearmAim();
-	bool TryStopFiring();
 	virtual void ReloadWeapon() override;
-	virtual void Reload() override;
 	
 
 	
@@ -54,12 +50,7 @@ public:
 
 private:
 
-	bool IsReloading();
-	FTimerHandle reloadHandle;
-	void ReloadTimePoint();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Anims")
-	UAnimMontage* ReloadMontage;
 
 	void DecrementAmmo();
 
@@ -74,8 +65,8 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<class UGameplayEffect> damageEffect;
-	
-
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FGameplayTagContainer reloadTag;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	USoundBase* hitMarkerSound;
@@ -98,32 +89,20 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Fire Mode")
 	TEnumAsByte<Firetype> fireMode;
-
-
-	UPROPERTY(EditDefaultsOnly, Category = "Stats")
-	float Handleability = 5.0f;
-	UPROPERTY(EditAnywhere, Category = "Stats")
-	float wielderControlPercent = 15.f;
-
 	
 
 	FTimerHandle fireDelayTimer;
 	FTimerHandle aimCastTimerHandle;
 
-	AActor* targetedActor;
-	AActor* potentialActor;
 	TArray<ACharacter_Base*>killedEnemies;
+
+	AActor* potentialActor;
+	AActor* targetedActor;
 
 	FHitResult PotentialActorResult(FHitResult potResult);
 
-	void WeaponFire();
-	void ReturnToInit();
-	void GoToRetaliate();
-	void BeginAttack();
 	void AfterFireCheck();
 
-	FTimerHandle GunKilledHandle;
-	void GunKilledTarget();
 	
 
 

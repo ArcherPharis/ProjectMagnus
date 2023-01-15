@@ -17,8 +17,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "TacticalGear.h"
 #include "SupportGear.h"
-#include "AIController.h"
-#include "BrainComponent.h"
 
 
 // Sets default values
@@ -53,23 +51,7 @@ void ACharacter_Base::SetIsAiming(bool value)
 
 void ACharacter_Base::SetLogicEnabled(bool bIsLogicEnabled)
 {
-	AAIController* AIC = GetController<AAIController>();
-	if (AIC)
-	{
-		UBrainComponent* braincomp = AIC->GetBrainComponent();
-		if (braincomp)
-		{
-			if (bIsLogicEnabled)
-			{
-				braincomp->StartLogic();
-			}
-			else
-			{
-				braincomp->StopLogic("Dead");
-			}
 
-		}
-	}
 }
 
 void ACharacter_Base::ToggleInput(bool enableInput)
@@ -118,7 +100,6 @@ void ACharacter_Base::BeginPlay()
 		GiveAbility(abilityKeyValuePair.Value, static_cast<int>(abilityKeyValuePair.Key), true);
 	}
 
-	aiController = Cast<AAIController>(GetController());
 
 	
 }
@@ -315,20 +296,9 @@ void ACharacter_Base::CharacterDied(const FOnAttributeChangeData& AttributeData)
 	{
 		isDead = true;
 		DeathEvent();
-		SetLogicEnabled(false);
 		SetActorEnableCollision(false);
 		float time = GetMesh()->GetAnimInstance()->Montage_Play(onDeadMontage);
-		if (GetGameMode()->IsPlayerPhase())
-		{
-			APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
-			cont->SetInputMode(FInputModeUIOnly());
-			FTimerHandle returnToTacPawnHandle;
-			GetWorldTimerManager().SetTimer(returnToTacPawnHandle, this, &ACharacter_Base::ReturnToTacActor, time + 2.5);
-		}
-		else if (GetGameMode()->IsEnemyPhase())
-		{
-			gameMode->AddDownedUnits(this);
-		}
+
 
 
 		
@@ -474,7 +444,10 @@ void ACharacter_Base::StopAiming()
 
 	
 	bIsAiming = false;
-	GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
+	if (!isSprinting)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
+	}
 	StopAttack();
 	AFirearm* fireArm = Cast<AFirearm>(GetCurrentWeapon());
 	if (fireArm)
@@ -500,16 +473,33 @@ void ACharacter_Base::EnemyTurnAttack()
 
 void ACharacter_Base::Sprint()
 {
+
 	if (!bIsAiming)
-	abilitySystemComp->TryActivateAbilityByClass(SprintAbility);
-	GetCharacterMovement()->MaxWalkSpeed = sprintValue;
+	{
+		abilitySystemComp->TryActivateAbilityByClass(SprintAbility);
+		GetCharacterMovement()->MaxWalkSpeed = sprintValue;
+	}
+	else
+	{
+		StopAiming();
+		StopAimMovement();
+		SetIsAiming(false);
+		abilitySystemComp->TryActivateAbilityByClass(SprintAbility);
+		GetCharacterMovement()->MaxWalkSpeed = sprintValue;
+	}
+
+	isSprinting = true;
 }
 
 void ACharacter_Base::StopSprint()
 {
 	if (!bIsAiming)
-	onStoppedSprinting.Broadcast();
-	GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
+	{
+		onStoppedSprinting.Broadcast();
+		GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
+	}
+	isSprinting = false;
+
 	
 
 }

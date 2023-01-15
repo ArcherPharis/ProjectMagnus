@@ -234,7 +234,9 @@ void APMGameModeBase::SpawnInitialUnits(UInGameUI* aUI)
 
 	for (TSubclassOf<APlayerCharacter> character : deployablePlayerUnits)
 	{
-		APlayerCharacter* initCharacter =  GetWorld()->SpawnActor<APlayerCharacter>(character);
+		FActorSpawnParameters spawnParams;
+		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		APlayerCharacter* initCharacter =  GetWorld()->SpawnActor<APlayerCharacter>(character, spawnParams);
 		currentPlayerUnits.Add(initCharacter);
 		aUI->NewUnitGiven(initCharacter);
 		ui = aUI;

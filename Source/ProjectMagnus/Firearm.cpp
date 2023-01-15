@@ -21,7 +21,6 @@ void AFirearm::FirearmAim()
 {
 	if (GetInAttackEvent()) return;
 
-	wielderControlPercent = ((10 + 24) * Handleability) / 10; //(level + dexterity)
 	FHitResult result;
 	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FVector CameraEnd = cameraManager->GetCameraLocation() + cameraManager->GetActorForwardVector() * weaponRange;
@@ -51,28 +50,6 @@ void AFirearm::StopFirearmAim()
 	GetWorldTimerManager().ClearTimer(aimCastTimerHandle);
 }
 
-bool AFirearm::TryStopFiring()
-{
-
-	if (!GetPlayerWantsToStopFiring()) return false;
-	onBeginAttackEvent.Broadcast();
-	int randomRoll = FMath::RandRange(1, 150);
-
-	if (wielderControlPercent <= 10)
-	{
-		wielderControlPercent = 15;
-	}
-
-	if (wielderControlPercent > randomRoll)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Stopped Firing! : %i"), randomRoll);
-		SetPlayerWantsToStopFiring(false);		
-		return true;
-	}
-
-
-	return false;
-}
 
 void AFirearm::ReloadWeapon()
 {
@@ -95,47 +72,8 @@ void AFirearm::ReloadWeapon()
 	}
 }
 
-void AFirearm::Reload()
-{
-	Super::Reload();
-	if (IsReloading()) return;
-
-	ABaseEnemy* enemy = Cast<ABaseEnemy>(GetOwner());
-	if (enemy)
-	{
-		float reloadDuration = enemy->GetMesh()->GetAnimInstance()->Montage_Play(ReloadMontage);
-		GetWorldTimerManager().SetTimer(reloadHandle, this, &AFirearm::ReloadTimePoint, reloadDuration, false);
-	}
-	else
-	{
-		float reloadDuration = GetWeaponOwner()->GetMesh()->GetAnimInstance()->Montage_Play(ReloadMontage);
-		GetWorldTimerManager().SetTimer(reloadHandle, this, &AFirearm::ReloadTimePoint, reloadDuration, false);
-	}
 
 
-	
-}
-
-
-
-bool AFirearm::IsReloading()
-{
-	ABaseEnemy* enemy = Cast<ABaseEnemy>(GetOwner());
-	if (enemy)
-	{
-		return enemy->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontage);
-	}
-	else
-	{
-		return GetWeaponOwner()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(ReloadMontage);
-	}
-	
-}
-
-void AFirearm::ReloadTimePoint()
-{
-	SetCurrentAmmo(GetMaxAmmo());
-}
 
 void AFirearm::DecrementAmmo()
 {
@@ -148,25 +86,71 @@ void AFirearm::DecrementAmmo()
 
 void AFirearm::Attack()
 {
-	if (GetCurrentAmmo() == 0) return;
-
-	if (potentialActor)
+	if (GetCurrentAmmo() == 0)
 	{
-		if (GetWeaponOwner())
-		RotateCharacter(GetWeaponOwner(), potentialActor);
-		potentialActor = nullptr;
+
+		if (GetAmmoReserves() > 0)
+		{
+			GetWeaponOwner()->GetAbilitySystemComponent()->TryActivateAbilitiesByTag(reloadTag);
+		}
 		return;
 	}
-	SetInAttackEvent(true);
-	APlayerController* pc = Cast<APlayerController>(GetWeaponOwner()->GetController());
-	pc->SetInputMode(FInputModeUIOnly());
-	onBeginAttackEvent.Broadcast();
-	GetWeaponOwner()->PlayGunAttackClip();
-	FTimerHandle delayShootHandle;
-	GetWorldTimerManager().SetTimer(delayShootHandle, this, &AFirearm::BeginAttack, 0.5f, false);
+	Super::Attack();
+	if (canfire)
+	{
+		canfire = false;
+	}
+	else
+	{
+		return;
+	}
+	FHitResult result;
+	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+
+	UGameplayStatics::SpawnEmitterAttached(muzzleEffect, firePoint);
+	FVector CameraEnd = cameraManager->GetCameraLocation() + cameraManager->GetActorForwardVector() * weaponRange;
+	OnAttack();
+	if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), WeaponSpread(CameraEnd), ECC_Camera))
+	{
+		UPRAbilitySystemComponent* ASC = result.GetActor()->FindComponentByClass<UPRAbilitySystemComponent>();
+		if (ASC)
+		{
+			FGameplayEffectContextHandle handle;
+			ASC->ApplyGameplayEffectToSelf(damageEffect.GetDefaultObject(), -1, handle);
+			UGameplayStatics::PlaySound2D(this, hitMarkerSound, 1.5f);
+			UGameplayStatics::PlaySound2D(this, impactSound, 0.5f);
+
+			ACharacter_Base* damagableChara = Cast<ACharacter_Base>(result.GetActor());
+
+
+			if (damagableChara && damagableChara->GetAttributeSet()->GetHealth() == 0)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Gun killed something"));
+
+			}
+
+
+		}
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
+		SpawnImpactEffects(result);
+
+	}
+
+	PlayWeaponSound(firePoint);
+	GetWeaponOwner()->GetMesh()->GetAnimInstance()->Montage_Play(GetAttackMontage());
+	ChangeCurrentAmmo(-1);
+	onWeaponUse.Broadcast(GetCurrentAmmo(), GetAmmoReserves());
+	GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / GetFireRate());
+}
+
 	
+FHitResult AFirearm::PotentialActorResult(FHitResult potResult)
+{
+	return potResult;
 
 }
+
+
 
 FVector AFirearm::WeaponSpread(FVector EndPoint)
 {	
@@ -179,219 +163,18 @@ FVector AFirearm::WeaponSpread(FVector EndPoint)
 
 }
 
-void AFirearm::AttackPointAnimNotify()
-{
-	if (IsReloading() || GetCurrentAmmo() == 0) return;
 
-	Super::AttackPointAnimNotify();
-
-	UE_LOG(LogTemp, Warning, TEXT("event fired"));
-
-	FHitResult result;
-	FVector ownerViewLoc;
-	FRotator ownerViewRot;
-	GetOwner()->GetActorEyesViewPoint(ownerViewLoc, ownerViewRot);
-	FVector Start = firePoint->GetComponentLocation();
-	FCollisionQueryParams CollisionParameters;
-	TArray<AActor*> enemyActors;
-	UGameplayStatics::GetAllActorsWithTag(this, "Enemy", enemyActors);
-	CollisionParameters.AddIgnoredActors(enemyActors);
-	if (GetWorld()->LineTraceSingleByChannel(result, Start, WeaponSpread(ownerViewLoc + ownerViewRot.Vector() * weaponRange) , ECC_Camera, CollisionParameters))
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, impactSound, result.ImpactPoint, 0.1f);
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
-		UPRAbilitySystemComponent* ASC = result.GetActor()->FindComponentByClass<UPRAbilitySystemComponent>();
-		if (ASC)
-		{
-			FGameplayEffectContextHandle handle;
-			ASC->ApplyGameplayEffectToSelf(damageEffect.GetDefaultObject(), -1, handle);
-			
-			ABaseEnemy* damagableEnemy = Cast<ABaseEnemy>(result.GetActor());
-			if (engagedEnemy == nullptr)
-			{
-				engagedEnemy = damagableEnemy;
-			}
-
-			if (damagableEnemy && damagableEnemy->GetAttributeSet()->GetHealth() == 0)
-			{
-				killedSomething = true;
-				damagableEnemy->SetKiller(GetWeaponOwner());
-				UE_LOG(LogTemp, Warning, TEXT("Gun killed enemy"));
-			}
-
-		}
-		
-	}
-	DecrementAmmo();
-}
-
-FHitResult AFirearm::PotentialActorResult(FHitResult potResult)
-{
-	return potResult;
-
-}
-
-void AFirearm::WeaponFire()
-{
-	
-	if (TryStopFiring()) return;
-	if (GetCurrentAmmo() > 0)
-	{		
-
-		if (canfire)
-		{
-			canfire = false;
-		}
-		else
-		{
-			
-			return;
-		}
-	FHitResult result;
-	APlayerCameraManager* cameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-
-	UGameplayStatics::SpawnEmitterAttached(muzzleEffect, firePoint);
-	FVector CameraEnd = cameraManager->GetCameraLocation() + cameraManager->GetActorForwardVector() * weaponRange;
-	OnAttack();
-	if (GetWorld()->LineTraceSingleByChannel(result, cameraManager->GetCameraLocation(), WeaponSpread(CameraEnd), ECC_GameTraceChannel1))
-	{
-		
-		UPRAbilitySystemComponent* ASC = result.GetActor()->FindComponentByClass<UPRAbilitySystemComponent>();
-		if (ASC)
-		{
-			
-			//damagableChara->GetAttributeSet()->SetHealth(FMath::Clamp(damagableChara->GetAttributeSet()->GetHealth() - damage, 0, damagableChara->GetAttributeSet()->GetMaxHealth()));
-			FGameplayEffectContextHandle handle;
-			ASC->ApplyGameplayEffectToSelf(damageEffect.GetDefaultObject(), -1, handle);
-			UGameplayStatics::PlaySound2D(this, hitMarkerSound, 1.5f);
-			UGameplayStatics::PlaySound2D(this, impactSound, 0.5f);
-			
-			ACharacter_Base* damagableChara = Cast<ACharacter_Base>(result.GetActor());
-			
-
-			if (damagableChara && damagableChara->GetAttributeSet()->GetHealth() == 0)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Gun killed something"));
-				//killedSomething = true;
-				//killedEnemies.Add(damagableChara);
-				//GetWorldTimerManager().SetTimer(GunKilledHandle, this, &AFirearm::GunKilledTarget, 1.f, false);
-				
-			}
-			else if (!damagableChara)
-			{
-				ABaseEnemy* damagableEnemy = Cast<ABaseEnemy>(result.GetActor());
-				if (engagedEnemy == nullptr)
-				{
-					engagedEnemy = damagableEnemy;
-				}
-				
-				if (damagableEnemy && damagableEnemy->GetAttributeSet()->GetHealth() == 0)
-				{
-					killedSomething = true;
-					damagableEnemy->SetKiller(GetWeaponOwner());
-					
-				}
-				else
-				{
-					killedSomething = false;
-				}
-
-			}
-		}
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), hitEffect, result.ImpactPoint);
-		SpawnImpactEffects(result);
-
-	}
-	PlayWeaponSound(firePoint);
-	GetWeaponOwner()->GetMesh()->GetAnimInstance()->Montage_Play(GetAttackMontage());
-	ChangeCurrentAmmo(-1);
-	onWeaponUse.Broadcast(GetCurrentAmmo(), GetAmmoReserves());
-	GetWorldTimerManager().SetTimer(fireDelayTimer, this, &AFirearm::AfterFireCheck, 1 / GetFireRate());
-}
-	else
-	{
-		if (GetInAttackEvent() && !killedSomething)
-		{
-			
-			if (engagedEnemy && engagedEnemy->GetAttributeSet()->GetHealth() > 0)
-			{
-
-				FTimerHandle delayFireHandle;
-				GetWorldTimerManager().SetTimer(delayFireHandle, this, &AFirearm::GoToRetaliate, 1.5f);
-				return;
-			}
-
-
-			
-		}
-		if (engagedEnemy == nullptr)
-		{
-			ReturnToInit();
-		}
-	}
-
-}
-
-void AFirearm::ReturnToInit()
-{
-	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
-	cont->SetInputMode(FInputModeGameOnly());
-	cont->SetViewTargetWithBlend(GetWeaponOwner(), 0.5f);
-	SetInAttackEvent(false);
-	GetWeaponOwner()->StopAiming();
-	GetWeaponOwner()->StopAimMovement();
-	killedSomething = false;
-	engagedEnemy = nullptr;
-}
-
-void AFirearm::GoToRetaliate()
-{
-	engagedEnemy->RotateTowardsAttackerAndRetaliate(GetWeaponOwner());
-	engagedEnemy->SetLogicEnabled(true);
-	APlayerController* cont = UGameplayStatics::GetPlayerController(this, 0);
-	cont->SetViewTargetWithBlend(engagedEnemy, 0.f);
-	FTimerHandle changeBackHandle;
-	GetWorldTimerManager().SetTimer(changeBackHandle, this, &AFirearm::ReturnToInit, 3.0f);
-}
-
-void AFirearm::BeginAttack()
-{
-	engagedEnemy = nullptr;
-	WeaponFire();
-}
 
 void AFirearm::AfterFireCheck()
 {
 	canfire = true;
 	OnStopAttack();
-	//if (bFireButtonPressed && fireMode == Firetype::Automatic)
-	WeaponFire();
+	if (bFireButtonPressed && fireMode == Firetype::Automatic)
+	{
+		Attack();
+	}
 		
 
 }
 
 
-void AFirearm::GunKilledTarget()
-{
-
-	if (killedEnemies.Num() > 1)
-	{
-		for (int i = 0; i < killedEnemies.Num(); i++)
-		{
-			if (killedEnemies[i] == killedEnemies.Last())
-			{
-				GetWeaponOwner()->OnUnitDeath(killedEnemies[i]);
-				continue;
-
-			}
-			killedEnemies[i]->HandleCharacterDeath();
-			
-		}
-	}
-	else
-	{
-		GetWeaponOwner()->OnUnitDeath(killedEnemies[0]);
-		
-	}
-	killedEnemies.Empty();
-}
