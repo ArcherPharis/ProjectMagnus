@@ -201,6 +201,11 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Gear")
 	ASupportGear* CurrentlyEquippedSupportGear;
 
+	UPROPERTY(VisibleAnywhere, Category = "Gear")
+	ACharacter_Base* partner1;
+	UPROPERTY(VisibleAnywhere, Category = "Gear")
+	ACharacter_Base* partner2;
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "PossessablePawns")
 	TSubclassOf<APawn> deathPawnClass;
