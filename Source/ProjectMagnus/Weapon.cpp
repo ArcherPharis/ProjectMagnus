@@ -111,7 +111,12 @@ void AWeapon::GetDamageInfo(ABaseEnemy* enemy, int& toBreak, int& toKill)
 
 void AWeapon::OnEquip(USkeletalMeshComponent* ownerMesh)
 {
-	AttachToComponent(ownerMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, socketName);
+	AttachToComponent(ownerMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, equipSocketName);
+}
+
+void AWeapon::OnUnequip(USkeletalMeshComponent* ownerMesh)
+{
+	AttachToComponent(ownerMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, unequipSocketName);
 }
 
 void AWeapon::Attack()

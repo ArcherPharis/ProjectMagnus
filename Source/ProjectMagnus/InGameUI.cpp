@@ -27,7 +27,7 @@
 void UInGameUI::NativeConstruct()
 {
 	Super::NativeConstruct();
-	stopFiringOverlayButton->bIsEnabled = false;
+	stopFiringOverlayButton->SetIsEnabled(false);
 	stopFiringOverlayButton->OnPressed.AddDynamic(this, &UInGameUI::StopFiring);
 	endUnitTurnButton->OnPressed.AddDynamic(this, &UInGameUI::ReturnToTacticsPawn);
 	returnToBattleButton->OnPressed.AddDynamic(this, &UInGameUI::ReturnToBattle);
@@ -242,13 +242,13 @@ void UInGameUI::UnhideButton()
 {
 
 	
-	if (stopFiringOverlayButton->bIsEnabled)
+	if (stopFiringOverlayButton->GetIsEnabled())
 	{
-		stopFiringOverlayButton->bIsEnabled = false;
+		stopFiringOverlayButton->SetIsEnabled(false);
 		return;
 	}
 
-	stopFiringOverlayButton->bIsEnabled = true;
+	stopFiringOverlayButton->SetIsEnabled(true);
 
 
 }
@@ -257,7 +257,7 @@ void UInGameUI::StopFiring()
 {
 	
 	onButtonPressed.Broadcast();
-	stopFiringOverlayButton->bIsEnabled = false;
+	stopFiringOverlayButton->SetIsEnabled(false);
 }
 
 void UInGameUI::ReturnToBattle()

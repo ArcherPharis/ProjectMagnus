@@ -15,4 +15,7 @@ enum class EPRAbilityInputID : uint8
 	Reload,
 	UseSupport,
 	FieldAbility,
+	SwitchWeapon1,
+	SwitchWeapon2,
+	SwitchWeapon3
 };

@@ -85,7 +85,7 @@ public:
 
 	UPRGameplayAbilityBase* GetUniqueSkillOne() const { return uniqueSkillOneObj; }
 	
-	
+	void Melee();
 
 protected:
 	// Called when the game starts or when spawned
@@ -94,6 +94,7 @@ protected:
 	virtual void PlayerAttack();
 	virtual void StopAttack();
 	void StopFiring();
+	
 
 	
 
@@ -120,6 +121,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
+	void SwitchWeaponV1();
 
 	UFUNCTION(BlueprintPure, Category = "AttributeSet")
 	void GetArmorValue(float& armor, float& maxArmor);
@@ -151,6 +155,8 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "CharacterBase")
 	class AWeapon* GetCurrentWeapon() { return equippedWeapon; }
+	UFUNCTION(BlueprintPure, Category = "CharacterBase")
+	class AWeapon* GetMeleeWeapon() { return meleeWeapon; }
 
 	UFUNCTION()
 	void GunAttackEventEnd();
@@ -179,6 +185,13 @@ public:
 
 private:
 
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
+	TSubclassOf<class UGameplayAbility> BasicAttackAbility;
+
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
+	FGameplayTag BasicAttackCombo;
+
+
 	UPROPERTY(EditDefaultsOnly, Category = "Interacter")
 	class UInteracter* interacter;
 
@@ -193,6 +206,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Gear")
 	TSubclassOf<AWeapon> weaponClass;
 	UPROPERTY(EditDefaultsOnly, Category = "Gear")
+	TSubclassOf<AWeapon> secondaryWeaponClass;
+	UPROPERTY(EditDefaultsOnly, Category = "Gear")
+	TSubclassOf<class AMeleeWeapon> meleeWeaponClass;
+	UPROPERTY(EditDefaultsOnly, Category = "Gear")
 	TSubclassOf<class ATacticalGear> tacticalGearClass;
 	UPROPERTY(EditDefaultsOnly, Category = "Gear")
 	TSubclassOf<class ASupportGear> supportGearClass;
@@ -200,11 +217,6 @@ private:
 	ATacticalGear* CurrentlyEquippedTacticalGear;
 	UPROPERTY(VisibleAnywhere, Category = "Gear")
 	ASupportGear* CurrentlyEquippedSupportGear;
-
-	UPROPERTY(VisibleAnywhere, Category = "Gear")
-	ACharacter_Base* partner1;
-	UPROPERTY(VisibleAnywhere, Category = "Gear")
-	ACharacter_Base* partner2;
 
 
 	UPROPERTY(EditDefaultsOnly, Category = "PossessablePawns")
@@ -226,6 +238,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Gear")
 	AWeapon* equippedWeapon;
+	UPROPERTY(VisibleAnywhere, Category = "Gear")
+	AWeapon* primaryWeapon;
+	UPROPERTY(VisibleAnywhere, Category = "Gear")
+	AWeapon* secondaryWeapon;
+	UPROPERTY(VisibleAnywhere, Category = "Gear")
+	AWeapon* meleeWeapon;
 
 
 	UPROPERTY(EditDefaultsOnly, Category = "Meta Stats")

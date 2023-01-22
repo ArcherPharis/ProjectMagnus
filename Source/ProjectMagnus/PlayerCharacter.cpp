@@ -44,6 +44,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &APlayerCharacter::StopAiming);
 	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &APlayerCharacter::PlayerAttack);
 	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Released, this, &APlayerCharacter::StopAttack);
+	PlayerInputComponent->BindAction("Melee", EInputEvent::IE_Pressed, this, &ACharacter_Base::Melee);
 	PlayerInputComponent->BindAction("OpenUnitMenu", EInputEvent::IE_Pressed, this, &APlayerCharacter::OpenUnitMenu);
 	GetAbilitySystemComponent()->BindAbilityActivationToInputComponent(PlayerInputComponent, FGameplayAbilityInputBinds("Confirm",
 		"Cancel",
@@ -129,6 +130,7 @@ void APlayerCharacter::LookUp(float value)
 
 	AddControllerPitchInput(value);
 }
+
 
 FRotator APlayerCharacter::GetControlRotator()
 {

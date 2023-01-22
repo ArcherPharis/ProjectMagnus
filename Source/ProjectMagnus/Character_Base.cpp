@@ -4,6 +4,7 @@
 #include "Character_Base.h"
 #include "Weapon.h"
 #include "Firearm.h"
+#include "MeleeWeapon.h"
 #include "StatComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PMGameModeBase.h"
@@ -94,6 +95,7 @@ void ACharacter_Base::BeginPlay()
 	GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(GetAttributeSet()->GetStaminaAttribute()).AddUObject(this, &ACharacter_Base::StaminaChange);
 	ApplyInitialEffect();
 	GiveAbility(SprintAbility);
+	GiveAbility(BasicAttackAbility, -1, false);
 	GiveUniqueClassSkills();
 	for (auto& abilityKeyValuePair : InitialAbilities)
 	{
@@ -110,6 +112,24 @@ void ACharacter_Base::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	DrainStamina();
 
+}
+
+void ACharacter_Base::SwitchWeaponV1()
+{
+	if (equippedWeapon == primaryWeapon)
+	{
+		equippedWeapon = secondaryWeapon;
+		secondaryWeapon->OnEquip(GetMesh());
+		primaryWeapon->OnUnequip(GetMesh());
+		onWeaponEquipped.Broadcast(equippedWeapon);
+	}
+	else if(equippedWeapon == secondaryWeapon || equippedWeapon == meleeWeapon)
+	{
+		equippedWeapon = primaryWeapon;
+		secondaryWeapon->OnUnequip(GetMesh());
+		primaryWeapon->OnEquip(GetMesh());
+		onWeaponEquipped.Broadcast(equippedWeapon);
+	}
 }
 
 void ACharacter_Base::SetKiller(AActor* killer)
@@ -349,6 +369,19 @@ void ACharacter_Base::StopFiring()
 	GetCurrentWeapon()->SetPlayerWantsToStopFiring(true);
 }
 
+void ACharacter_Base::Melee()
+{
+	FGameplayAbilitySpec* MeleeAbilitySpec = abilitySystemComp->FindAbilitySpecFromClass(BasicAttackAbility);
+	if (MeleeAbilitySpec->IsActive())
+	{
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, BasicAttackCombo, FGameplayEventData());
+	}
+	else
+	{
+		abilitySystemComp->TryActivateAbilityByClass(BasicAttackAbility);
+	}
+}
+
 void ACharacter_Base::Interact()
 {
 
@@ -400,8 +433,28 @@ void ACharacter_Base::GiveEquipment()
 		weapon = GetWorld()->SpawnActor<AWeapon>(weaponClass);
 		weapon->SetWeaponOwner(this);
 		weapon->OnEquip(GetMesh());
-		equippedWeapon = weapon;
+		primaryWeapon = weapon;
+		equippedWeapon = primaryWeapon;
 		onWeaponEquipped.Broadcast(equippedWeapon);
+
+		if (secondaryWeaponClass)
+		{
+			AWeapon* weaponS;
+			weaponS = GetWorld()->SpawnActor<AWeapon>(secondaryWeaponClass);
+			weaponS->SetWeaponOwner(this);
+			weaponS->OnUnequip(GetMesh());
+			secondaryWeapon = weaponS;
+			
+		}
+
+		if (meleeWeaponClass)
+		{
+			AMeleeWeapon* weaponM;
+			weaponM = GetWorld()->SpawnActor<AMeleeWeapon>(meleeWeaponClass);
+			weaponM->SetWeaponOwner(this);
+			weaponM->OnUnequip(GetMesh());
+			meleeWeapon = weaponM;
+		}
 
 	}
 

@@ -73,9 +73,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	
+
 	void GetDamageInfo(class ABaseEnemy* enemy, int& toBreak, int& toKill);
 
 	void OnEquip(USkeletalMeshComponent* ownerMesh);
+	void OnUnequip(USkeletalMeshComponent* ownerMesh);
 
 	float GetWeight() const { return weight; }
 
@@ -133,7 +136,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	USoundBase* attackAudio;
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	FName socketName;
+	FName equipSocketName;
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName unequipSocketName;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	UAnimMontage* attackMontage;
