@@ -45,9 +45,46 @@ void ACharacter_Base::PossessedBy(AController* NewController)
 	abilitySystemComp->InitAbilityActorInfo(this, this);
 }
 
+void ACharacter_Base::OnAimEffects()
+{
+	if (!bIsAiming && equippedWeapon != meleeWeapon)
+	{
+
+		AFirearm* fireArm = Cast<AFirearm>(GetCurrentWeapon());
+		fireArm->FirearmAim();
+	}
+	bIsAiming = true;
+	GetCharacterMovement()->MaxWalkSpeed = aimSpeedValue;
+}
+
+void ACharacter_Base::OnUnAimEffects()
+{
+	bIsAiming = false;
+	if (!isSprinting)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
+	}
+	StopAttack();
+
+	if (equippedWeapon != meleeWeapon)
+	{
+		AFirearm* fireArm = Cast<AFirearm>(GetCurrentWeapon());
+		fireArm->StopFirearmAim();
+	}
+}
+
 void ACharacter_Base::SetIsAiming(bool value)
 {
 	bIsAiming = value;
+}
+
+void ACharacter_Base::EquipWeapon(AWeapon* weapon)
+{
+}
+
+void ACharacter_Base::UnequipWeapon()
+{
+	equippedWeapon->OnUnequip(GetMesh());
 }
 
 void ACharacter_Base::SetLogicEnabled(bool bIsLogicEnabled)
@@ -125,11 +162,36 @@ void ACharacter_Base::SwitchWeaponV1()
 	}
 	else if(equippedWeapon == secondaryWeapon || equippedWeapon == meleeWeapon)
 	{
+		equippedWeapon->OnUnequip(GetMesh());
+		primaryWeapon->OnEquip(GetMesh());
 		equippedWeapon = primaryWeapon;
-		secondaryWeapon->OnUnequip(GetMesh());
+		onWeaponEquipped.Broadcast(equippedWeapon);
+	}
+}
+
+void ACharacter_Base::SwitchWeaponV2()
+{
+	if (equippedWeapon == secondaryWeapon)
+	{
+		equippedWeapon = primaryWeapon;
 		primaryWeapon->OnEquip(GetMesh());
 		onWeaponEquipped.Broadcast(equippedWeapon);
 	}
+	else if (equippedWeapon == primaryWeapon || equippedWeapon == meleeWeapon)
+	{
+		
+		secondaryWeapon->OnEquip(GetMesh());
+		equippedWeapon = secondaryWeapon;
+		onWeaponEquipped.Broadcast(equippedWeapon);
+	}
+}
+
+void ACharacter_Base::SwitchWeaponV3()
+{
+	//if (equippedWeapon == meleeWeapon) return;
+	meleeWeapon->OnEquip(GetMesh());
+	equippedWeapon = meleeWeapon;
+	onWeaponEquipped.Broadcast(equippedWeapon);
 }
 
 void ACharacter_Base::SetKiller(AActor* killer)
@@ -371,14 +433,21 @@ void ACharacter_Base::StopFiring()
 
 void ACharacter_Base::Melee()
 {
-	FGameplayAbilitySpec* MeleeAbilitySpec = abilitySystemComp->FindAbilitySpecFromClass(BasicAttackAbility);
-	if (MeleeAbilitySpec->IsActive())
+	if (equippedWeapon == meleeWeapon)
 	{
-		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, BasicAttackCombo, FGameplayEventData());
+		FGameplayAbilitySpec* MeleeAbilitySpec = abilitySystemComp->FindAbilitySpecFromClass(BasicAttackAbility);
+		if (MeleeAbilitySpec->IsActive())
+		{
+			UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, BasicAttackCombo, FGameplayEventData());
+		}
+		else
+		{
+			abilitySystemComp->TryActivateAbilityByClass(BasicAttackAbility);
+		}
 	}
 	else
 	{
-		abilitySystemComp->TryActivateAbilityByClass(BasicAttackAbility);
+		//equip melee weapon..
 	}
 }
 
@@ -481,34 +550,19 @@ void ACharacter_Base::GiveEquipment()
 
 void ACharacter_Base::Aim()
 {
-	if (!bIsAiming)
-	{
-		bIsAiming = true;
-		GetCharacterMovement()->MaxWalkSpeed = aimSpeedValue;
-		AFirearm* fireArm = Cast<AFirearm>(GetCurrentWeapon());
-		fireArm->FirearmAim();
-	}
+
 
 	
 }
 
 void ACharacter_Base::StopAiming()
 {
-
 	
-	bIsAiming = false;
-	if (!isSprinting)
-	{
-		GetCharacterMovement()->MaxWalkSpeed = originalSpeedValue;
-	}
-	StopAttack();
-	AFirearm* fireArm = Cast<AFirearm>(GetCurrentWeapon());
-	if (fireArm)
-	{
-		fireArm->StopFirearmAim();
-	}
+}
 
-	
+bool ACharacter_Base::IsUsingMeleeWeapon() const
+{
+	return equippedWeapon == meleeWeapon;
 }
 
 void ACharacter_Base::Attack()

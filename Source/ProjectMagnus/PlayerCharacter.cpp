@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "AbilitySystemBlueprintLibrary.h"
 #include "StatComponent.h"
 #include "PMGameModeBase.h"
 #include "AbilitySystemComponent.h"
@@ -62,6 +63,7 @@ void APlayerCharacter::BeginPlay()
 	UGameplayStatics::GetPlayerController(this, 0)->PlayerCameraManager->ViewPitchMin = -70.f;
 	UGameplayStatics::GetPlayerController(this, 0)->PlayerCameraManager->ViewPitchMax = 60.f;
 	onUnitGiven.Broadcast(this);
+	GiveAbility(AimAbility);
 	
 	
 	
@@ -143,12 +145,31 @@ FRotator APlayerCharacter::GetControlRotator()
 void APlayerCharacter::Aim()
 {
 
-	Super::Aim();
-	playerEye->SetFieldOfView(aimFOV);
-	GetGameMode()->ToggleEnemyLogic(false);
-	GetGameMode()->TogglePlayerLogic(false);
-	SetIsAiming(true);
-	
+	FGameplayAbilitySpec* AimAbilitySpec = GetAbilitySystemComponent()->FindAbilitySpecFromClass(AimAbility);
+	if (AimAbilitySpec->IsActive())
+	{
+		return;
+	}
+	else
+	{
+		GetAbilitySystemComponent()->TryActivateAbilityByClass(AimAbility);
+
+	}
+
+}
+
+void APlayerCharacter::StopAiming()
+{
+
+	FGameplayAbilitySpec* AimAbilitySpec = GetAbilitySystemComponent()->FindAbilitySpecFromClass(AimAbility);
+	if (AimAbilitySpec->IsActive())
+	{
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, AimTag, FGameplayEventData());
+
+	}
+
+
+
 
 }
 
@@ -161,17 +182,7 @@ void APlayerCharacter::OpenUnitMenu()
 	UGameplayStatics::SetGamePaused(this, true);
 }
 
-void APlayerCharacter::StopAiming()
-{
-	
-	Super::StopAiming();
-	playerEye->SetFieldOfView(nonAimFOV);
-	SetIsAiming(false);
-	FTimerHandle handle;
-	GetWorldTimerManager().SetTimer(handle, this, &APlayerCharacter::ReenableAILogic, 0.3f);
 
-	
-}
 
 void APlayerCharacter::OnUnitDeath(ACharacter_Base* characterToDie)
 {
@@ -230,6 +241,20 @@ void APlayerCharacter::DisplayTargetInfo()
 	}
 
 
+}
+
+void APlayerCharacter::OnAimEffects()
+{
+	Super::OnAimEffects();
+	playerEye->SetFieldOfView(aimFOV);
+	SetIsAiming(true);
+}
+
+void APlayerCharacter::OnUnAimEffects()
+{
+	Super::OnUnAimEffects();
+	playerEye->SetFieldOfView(nonAimFOV);
+	SetIsAiming(false);
 }
 
 void APlayerCharacter::GenerateHealthLevelUp(float& oldHealth)

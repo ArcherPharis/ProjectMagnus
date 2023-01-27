@@ -35,7 +35,7 @@ void UGA_UseItem::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 	if (user)
 	{
 		GetAvatarAsCharacter()->SetIsUsingGear(true);
-		user->BeginAimMovement();
+		//user->BeginAimMovement();
 		initMontage = user->GetTacticalGear()->GetBeginUseMontage();
 		finishMontage = user->GetTacticalGear()->GetConfirmUseMontage();
 		user->GetTacticalGear()->AttatchToCharacterHand(user->GetMesh());

@@ -36,6 +36,12 @@ public:
 	void ApplyInitialEffect();
 	virtual void PossessedBy(AController* NewController) override;
 
+	UFUNCTION(BlueprintCallable)
+	virtual void OnAimEffects();
+	UFUNCTION(BlueprintCallable)
+	virtual void OnUnAimEffects();
+
+
 	UFUNCTION(BlueprintCallable, Category = "PlayerAiming")
 	bool GetIsAiming() const { return bIsAiming; }
 
@@ -58,17 +64,27 @@ public:
 	void Sprint();
 	void StopSprint();
 	void GiveEquipment();
+	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
+	virtual void Aim();
+	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
 	virtual void StopAiming();
 	TSubclassOf<APawn> GetDeathPawnClass() const { return deathPawnClass; }
+
+	UFUNCTION(BlueprintPure, Category = "CharacterBase")
+	bool IsUsingMeleeWeapon() const;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "After Firing Event")
 	void PostFireEventEffects();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "After Firing Event")
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "After Firing Event")
 	void StopAimMovement();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "After Firing Event")
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "After Firing Event")
 	void BeginAimMovement();
+	UFUNCTION(BlueprintCallable, Category = "PlayerWeapons")
+	void EquipWeapon(AWeapon* weapon);
+	UFUNCTION(BlueprintCallable, Category = "PlayerWeapons")
+	void UnequipWeapon();
 
 	void SetLogicEnabled(bool bIsLogicEnabled);
 
@@ -90,7 +106,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	virtual void Aim();
+	
 	virtual void PlayerAttack();
 	virtual void StopAttack();
 	void StopFiring();
@@ -124,6 +140,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
 	void SwitchWeaponV1();
+	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
+	void SwitchWeaponV2();
+	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
+	void SwitchWeaponV3();
 
 	UFUNCTION(BlueprintPure, Category = "AttributeSet")
 	void GetArmorValue(float& armor, float& maxArmor);

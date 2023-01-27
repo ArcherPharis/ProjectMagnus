@@ -17,5 +17,5 @@ enum class EPRAbilityInputID : uint8
 	FieldAbility,
 	SwitchWeapon1,
 	SwitchWeapon2,
-	SwitchWeapon3
+	SwitchWeapon3,
 };

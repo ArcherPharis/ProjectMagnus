@@ -78,6 +78,9 @@ private:
 	void ReenableAILogic();
 	void DisplayTargetInfo();
 
+	virtual void OnAimEffects() override;
+	virtual void OnUnAimEffects() override;
+
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	USpringArmComponent* springArm;
 
@@ -138,7 +141,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Level Up Mechanics")
 	int dexterityMaxRoll = 1;
 
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
+	TSubclassOf<class UGameplayAbility> AimAbility;
 
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayAbility")
+	FGameplayTag AimTag;
 
 	UFUNCTION()
 	void MoveForward(float value);

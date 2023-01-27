@@ -76,8 +76,9 @@ public:
 	
 
 	void GetDamageInfo(class ABaseEnemy* enemy, int& toBreak, int& toKill);
-
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void OnEquip(USkeletalMeshComponent* ownerMesh);
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void OnUnequip(USkeletalMeshComponent* ownerMesh);
 
 	float GetWeight() const { return weight; }

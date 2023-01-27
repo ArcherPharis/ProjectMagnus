@@ -44,6 +44,7 @@ public:
 
 
 protected:
+	UFUNCTION(BlueprintPure, Category = "PRAbility")
 	FORCEINLINE  ACharacter_Base* GetAvatarAsCharacter() const { return AvatarCharacterBase; }
 
 	
